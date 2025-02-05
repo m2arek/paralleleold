@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire (onglets) + Prime & Territoire</title>
+  <title>FRH PRO formulaire (onglets) + Prime & Territoire (Réparation CP)</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -229,7 +229,7 @@
 
 <body>
   <div class="container">
-    <h1 class="page-title">Formulaire FRH PRO - Vue Onglets (Prime & Territoire)</h1>
+    <h1 class="page-title">Formulaire FRH PRO - Vue Onglets (Prime & Territoire, Corrigé CP)</h1>
 
     <div class="tabNav" id="topTabNav">
       <button type="button" class="tablinks" onclick="openTab(event, 'tab1')">1. Localisation / Données Irradiation</button>
@@ -581,8 +581,6 @@
         <div class="form-section">
           <h3>Préconisation</h3>
 
-          <!-- Le tarif n'est plus saisi librement => on garde l'input, mais on pourrait le disabled
-               ou laisser visible si on veut. -->
           <label for="annualPriceIncrease">Augmentation annuelle du prix de l'électricité (%):</label>
           <input
             type="number"
@@ -592,6 +590,7 @@
             value="5"
           />
 
+          <!-- On rend ce champ readonly, car on détermine le tarif en fonction du territoire & S -->
           <label for="tarifRachat">Tarif de rachat du surplus (€/kWh) :</label>
           <input
             type="number"
@@ -656,11 +655,8 @@
           <div id="preconisationSummary" style="margin-top:10px;">
             <p><strong>Puissance préconisée :</strong> <span id="puissanceReco">-</span> kWc</p>
             <p><strong>Coût de l'installation :</strong> <span id="coutInstallation">-</span> €</p>
-
-            <!-- NOUVELLES LIGNES -->
             <p><strong>Prime :</strong> <span id="primeAmount">-</span> €</p>
             <p><strong>Coût réél de l'installation :</strong> <span id="coutInstallationReel">-</span> €</p>
-
             <p><strong>Gain total (sans inv.) :</strong> <span id="gainSansInv">-</span> €</p>
             <p><strong>Gain total (avec inv.) :</strong> <span id="gainAvecInv">-</span> €</p>
             <p><strong>ROI (années) :</strong> <span id="roiResult">-</span></p>
@@ -723,11 +719,8 @@
           <div id="preconisationSummaryForced" style="margin-top:10px;">
             <p><strong>Puissance préconisée (forcée) :</strong> <span id="puissanceRecoForced">-</span> kWc</p>
             <p><strong>Coût de l'installation (forcé) :</strong> <span id="coutInstallationForced">-</span> €</p>
-
-            <!-- NOUVELLES LIGNES -->
             <p><strong>Prime (forcé) :</strong> <span id="primeAmountForced">-</span> €</p>
             <p><strong>Coût réél de l'installation (forcé) :</strong> <span id="coutInstallationReelForced">-</span> €</p>
-
             <p><strong>Gain total (sans inv.) :</strong> <span id="gainSansInvForced">-</span> €</p>
             <p><strong>Gain total (avec inv.) :</strong> <span id="gainAvecInvForced">-</span> €</p>
             <p><strong>ROI (années) :</strong> <span id="roiResultForced">-</span></p>
@@ -793,7 +786,7 @@
     });
 
     /***************************************************
-     * 0) PRIMES & TARIFS (SIMPLIFIÉS EN OBJET LOCAL)
+     * 0) PRIMES & TARIFS
      ***************************************************/
     const primeTarifsData = {
       "France Metropolitaine": {
@@ -847,7 +840,6 @@
     };
 
     function getPrimeAndTarif(S, territory){
-      // Parcours la liste correspondant au territory
       const dataT = primeTarifsData[territory] || primeTarifsData["France Metropolitaine"];
 
       let foundTarif=0.0761;
@@ -861,7 +853,6 @@
       let foundPrime =0;
       for(let p of dataT.primes){
         if(S>= p.min && S<= p.max){
-          // Montant unitaire * S * 1000
           foundPrime = p.montant_euros_par_wc * (S*1000);
           break;
         }
@@ -1019,55 +1010,12 @@
 
     /***************************************************
      * 3) RECHERCHE D'ADRESSE + MARQUEUR
-     *    + Territoire via code postal
+     *    + Territoire via code postal (reverse geocoding)
      ***************************************************/
     const addressSearchBtn = document.getElementById("addressSearchBtn");
     addressSearchBtn.addEventListener("click", searchAddress);
 
-    function searchAddress() {
-      const address = document.getElementById("address").value;
-      if(!address) return;
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
-        .then(r => r.json())
-        .then(data => {
-          if(data.length>0){
-            const { lat, lon, display_name }= data[0];
-            map.setView([lat,lon],18);
-            AdresseField.value= address;
-
-            if(searchMarker){
-              map.removeLayer(searchMarker);
-            }
-            searchMarker= L.marker([lat,lon]).addTo(map);
-            searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
-
-            document.getElementById("latitudeIrr").value= lat;
-            document.getElementById("longitudeIrr").value= lon;
-
-            // Extraction du code postal s'il est présent
-            // data[0] ne fournit parfois pas le code postal direct => on refait un fetch sur "details" ?
-            // Pour simplifier, on parse "display_name" ou on refait un fetch reverse geocoding
-            // Pour la démo, on suppose qu'on a "postcode" dans data[0].
-            // Dans la réalité, on ferait un "reverse" ou on parse "address" = data[0].address.
-            if (data[0].address && data[0].address.postcode) {
-              const cp = data[0].address.postcode;
-              defineTerritoryFromCP(cp);
-            } else {
-              // On peut tenter un reverse geocoding
-              defineTerritoryFromCP("00000");
-            }
-          } else {
-            alert("Adresse introuvable.");
-          }
-        })
-        .catch(err => {
-          console.error("Erreur recherche adresse:", err);
-          alert("Une erreur est survenue lors de la recherche de l'adresse.");
-        });
-    }
-
     function defineTerritoryFromCP(cp){
-      // Extrait les 2 premiers chiffres
       const prefix = cp.slice(0,2);
       let t = "France Metropolitaine";
       if(prefix==="20"){
@@ -1076,6 +1024,47 @@
         t= "Reunion";
       }
       document.getElementById("territory").value = t;
+    }
+
+    async function searchAddress() {
+      const address = document.getElementById("address").value;
+      if(!address) return;
+      try {
+        // 1) On cherche lat/lon
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+        const data = await resp.json();
+        if(data.length>0){
+          const { lat, lon, display_name }= data[0];
+          map.setView([lat,lon],18);
+          AdresseField.value= address;
+
+          if(searchMarker){
+            map.removeLayer(searchMarker);
+          }
+          searchMarker= L.marker([lat,lon]).addTo(map);
+          searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
+
+          document.getElementById("latitudeIrr").value= lat;
+          document.getElementById("longitudeIrr").value= lon;
+
+          // 2) On fait un reverse geocoding pour récupérer un code postal valide
+          const reverseUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+          const reverseResp= await fetch(reverseUrl);
+          const reverseData= await reverseResp.json();
+
+          if(reverseData && reverseData.address && reverseData.address.postcode){
+            defineTerritoryFromCP(reverseData.address.postcode);
+          } else {
+            defineTerritoryFromCP("00000");
+          }
+        }
+        else {
+          alert("Adresse introuvable.");
+        }
+      } catch(err){
+        console.error("Erreur recherche adresse ou reverse geocoding:", err);
+        alert("Une erreur est survenue lors de la recherche ou reverse geocoding de l'adresse.");
+      }
     }
 
     /***************************************************
@@ -1393,10 +1382,7 @@
     /***************************************************
      * 7) CALCUL DE LA PRÉCONISATION
      ***************************************************/
-
-    // (A) COÛT INSTALLATION
     function costInstallation(S){
-      // ≤100 kWc => formule 1, >100 => 1.15 k€/kWc
       if (S <= 100) {
         const raw = S * ((1.8093 - (0.00659 * S))) * 1000;
         return Math.round(raw / 100) * 100;
@@ -1406,7 +1392,6 @@
       }
     }
 
-    // (B) FRACTION DE JOURS FERMÉS
     function getClosedDaysFraction() {
       const closedDays = [];
       document.querySelectorAll('input[name="joursConges[]"]:checked')
@@ -1416,7 +1401,6 @@
       return fraction;
     }
 
-    // (C) Calcule le GAIN total (auto + revente) en tenant compte "jours fermés"
     function computeAutoAndSurplusForPower(S, tarifRachat){
       const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
       const ratioD= parseFloat(ratioDStr)||50;
@@ -1433,11 +1417,9 @@
         const E_m1kW= monthlyProductionData[i].E_m;
         const production= S* E_m1kW;
 
-        // fraction forcée en revente
         const forcedSurplus= fractionClosed* production;
         const leftover= production- forcedSurplus;
 
-        // conso diurne => ratio
         const consoKwhDiurne= consoKwh*(ratioD/100);
 
         const autoCons= Math.min(leftover, consoKwhDiurne);
@@ -1450,10 +1432,8 @@
       return totalGain;
     }
 
-    // (D) findBestPowerByPayback => Recherche la puissance S max gain
     function findBestPowerByPayback(){
       console.log("==> findBestPowerByPayback triggered!");
-      // On va ignorer la saisie "tarifRachat" et le remplacer par la table
       let maxPowerStr= (document.getElementById("puissanceMaxPV").value||"0").replace(/\s/g,"");
       const maxPower= parseFloat(maxPowerStr)||0;
       if(maxPower<=0){
@@ -1461,15 +1441,12 @@
         return;
       }
 
-      // Récupération du territory
-      const territory = document.getElementById("territory").value || "France Metropolitaine";
+      const territory= document.getElementById("territory").value || "France Metropolitaine";
 
       let bestS=1;
       let bestTotalGain=0;
 
-      // On teste S=1..maxPower => on retient la puissance S qui maximise totalGain
       for(let s=1; s<=maxPower; s++){
-        // Récup tarif depuis primeTarifsData
         const { prime: primeVal, tarif } = getPrimeAndTarif(s, territory);
         const totalGain= computeAutoAndSurplusForPower(s, tarif);
         if(totalGain> bestTotalGain){
@@ -1477,23 +1454,20 @@
           bestS= s;
         }
       }
-      // Applique le S trouvé
-      // Recalcule le totalGain final avec le bon tarif
+
       const { prime: finalPrime, tarif: finalTarif } = getPrimeAndTarif(bestS, territory);
       const finalGain= computeAutoAndSurplusForPower(bestS, finalTarif);
-      // On met à jour l'input "tarifRachat" juste pour affichage
       document.getElementById("tarifRachat").value = finalTarif.toFixed(4);
+
       calculatePreconisationWithPower(bestS, finalGain, finalPrime, finalTarif);
     }
 
-    // (E) Applique la puissance retenue => Fill Tables
     function calculatePreconisationWithPower(S, firstYearGain, primeVal, actualTarif){
       const installationCost= costInstallation(S);
       fillMonthlyPreconisation(S, actualTarif);
       fill20YearsPreconisation(S, firstYearGain, installationCost, primeVal);
     }
 
-    // (F) fillMonthlyPreconisation
     let monthlyBarChart=null;
     function createMonthlyBarChart(labels, consoData, autoData, revData){
       const ctx= document.getElementById("monthlyBarChart").getContext("2d");
@@ -1582,7 +1556,6 @@
         const E_m1kW= monthlyProductionData[i].E_m;
         const production= S* E_m1kW;
 
-        // fraction forcée en revente
         const forcedSurplus= fractionClosed* production;
         const leftover= production - forcedSurplus;
 
@@ -1662,7 +1635,6 @@
       createMonthlyBarChart(moisNoms, chartConso, chartAuto, chartRev);
     }
 
-    // (G) fill20YearsPreconisation
     function fill20YearsPreconisation(S, firstYearGain, installationCost, primeVal){
       const annualPriceIncrease= parseFloat(document.getElementById("annualPriceIncrease").value)||5;
 
@@ -1728,7 +1700,6 @@
       document.getElementById("roiResult").textContent= payback.toFixed(1);
     }
 
-    // Écouteur => "Calculer la préconisation"
     const calcPrecBtn= document.getElementById("calculatePreconisation");
     calcPrecBtn.addEventListener("click", findBestPowerByPayback);
 
@@ -1957,7 +1928,6 @@
       const forcedCost= installationCost;
       document.getElementById("coutInstallationForced").textContent= forcedCost.toLocaleString('fr-FR');
 
-      // prime forced
       document.getElementById("primeAmountForced").textContent= primeVal.toFixed(2);
       const costReelForced = forcedCost - primeVal;
       document.getElementById("coutInstallationReelForced").textContent= costReelForced.toLocaleString('fr-FR');
@@ -1972,7 +1942,6 @@
       document.getElementById("roiResultForced").textContent= payback.toFixed(1);
     }
 
-    // Bouton => Préconisation forcée
     const applyForcedPreconisationBtn= document.getElementById("applyForcedPreconisationBtn");
     applyForcedPreconisationBtn.addEventListener("click", ()=>{
       const forcedPowerStr= document.getElementById("forcedPower").value||"1";
