@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire (onglets) + Prime & Territoire (Réparation CP)</title>
+  <title>FRH PRO formulaire (onglets) - Gestion Territoires + Primes</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -145,6 +145,10 @@
       box-sizing: border-box;
       margin-top: 5px;
     }
+    .form-section input[disabled] {
+      background-color: #ececec;
+      color: #666;
+    }
 
     /****************************************************
      * TABLES
@@ -224,12 +228,19 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+
+    /****************************************************
+     * STYLES SPÉCIAUX POUR L'ONGLET 9
+     ****************************************************/
+    #tab9.tabContent {
+      background-color: #fff8ef;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1 class="page-title">Formulaire FRH PRO - Vue Onglets (Prime & Territoire, Corrigé CP)</h1>
+    <h1 class="page-title">Formulaire FRH PRO - Vue Onglets (Gestion Territoires + Primes)</h1>
 
     <div class="tabNav" id="topTabNav">
       <button type="button" class="tablinks" onclick="openTab(event, 'tab1')">1. Localisation / Données Irradiation</button>
@@ -303,9 +314,9 @@
           <label for="productible">Productible :</label>
           <input type="text" id="productible" name="productible" placeholder="kWh/kWc/an" readonly/>
 
-          <!-- NOUVEAU : Territoire -->
-          <label for="territory">Territoire :</label>
-          <input type="text" id="territory" name="territory" value="France Métropolitaine" readonly style="background:#f2f2f2;" />
+          <!-- Nouveau champ Territoire (détecté auto) -->
+          <label for="territory">Territoire détecté :</label>
+          <input type="text" id="territory" name="territory" disabled />
 
           <button type="button" id="calculateIrrButton">Calculer le productible</button>
         </div>
@@ -590,7 +601,7 @@
             value="5"
           />
 
-          <!-- On rend ce champ readonly, car on détermine le tarif en fonction du territoire & S -->
+          <!-- Le tarif rachat n'est plus un input "manuel", mais "disabled" pour affichage --> 
           <label for="tarifRachat">Tarif de rachat du surplus (€/kWh) :</label>
           <input
             type="number"
@@ -598,8 +609,7 @@
             id="tarifRachat"
             name="tarifRachat"
             value="0.0761"
-            readonly
-            style="background:#f2f2f2;"
+            disabled
           />
 
           <label for="ratioDiurne">Ratio diurne (%) :</label>
@@ -635,6 +645,7 @@
                 <th>Facture Sans PV</th>
                 <th>Économies Autoconso</th>
                 <th>Gains Revente</th>
+                <th>Prime (année 2)</th>
                 <th>Facture Avec PV</th>
                 <th>Total Économies</th>
               </tr>
@@ -646,6 +657,7 @@
                 <td id="totalSansPv">-</td>
                 <td id="totalAuto">-</td>
                 <td id="totalRevente">-</td>
+                <td id="totalPrime">-</td>
                 <td id="totalAvecPv">-</td>
                 <td id="totalEconomies">-</td>
               </tr>
@@ -655,8 +667,8 @@
           <div id="preconisationSummary" style="margin-top:10px;">
             <p><strong>Puissance préconisée :</strong> <span id="puissanceReco">-</span> kWc</p>
             <p><strong>Coût de l'installation :</strong> <span id="coutInstallation">-</span> €</p>
-            <p><strong>Prime :</strong> <span id="primeAmount">-</span> €</p>
-            <p><strong>Coût réél de l'installation :</strong> <span id="coutInstallationReel">-</span> €</p>
+            <p><strong>Prime :</strong> <span id="primeValue">-</span> €</p>
+            <p><strong>Coût réel de l'installation :</strong> <span id="coutReelInstallation">-</span> €</p>
             <p><strong>Gain total (sans inv.) :</strong> <span id="gainSansInv">-</span> €</p>
             <p><strong>Gain total (avec inv.) :</strong> <span id="gainAvecInv">-</span> €</p>
             <p><strong>ROI (années) :</strong> <span id="roiResult">-</span></p>
@@ -665,7 +677,7 @@
       </div><!-- fin tab8 -->
 
       <!-- TAB 9 : Préconisation Forcée -->
-      <div id="tab9" class="tabContent" style="background-color:#fff8ef;">
+      <div id="tab9" class="tabContent">
         <div class="tabLogo">
           <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation Forcée</h2>
@@ -699,6 +711,7 @@
                 <th>Facture Sans PV</th>
                 <th>Économies Autoconso</th>
                 <th>Gains Revente</th>
+                <th>Prime (année 2)</th>
                 <th>Facture Avec PV</th>
                 <th>Total Économies</th>
               </tr>
@@ -710,6 +723,7 @@
                 <td id="totalSansPvForced">-</td>
                 <td id="totalAutoForced">-</td>
                 <td id="totalReventeForced">-</td>
+                <td id="totalPrimeForced">-</td>
                 <td id="totalAvecPvForced">-</td>
                 <td id="totalEconomiesForced">-</td>
               </tr>
@@ -719,8 +733,8 @@
           <div id="preconisationSummaryForced" style="margin-top:10px;">
             <p><strong>Puissance préconisée (forcée) :</strong> <span id="puissanceRecoForced">-</span> kWc</p>
             <p><strong>Coût de l'installation (forcé) :</strong> <span id="coutInstallationForced">-</span> €</p>
-            <p><strong>Prime (forcé) :</strong> <span id="primeAmountForced">-</span> €</p>
-            <p><strong>Coût réél de l'installation (forcé) :</strong> <span id="coutInstallationReelForced">-</span> €</p>
+            <p><strong>Prime :</strong> <span id="primeValueForced">-</span> €</p>
+            <p><strong>Coût réel de l'installation :</strong> <span id="coutReelInstallationForced">-</span> €</p>
             <p><strong>Gain total (sans inv.) :</strong> <span id="gainSansInvForced">-</span> €</p>
             <p><strong>Gain total (avec inv.) :</strong> <span id="gainAvecInvForced">-</span> €</p>
             <p><strong>ROI (années) :</strong> <span id="roiResultForced">-</span></p>
@@ -786,78 +800,31 @@
     });
 
     /***************************************************
-     * 0) PRIMES & TARIFS
+     *  VARIABLES GLOBALES & CHARGEMENT JSON PRIMES
      ***************************************************/
-    const primeTarifsData = {
-      "France Metropolitaine": {
-        tarif_rachat: [
-          { min:0, max:3, tarif:0.1269 },
-          { min:4, max:9, tarif:0.1269 },
-          { min:10, max:36, tarif:0.0761 },
-          { min:37, max:100, tarif:0.0761 },
-          { min:101, max:500, tarif:0.0761 }
-        ],
-        primes: [
-          { min:0, max:3, montant_euros_par_wc:0.22 },
-          { min:4, max:9, montant_euros_par_wc:0.16 },
-          { min:10, max:36, montant_euros_par_wc:0.19 },
-          { min:37, max:100, montant_euros_par_wc:0.10 },
-          { min:101, max:500, montant_euros_par_wc:0.10 }
-        ]
-      },
-      "Corse": {
-        tarif_rachat: [
-          { min:0, max:3, tarif:0.1645 },
-          { min:4, max:9, tarif:0.1645 },
-          { min:10, max:36, tarif:0.0893 },
-          { min:37, max:100, tarif:0.0893 },
-          { min:101, max:500, tarif:0.1319 }
-        ],
-        primes: [
-          { min:0, max:3, montant_euros_par_wc:1.27 },
-          { min:4, max:9, montant_euros_par_wc:0.72 },
-          { min:10, max:36, montant_euros_par_wc:0.893 },
-          { min:37, max:100, montant_euros_par_wc:0.893 },
-          { min:101, max:500, montant_euros_par_wc:0.00 }
-        ]
-      },
-      "Reunion": {
-        tarif_rachat: [
-          { min:0, max:3, tarif:0.2162 },
-          { min:4, max:9, tarif:0.2162 },
-          { min:10, max:36, tarif:0.1410 },
-          { min:37, max:100, tarif:0.1410 },
-          { min:101, max:500, tarif:0.2094 }
-        ],
-        primes: [
-          { min:0, max:3, montant_euros_par_wc:0.164 },
-          { min:4, max:9, montant_euros_par_wc:0.98 },
-          { min:10, max:36, montant_euros_par_wc:0.58 },
-          { min:37, max:100, montant_euros_par_wc:0.40 },
-          { min:101, max:500, montant_euros_par_wc:0.00 }
-        ]
-      }
-    };
+    let monthlyProductionData= [];
+    let primeTarifsData= null;   // On stockera le JSON complet ici
 
-    function getPrimeAndTarif(S, territory){
-      const dataT = primeTarifsData[territory] || primeTarifsData["France Metropolitaine"];
+    // Charge prime_tarifs.json depuis GitHub ou hébergement
+    // => Remplacez l'URL par la vôtre :
+    const primeTarifsUrl= "https://raw.githubusercontent.com/m2arek/parallele/main/assets/json/prime_tarifs.json";
 
-      let foundTarif=0.0761;
-      for(let t of dataT.tarif_rachat){
-        if(S>= t.min && S<= t.max){
-          foundTarif= t.tarif;
-          break;
-        }
-      }
+    fetch(primeTarifsUrl)
+      .then(resp=> resp.json())
+      .then(data=>{
+        primeTarifsData= data;
+        console.log("prime_tarifs.json chargé:", primeTarifsData);
+      })
+      .catch(err=> console.error("Erreur chargement prime_tarifs.json:", err));
 
-      let foundPrime =0;
-      for(let p of dataT.primes){
-        if(S>= p.min && S<= p.max){
-          foundPrime = p.montant_euros_par_wc * (S*1000);
-          break;
-        }
-      }
-      return { prime: foundPrime, tarif: foundTarif };
+    function detectTerritoryFromZip(cpStr) {
+      // cpStr => "97435", "20137", ...
+      if(!cpStr || cpStr.length<2) return "France Metropolitaine";
+
+      let prefix2= cpStr.substring(0,2); 
+      if(prefix2==="20") return "Corse";
+      if(prefix2==="97") return "Reunion";
+      return "France Metropolitaine";
     }
 
     /***************************************************
@@ -1009,72 +976,71 @@
     });
 
     /***************************************************
-     * 3) RECHERCHE D'ADRESSE + MARQUEUR
-     *    + Territoire via code postal (reverse geocoding)
+     * 3) RECHERCHE D'ADRESSE + MARQUEUR + TERRITOIRE
      ***************************************************/
     const addressSearchBtn = document.getElementById("addressSearchBtn");
     addressSearchBtn.addEventListener("click", searchAddress);
 
-    function defineTerritoryFromCP(cp){
-      const prefix = cp.slice(0,2);
-      let t = "France Metropolitaine";
-      if(prefix==="20"){
-        t= "Corse";
-      } else if(prefix==="97"){
-        t= "Reunion";
-      }
-      document.getElementById("territory").value = t;
-    }
-
-    async function searchAddress() {
+    function searchAddress() {
       const address = document.getElementById("address").value;
       if(!address) return;
-      try {
-        // 1) On cherche lat/lon
-        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
-        const data = await resp.json();
-        if(data.length>0){
-          const { lat, lon, display_name }= data[0];
-          map.setView([lat,lon],18);
-          AdresseField.value= address;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+        .then(r => r.json())
+        .then(data => {
+          if(data.length>0){
+            const { lat, lon, display_name }= data[0];
+            map.setView([lat, lon],18);
+            AdresseField.value= address;
 
-          if(searchMarker){
-            map.removeLayer(searchMarker);
-          }
-          searchMarker= L.marker([lat,lon]).addTo(map);
-          searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
+            if(searchMarker){
+              map.removeLayer(searchMarker);
+            }
+            searchMarker= L.marker([lat, lon]).addTo(map);
+            searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
 
-          document.getElementById("latitudeIrr").value= lat;
-          document.getElementById("longitudeIrr").value= lon;
+            document.getElementById("latitudeIrr").value= lat;
+            document.getElementById("longitudeIrr").value= lon;
 
-          // 2) On fait un reverse geocoding pour récupérer un code postal valide
-          const reverseUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
-          const reverseResp= await fetch(reverseUrl);
-          const reverseData= await reverseResp.json();
+            // Cherchons code postal
+            // On peut boucler sur data si besoin, ou sur "display_name" ou "address" 
+            // Nominatim renvoie parfois "address" complet
+            // On parse "display_name" ou "address" pour extraire CP
+            let foundCP= null;
+            if(data[0].address && data[0].address.postcode){
+              foundCP= data[0].address.postcode;
+            } else {
+              // fallback => parser "display_name" 
+              // (ex : "2 Rue du Poivre Vert, 97435, La Réunion, ..." => on essaye de repérer \d{4,5}
+              const patternCP= /\b(\d{4,5})\b/;
+              let match= display_name.match(patternCP);
+              if(match) foundCP= match[1];
+            }
 
-          if(reverseData && reverseData.address && reverseData.address.postcode){
-            defineTerritoryFromCP(reverseData.address.postcode);
+            console.log("Code postal détecté:", foundCP);
+            if(foundCP){
+              const territoryValue= detectTerritoryFromZip(foundCP);
+              document.getElementById("territory").value= territoryValue;
+            } else {
+              document.getElementById("territory").value= "France Metropolitaine";
+            }
+
           } else {
-            defineTerritoryFromCP("00000");
+            alert("Adresse introuvable.");
           }
-        }
-        else {
-          alert("Adresse introuvable.");
-        }
-      } catch(err){
-        console.error("Erreur recherche adresse ou reverse geocoding:", err);
-        alert("Une erreur est survenue lors de la recherche ou reverse geocoding de l'adresse.");
-      }
+        })
+        .catch(err => {
+          console.error("Erreur recherche adresse:", err);
+          alert("Une erreur est survenue lors de la recherche de l'adresse.");
+        });
     }
 
     /***************************************************
      * 3B) CALCUL PRODUCTIBLE (API PVGIS)
      ***************************************************/
-    let monthlyProductionData= [];
-
     async function getProductible(lat, lon, aspectValue){
       const angleValue= parseFloat(document.getElementById("angleIrr").value)||35;
       const originalUrl= `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=${angleValue}&aspect=${aspectValue}&usehorizon=1`;
+      // proxy ou direct
       const proxyUrl= `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
 
       try {
@@ -1382,7 +1348,10 @@
     /***************************************************
      * 7) CALCUL DE LA PRÉCONISATION
      ***************************************************/
+
+    // (A) COÛT INSTALLATION
     function costInstallation(S){
+      // ≤100 kWc => formule 1, >100 => 1.15 k€/kWc
       if (S <= 100) {
         const raw = S * ((1.8093 - (0.00659 * S))) * 1000;
         return Math.round(raw / 100) * 100;
@@ -1392,6 +1361,7 @@
       }
     }
 
+    // (B) FRACTION DE JOURS FERMÉS
     function getClosedDaysFraction() {
       const closedDays = [];
       document.querySelectorAll('input[name="joursConges[]"]:checked')
@@ -1401,7 +1371,42 @@
       return fraction;
     }
 
-    function computeAutoAndSurplusForPower(S, tarifRachat){
+    // (C) Récupération du tarif de rachat et prime
+    function getTarifRachatAndPrime(S, territory){
+      if(!primeTarifsData) {
+        console.warn("primeTarifsData introuvable, on retourne par défaut le 0.0761 et prime=0");
+        return {tarif:0.0761, primeByWc:0};
+      }
+      const tData= primeTarifsData[territory] || primeTarifsData["France Metropolitaine"];
+      // trouver la plage
+      let foundTarif= 0.0761;
+      let foundPrime= 0;
+      if(tData){
+        // 1) tarif
+        if(Array.isArray(tData.tarif_rachat)){
+          for(let range of tData.tarif_rachat){
+            if(S>= range.min && S<= range.max){
+              foundTarif= range.tarif;
+              break;
+            }
+          }
+        }
+        // 2) prime
+        if(Array.isArray(tData.primes)){
+          for(let range of tData.primes){
+            if(S>= range.min && S<= range.max){
+              foundPrime= range.montant_euros_par_wc;
+              break;
+            }
+          }
+        }
+      }
+      return {tarif: foundTarif, primeByWc: foundPrime};
+    }
+
+    // (D) Calcule le GAIN total (auto + revente) en tenant compte "jours fermés"
+    // On utilisera "globalTarif" (déjà déterminé via getTarifRachatAndPrime)
+    function computeAutoAndSurplusForPower(S, globalTarif){
       const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
       const ratioD= parseFloat(ratioDStr)||50;
       const fractionClosed= getClosedDaysFraction();
@@ -1417,57 +1422,30 @@
         const E_m1kW= monthlyProductionData[i].E_m;
         const production= S* E_m1kW;
 
+        // fraction forcée en revente
         const forcedSurplus= fractionClosed* production;
         const leftover= production- forcedSurplus;
 
+        // conso diurne => ratio
         const consoKwhDiurne= consoKwh*(ratioD/100);
 
         const autoCons= Math.min(leftover, consoKwhDiurne);
         const leftoverAfter= leftover- autoCons;
         const finalSurplus= forcedSurplus + Math.max(leftoverAfter,0);
 
-        const gainMonth= (autoCons*p_kWh) + (finalSurplus*tarifRachat);
+        const gainMonth= (autoCons*p_kWh) + (finalSurplus* globalTarif);
         totalGain+= gainMonth;
       }
       return totalGain;
     }
 
-    function findBestPowerByPayback(){
-      console.log("==> findBestPowerByPayback triggered!");
-      let maxPowerStr= (document.getElementById("puissanceMaxPV").value||"0").replace(/\s/g,"");
-      const maxPower= parseFloat(maxPowerStr)||0;
-      if(maxPower<=0){
-        alert("Puissance max PV non définie ou nulle.");
-        return;
-      }
-
-      const territory= document.getElementById("territory").value || "France Metropolitaine";
-
-      let bestS=1;
-      let bestTotalGain=0;
-
-      for(let s=1; s<=maxPower; s++){
-        const { prime: primeVal, tarif } = getPrimeAndTarif(s, territory);
-        const totalGain= computeAutoAndSurplusForPower(s, tarif);
-        if(totalGain> bestTotalGain){
-          bestTotalGain= totalGain;
-          bestS= s;
-        }
-      }
-
-      const { prime: finalPrime, tarif: finalTarif } = getPrimeAndTarif(bestS, territory);
-      const finalGain= computeAutoAndSurplusForPower(bestS, finalTarif);
-      document.getElementById("tarifRachat").value = finalTarif.toFixed(4);
-
-      calculatePreconisationWithPower(bestS, finalGain, finalPrime, finalTarif);
+    // (E) Applique la puissance retenue => Fill Tables
+    function calculatePreconisationWithPower(S, firstYearGain, territoryObj){
+      fillMonthlyPreconisation(S, territoryObj.tarif);
+      fill20YearsPreconisation(S, firstYearGain, territoryObj);
     }
 
-    function calculatePreconisationWithPower(S, firstYearGain, primeVal, actualTarif){
-      const installationCost= costInstallation(S);
-      fillMonthlyPreconisation(S, actualTarif);
-      fill20YearsPreconisation(S, firstYearGain, installationCost, primeVal);
-    }
-
+    // (F) fillMonthlyPreconisation
     let monthlyBarChart=null;
     function createMonthlyBarChart(labels, consoData, autoData, revData){
       const ctx= document.getElementById("monthlyBarChart").getContext("2d");
@@ -1491,7 +1469,7 @@
       });
     }
 
-    function fillMonthlyPreconisation(S, actualTarif){
+    function fillMonthlyPreconisation(S, globalTarif){
       const showKwh= document.getElementById("showKwhColumns").checked;
       const table= document.getElementById("preconisationMonthlyTable");
       table.innerHTML="";
@@ -1556,6 +1534,7 @@
         const E_m1kW= monthlyProductionData[i].E_m;
         const production= S* E_m1kW;
 
+        // fraction forcée en revente
         const forcedSurplus= fractionClosed* production;
         const leftover= production - forcedSurplus;
 
@@ -1566,7 +1545,7 @@
         const finalSurplus= forcedSurplus + Math.max(leftoverAfter,0);
 
         const economies= autoCons* costUnit;
-        const revente= finalSurplus* actualTarif;
+        const revente= finalSurplus* globalTarif;
         const totalEco= economies+ revente;
         const factureAvecPv= factureSansPv- economies;
 
@@ -1583,8 +1562,11 @@
         let autoprodPerc=0;
         if(consoKwh>0) autoprodPerc= 100*(autoCons/consoKwh);
         const totProd= production;
-        const percAutoConsoGlobal= (autoCons/totProd)*100;
-        const percReventeGlobal= (finalSurplus/totProd)*100;
+        let percAutoConsoGlobal=0, percReventeGlobal=0;
+        if(totProd>0){
+          percAutoConsoGlobal= 100*(autoCons/totProd);
+          percReventeGlobal= 100*(finalSurplus/totProd);
+        }
 
         let row= document.createElement("tr");
         let rowHTML= `<td>${moisNoms[i]}</td>`;
@@ -1635,7 +1617,8 @@
       createMonthlyBarChart(moisNoms, chartConso, chartAuto, chartRev);
     }
 
-    function fill20YearsPreconisation(S, firstYearGain, installationCost, primeVal){
+    // (G) fill20YearsPreconisation
+    function fill20YearsPreconisation(S, firstYearGain, territoryObj){
       const annualPriceIncrease= parseFloat(document.getElementById("annualPriceIncrease").value)||5;
 
       let baseYearStr= document.getElementById("monthlyTotalSansPv").textContent.replace("€","").trim();
@@ -1646,21 +1629,31 @@
       let autoYear1= parseFloat(strEco)||0;
       let surplusYear1= parseFloat(strRev)||0;
 
+      // Calcul prime => primeByWc * (S * 1000)
+      const primeByWc= territoryObj.primeByWc||0;
+      const primeTotal= Math.round(primeByWc* (S*1000));
+
       const preconTableBody= document.querySelector("#preconisationTable tbody");
       preconTableBody.innerHTML="";
 
-      let totalSansPv=0, totalAuto=0, totalRev=0, totalAvecPv=0, totalEco=0;
+      let totalSansPv=0, totalAuto=0, totalRev=0, totalPrime=0, totalAvecPv=0, totalEco=0;
 
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100, (year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100, (year-1));
         const gainsRev= surplusYear1;
-        const totalEcos= econAuto+ gainsRev;
+        // prime => uniquement année 2
+        let primeYear=0;
+        if(year===2){
+          primeYear= primeTotal;
+        }
+        const totalEcos= econAuto+ gainsRev+ primeYear;
         const factureAvecPv= factureSansPv- econAuto;
 
         totalSansPv+= factureSansPv;
         totalAuto+= econAuto;
         totalRev+= gainsRev;
+        totalPrime+= primeYear;
         totalAvecPv+= factureAvecPv;
         totalEco+= totalEcos;
 
@@ -1670,6 +1663,7 @@
           <td>${factureSansPv.toFixed(2)} €</td>
           <td>${econAuto.toFixed(2)} €</td>
           <td>${gainsRev.toFixed(2)} €</td>
+          <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
         `;
@@ -1679,29 +1673,59 @@
       document.getElementById("totalSansPv").textContent= totalSansPv.toFixed(2)+" €";
       document.getElementById("totalAuto").textContent= totalAuto.toFixed(2)+" €";
       document.getElementById("totalRevente").textContent= totalRev.toFixed(2)+" €";
+      document.getElementById("totalPrime").textContent= totalPrime.toFixed(2)+" €";
       document.getElementById("totalAvecPv").textContent= totalAvecPv.toFixed(2)+" €";
       document.getElementById("totalEconomies").textContent= totalEco.toFixed(2)+" €";
 
-      // AFFICHAGE RÉSUMÉ
+      // recap final
       document.getElementById("puissanceReco").textContent= S.toLocaleString('fr-FR');
-      document.getElementById("coutInstallation").textContent= installationCost.toLocaleString('fr-FR');
+      const costInst= costInstallation(S);
+      document.getElementById("coutInstallation").textContent= costInst.toLocaleString('fr-FR');
+      document.getElementById("primeValue").textContent= primeTotal.toLocaleString('fr-FR');
 
-      // => prime
-      document.getElementById("primeAmount").textContent= primeVal.toFixed(2);
-      const costReel = installationCost - primeVal;
-      document.getElementById("coutInstallationReel").textContent= costReel.toLocaleString('fr-FR');
+      let coutReel= costInst - primeTotal;
+      if(coutReel<0) coutReel=0;
+      document.getElementById("coutReelInstallation").textContent= coutReel.toLocaleString('fr-FR');
 
       document.getElementById("gainSansInv").textContent= totalEco.toFixed(2)+" €";
 
-      let gainAvecInvVal= totalEco - costReel;
+      let gainAvecInvVal= totalEco - coutReel;
       document.getElementById("gainAvecInv").textContent= gainAvecInvVal.toFixed(2)+" €";
 
-      let payback= costReel/(firstYearGain||1);
+      let payback= coutReel/(firstYearGain||1);
       document.getElementById("roiResult").textContent= payback.toFixed(1);
     }
 
+    // Écouteur => "Calculer la préconisation"
     const calcPrecBtn= document.getElementById("calculatePreconisation");
-    calcPrecBtn.addEventListener("click", findBestPowerByPayback);
+    calcPrecBtn.addEventListener("click", ()=>{
+      const territory= document.getElementById("territory").value || "France Metropolitaine";
+      let maxPowerStr= (document.getElementById("puissanceMaxPV").value||"0").replace(/\s/g,"");
+      const maxPower= parseFloat(maxPowerStr)||0;
+      if(maxPower<=0){
+        alert("Puissance max PV non définie ou nulle.");
+        return;
+      }
+
+      // On va chercher la plage => on calc le tarif & prime
+      let bestS=1, bestTotalGain=0;
+      let bestTerritoryObj= {tarif:0.0761, primeByWc:0};
+
+      for(let s=1; s<=maxPower; s++){
+        // recup tarif, prime
+        const tObj= getTarifRachatAndPrime(s, territory);
+        const totalGain= computeAutoAndSurplusForPower(s, tObj.tarif);
+        if(totalGain> bestTotalGain){
+          bestTotalGain= totalGain;
+          bestS= s;
+          bestTerritoryObj= tObj;
+        }
+      }
+      calculatePreconisationWithPower(bestS, bestTotalGain, bestTerritoryObj);
+
+      // On affiche le tarif rachat dans l'input "tarifRachat"
+      document.getElementById("tarifRachat").value= bestTerritoryObj.tarif.toFixed(4);
+    });
 
     /***************************************************
      * 8) PRÉCONISATION FORCÉE
@@ -1731,7 +1755,7 @@
       });
     }
 
-    function fillMonthlyPreconisationForced(S, actualTarif){
+    function fillMonthlyPreconisationForced(S, globalTarif){
       const showKwh= document.getElementById("showKwhColumns").checked;
       const table= document.getElementById("preconisationMonthlyTableForced");
       table.innerHTML="";
@@ -1778,8 +1802,7 @@
       let sumSansPv=0,sumAuto=0, sumRev=0, sumAvecPv=0,sumEco=0;
       let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0;
 
-      const moisNoms= ["Janvier","Février","Mars","Avril","Mai","Juin",
-                       "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+      const moisNoms= ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
       const chartConso=[], chartAuto=[], chartRev=[];
 
       const fractionClosed= getClosedDaysFraction();
@@ -1806,7 +1829,7 @@
         const finalSurplus= forcedSurplus+ Math.max(leftoverAfter,0);
 
         const economies= autoCons* costUnit;
-        const revente= finalSurplus* actualTarif;
+        const revente= finalSurplus* globalTarif;
         const totalEco= economies+ revente;
         const factureAvecPv= factureSansPv- economies;
 
@@ -1823,8 +1846,11 @@
         let autoprodPerc=0;
         if(consoKwh>0) autoprodPerc= 100*(autoCons/consoKwh);
         const totProd= production;
-        const percAutoConsoGlobal= (autoCons/totProd)*100;
-        const percReventeGlobal= (finalSurplus/totProd)*100;
+        let percAutoConsoGlobal=0, percReventeGlobal=0;
+        if(totProd>0){
+          percAutoConsoGlobal= 100*(autoCons/totProd);
+          percReventeGlobal= 100*(finalSurplus/totProd);
+        }
 
         let row= document.createElement("tr");
         let rowHTML= `<td>${moisNoms[i]}</td>`;
@@ -1878,7 +1904,7 @@
       createMonthlyBarChartForced(moisNoms, chartConso, chartAuto, chartRev);
     }
 
-    function fill20YearsPreconisationForced(S, firstYearGain, installationCost, primeVal){
+    function fill20YearsPreconisationForced(S, firstYearGain, territoryObj){
       const annualPriceIncrease= parseFloat(document.getElementById("annualPriceIncrease").value)||5;
 
       let baseYearStr= document.getElementById("monthlyTotalSansPvForced").textContent.replace("€","").trim();
@@ -1889,20 +1915,30 @@
       let autoYear1= parseFloat(strEco)||0;
       let surplusYear1= parseFloat(strRev)||0;
 
+      // Calcul prime => primeByWc * (S * 1000)
+      const primeByWc= territoryObj.primeByWc||0;
+      const primeTotal= Math.round(primeByWc* (S*1000));
+
       const preconTableBody= document.querySelector("#preconisationTableForced tbody");
       preconTableBody.innerHTML="";
 
-      let totalSansPv=0, totalAuto=0, totalRev=0, totalAvecPv=0, totalEco=0;
+      let totalSansPv=0, totalAuto=0, totalRev=0, totalPrime=0, totalAvecPv=0, totalEco=0;
+
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100,(year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100,(year-1));
         const gainsRev= surplusYear1;
-        const totalEcos= econAuto+ gainsRev;
+        let primeYear=0;
+        if(year===2){
+          primeYear= primeTotal;
+        }
+        const totalEcos= econAuto+ gainsRev+ primeYear;
         const factureAvecPv= factureSansPv- econAuto;
 
         totalSansPv+= factureSansPv;
         totalAuto+= econAuto;
         totalRev+= gainsRev;
+        totalPrime+= primeYear;
         totalAvecPv+= factureAvecPv;
         totalEco+= totalEcos;
 
@@ -1912,6 +1948,7 @@
           <td>${factureSansPv.toFixed(2)} €</td>
           <td>${econAuto.toFixed(2)} €</td>
           <td>${gainsRev.toFixed(2)} €</td>
+          <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
         `;
@@ -1921,42 +1958,44 @@
       document.getElementById("totalSansPvForced").textContent= totalSansPv.toFixed(2)+" €";
       document.getElementById("totalAutoForced").textContent= totalAuto.toFixed(2)+" €";
       document.getElementById("totalReventeForced").textContent= totalRev.toFixed(2)+" €";
+      document.getElementById("totalPrimeForced").textContent= totalPrime.toFixed(2)+" €";
       document.getElementById("totalAvecPvForced").textContent= totalAvecPv.toFixed(2)+" €";
       document.getElementById("totalEconomiesForced").textContent= totalEco.toFixed(2)+" €";
 
       document.getElementById("puissanceRecoForced").textContent= S.toLocaleString('fr-FR');
-      const forcedCost= installationCost;
+      const forcedCost= costInstallation(S);
       document.getElementById("coutInstallationForced").textContent= forcedCost.toLocaleString('fr-FR');
+      document.getElementById("primeValueForced").textContent= primeTotal.toLocaleString('fr-FR');
 
-      document.getElementById("primeAmountForced").textContent= primeVal.toFixed(2);
-      const costReelForced = forcedCost - primeVal;
-      document.getElementById("coutInstallationReelForced").textContent= costReelForced.toLocaleString('fr-FR');
+      let coutReel= forcedCost- primeTotal;
+      if(coutReel<0) coutReel=0;
+      document.getElementById("coutReelInstallationForced").textContent= coutReel.toLocaleString('fr-FR');
 
       let gainSansInvVal= totalEco;
       document.getElementById("gainSansInvForced").textContent= gainSansInvVal.toFixed(2)+" €";
 
-      let gainAvecInvVal= totalEco- costReelForced;
+      let gainAvecInvVal= totalEco- coutReel;
       document.getElementById("gainAvecInvForced").textContent= gainAvecInvVal.toFixed(2)+" €";
 
-      let payback= costReelForced/(firstYearGain||1);
+      let payback= coutReel/(firstYearGain||1);
       document.getElementById("roiResultForced").textContent= payback.toFixed(1);
     }
 
+    // Bouton => Préconisation forcée
     const applyForcedPreconisationBtn= document.getElementById("applyForcedPreconisationBtn");
     applyForcedPreconisationBtn.addEventListener("click", ()=>{
+      const territory= document.getElementById("territory").value|| "France Metropolitaine";
       const forcedPowerStr= document.getElementById("forcedPower").value||"1";
       let S= parseFloat(forcedPowerStr);
       if(isNaN(S)|| S<=0){
         alert("Veuillez saisir une valeur > 0 pour l'installation choisie (kWc).");
         return;
       }
-      const territory= document.getElementById("territory").value|| "France Metropolitaine";
-      const { prime: primeVal, tarif } = getPrimeAndTarif(S, territory);
-      document.getElementById("tarifRachat").value = tarif.toFixed(4);
-
-      const totalGain= computeAutoAndSurplusForPower(S, tarif);
-      fillMonthlyPreconisationForced(S, tarif);
-      fill20YearsPreconisationForced(S, totalGain, costInstallation(S), primeVal);
+      // Recup tarif & prime
+      const territoryObj= getTarifRachatAndPrime(S, territory);
+      fillMonthlyPreconisationForced(S, territoryObj.tarif);
+      const totalGain= computeAutoAndSurplusForPower(S, territoryObj.tarif);
+      fill20YearsPreconisationForced(S, totalGain, territoryObj);
     });
   </script>
 </body>
