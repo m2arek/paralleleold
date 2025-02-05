@@ -1,0 +1,50 @@
+{
+  "France Metropolitaine": {
+    "tarif_rachat": [
+      { "min": 0, "max": 3, "tarif": 0.1269 },
+      { "min": 4, "max": 9, "tarif": 0.1269 },
+      { "min": 10, "max": 36, "tarif": 0.0761 },
+      { "min": 37, "max": 100, "tarif": 0.0761 },
+      { "min": 101, "max": 500, "tarif": 0.0761 }
+    ],
+    "primes": [
+      { "min": 0, "max": 3, "montant_euros_par_wc": 0.22 },
+      { "min": 4, "max": 9, "montant_euros_par_wc": 0..16 },
+      { "min": 10, "max": 36, "montant_euros_par_wc": 0.19 },
+      { "min": 37, "max": 100, "montant_euros_par_wc": 0.10 },
+      { "min": 101, "max": 500, "montant_euros_par_wc": 0.10 }
+    ]
+  },
+  "Corse": {
+    "tarif_rachat": [
+      { "min": 0, "max": 3, "tarif": 0.1645 },
+      { "min": 4, "max": 9, "tarif": 0.1645 },
+      { "min": 10, "max": 36, "tarif": 0.893 },
+      { "min": 37, "max": 100, "tarif": 0.893 },
+      { "min": 101, "max": 500, "tarif": 0.1319 }
+    ],
+    "primes": [
+      { "min": 0, "max": 3, "montant_euros_par_wc": 1.27 },
+      { "min": 4, "max": 9, "montant_euros_par_wc": 0.72 },
+      { "min": 10, "max": 36, "montant_euros_par_wc": 0.893 },
+      { "min": 37, "max": 100, "montant_euros_par_wc": 0.893 },
+      { "min": 101, "max": 500, "montant_euros_par_wc": 0.00 }
+    ]
+  },
+  "Reunion": {
+    "tarif_rachat": [
+      { "min": 0, "max": 3, "tarif": 0.2162 },
+      { "min": 4, "max": 9, "tarif": 0.2162 },
+      { "min": 10, "max": 36, "tarif": 0.1410 },
+      { "min": 37, "max": 100, "tarif": 0.1410 },
+      { "min": 101, "max": 500, "tarif": 0.2094 }
+    ],
+    "primes": [
+      { "min": 0, "max": 3, "montant_euros_par_wc": 0.164 },
+      { "min": 4, "max": 9, "montant_euros_par_wc": 0.98 },
+      { "min": 10, "max": 36, "montant_euros_par_wc": 0.58 },
+      { "min": 37, "max": 100, "montant_euros_par_wc": 0.40 },
+      { "min": 101, "max": 500, "montant_euros_par_wc": 0.00 }
+    ]
+  }
+}
