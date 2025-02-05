@@ -9,7 +9,7 @@
     ],
     "primes": [
       { "min": 0, "max": 3, "montant_euros_par_wc": 0.22 },
-      { "min": 4, "max": 9, "montant_euros_par_wc": 0..16 },
+      { "min": 4, "max": 9, "montant_euros_par_wc": 0.16 },
       { "min": 10, "max": 36, "montant_euros_par_wc": 0.19 },
       { "min": 37, "max": 100, "montant_euros_par_wc": 0.10 },
       { "min": 101, "max": 500, "montant_euros_par_wc": 0.10 }
