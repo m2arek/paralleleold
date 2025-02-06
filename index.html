@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire (onglets) - Gestion Territoires + Primes</title>
+  <title>FRH PRO formulaire  -  Territoires + Primes</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -240,7 +240,7 @@
 
 <body>
   <div class="container">
-    <h1 class="page-title">Formulaire FRH PRO -  (Gestion Territoires + Primes)</h1>
+    <h1 class="page-title">Formulaire FRH PRO - Vue Onglets (Gestion Territoires + Primes)</h1>
 
     <div class="tabNav" id="topTabNav">
       <button type="button" class="tablinks" onclick="openTab(event, 'tab1')">1. Localisation / Données Irradiation</button>
@@ -260,7 +260,7 @@
       <!-- TAB 1 : Localisation & Données Irradiation -->
       <div id="tab1" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Localisation & Données Irradiation</h2>
         </div>
 
@@ -325,7 +325,7 @@
       <!-- TAB 2 : Potentiel de production -->
       <div id="tab2" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+           <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Potentiel de Production</h2>
         </div>
         <div class="form-section">
@@ -360,7 +360,7 @@
       <!-- TAB 3 : Production mensuel -->
       <div id="tab3" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Production mensuel</h2>
         </div>
         <div class="form-section">
@@ -382,7 +382,7 @@
       <!-- TAB 4 : Infos société -->
       <div id="tab4" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Informations sur la société</h2>
         </div>
         <div class="form-section">
@@ -410,7 +410,7 @@
       <!-- TAB 5 : Infos toiture -->
       <div id="tab5" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Informations sur la toiture</h2>
         </div>
         <div class="form-section">
@@ -473,7 +473,7 @@
       <!-- TAB 6 : Périodes d'utilisation -->
       <div id="tab6" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Périodes d'utilisation</h2>
         </div>
         <div class="form-section">
@@ -523,7 +523,7 @@
       <!-- TAB 7 : Conso mensuelle -->
       <div id="tab7" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Consommation mensuelle</h2>
         </div>
         <div id="consumptionTableContainer" class="form-section">
@@ -544,32 +544,32 @@
                   "Juillet","Août","Septembre","Octobre","Novembre","Décembre",
                 ];
                 months.forEach((month, index) => {
-                  document.write(`
+                  document.write(\`
                     <tr>
-                      <td>${month}</td>
+                      <td>\${month}</td>
                       <td>
                         <input
                           type="number"
-                          id="euros_${index}"
-                          name="euros_${index}"
+                          id="euros_\${index}"
+                          name="euros_\${index}"
                           placeholder="€"
                           style="width: 90%;"
-                          oninput="calculateCost(${index})"
+                          oninput="calculateCost(\${index})"
                         />
                       </td>
                       <td>
                         <input
                           type="number"
-                          id="kwh_${index}"
-                          name="kwh_${index}"
+                          id="kwh_\${index}"
+                          name="kwh_\${index}"
                           placeholder="kWh"
                           style="width: 90%;"
-                          oninput="calculateCost(${index})"
+                          oninput="calculateCost(\${index})"
                         />
                       </td>
-                      <td id="costPerKwh_${index}">-</td>
+                      <td id="costPerKwh_\${index}">-</td>
                     </tr>
-                  `);
+                  \`);
                 });
               </script>
               <tr>
@@ -586,7 +586,7 @@
       <!-- TAB 8 : Préconisation -->
       <div id="tab8" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation</h2>
         </div>
         <div class="form-section">
@@ -679,7 +679,7 @@
       <!-- TAB 9 : Préconisation Forcée -->
       <div id="tab9" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation Forcée</h2>
         </div>
         <div class="form-section">
@@ -745,7 +745,7 @@
       <!-- TAB 10 : Commentaires -->
       <div id="tab10" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+           <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Commentaires</h2>
         </div>
         <div class="form-section">
@@ -800,28 +800,59 @@
     });
 
     /***************************************************
-     *  VARIABLES GLOBALES & CHARGEMENT JSON PRIMES
+     *  VARIABLES GLOBALES & DONNÉES PRIMES INTÉGRÉES
      ***************************************************/
-    let monthlyProductionData= [];
-    let primeTarifsData= null;   // On stockera le JSON complet ici
-
-    // Charge prime_tarifs.json depuis GitHub ou hébergement
-    // => Remplacez l'URL par la vôtre :
-    const primeTarifsUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/assets/json/prime_tarifs.json";
-
-
-    fetch(primeTarifsUrl)
-      .then(resp=> resp.json())
-      .then(data=>{
-        primeTarifsData= data;
-        console.log("prime_tarifs.json chargé:", primeTarifsData);
-      })
-      .catch(err=> console.error("Erreur chargement prime_tarifs.json:", err));
+    let monthlyProductionData = [];
+    
+    // On intègre directement le JSON dans une variable :
+    const primeTarifsData = {
+      "France Metropolitaine": {
+        "tarif_rachat": [
+          { "min": 1, "max": 3,   "tarif": 0.17 },
+          { "min": 3, "max": 9,   "tarif": 0.15 },
+          { "min": 9, "max": 36,  "tarif": 0.13 },
+          { "min": 36,"max": 100, "tarif": 0.11 },
+          { "min": 100,"max": 500,"tarif": 0.08 }
+        ],
+        "primes": [
+          { "min": 1,  "max": 3,   "montant_euros_par_wc": 0.38 },
+          { "min": 3,  "max": 9,   "montant_euros_par_wc": 0.28 },
+          { "min": 9,  "max": 36,  "montant_euros_par_wc": 0.18 },
+          { "min": 36, "max": 100, "montant_euros_par_wc": 0.1 }
+        ]
+      },
+      "Reunion": {
+        "tarif_rachat": [
+          { "min": 1, "max": 3,   "tarif": 0.18 },
+          { "min": 3, "max": 9,   "tarif": 0.16 },
+          { "min": 9, "max": 36,  "tarif": 0.14 },
+          { "min": 36,"max": 100, "tarif": 0.12 }
+        ],
+        "primes": [
+          { "min": 1, "max": 3,   "montant_euros_par_wc": 0.45 },
+          { "min": 3, "max": 9,   "montant_euros_par_wc": 0.35 },
+          { "min": 9, "max": 36,  "montant_euros_par_wc": 0.25 },
+          { "min": 36,"max": 100, "montant_euros_par_wc": 0.15 }
+        ]
+      },
+      "Corse": {
+        "tarif_rachat": [
+          { "min": 1, "max": 3,   "tarif": 0.185 },
+          { "min": 3, "max": 9,   "tarif": 0.16 },
+          { "min": 9, "max": 36,  "tarif": 0.14 },
+          { "min": 36,"max": 100, "tarif": 0.12 }
+        ],
+        "primes": [
+          { "min": 1, "max": 3,   "montant_euros_par_wc": 0.4 },
+          { "min": 3, "max": 9,   "montant_euros_par_wc": 0.3 },
+          { "min": 9, "max": 36,  "montant_euros_par_wc": 0.2 },
+          { "min": 36,"max": 100, "montant_euros_par_wc": 0.12 }
+        ]
+      }
+    };
 
     function detectTerritoryFromZip(cpStr) {
-      // cpStr => "97435", "20137", ...
       if(!cpStr || cpStr.length<2) return "France Metropolitaine";
-
       let prefix2= cpStr.substring(0,2); 
       if(prefix2==="20") return "Corse";
       if(prefix2==="97") return "Reunion";
@@ -1003,21 +1034,15 @@
             document.getElementById("longitudeIrr").value= lon;
 
             // Cherchons code postal
-            // On peut boucler sur data si besoin, ou sur "display_name" ou "address" 
-            // Nominatim renvoie parfois "address" complet
-            // On parse "display_name" ou "address" pour extraire CP
             let foundCP= null;
             if(data[0].address && data[0].address.postcode){
               foundCP= data[0].address.postcode;
             } else {
-              // fallback => parser "display_name" 
-              // (ex : "2 Rue du Poivre Vert, 97435, La Réunion, ..." => on essaye de repérer \d{4,5}
               const patternCP= /\b(\d{4,5})\b/;
               let match= display_name.match(patternCP);
               if(match) foundCP= match[1];
             }
 
-            console.log("Code postal détecté:", foundCP);
             if(foundCP){
               const territoryValue= detectTerritoryFromZip(foundCP);
               document.getElementById("territory").value= territoryValue;
@@ -1041,7 +1066,7 @@
     async function getProductible(lat, lon, aspectValue){
       const angleValue= parseFloat(document.getElementById("angleIrr").value)||35;
       const originalUrl= `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=${angleValue}&aspect=${aspectValue}&usehorizon=1`;
-      // proxy ou direct
+      // On passe éventuellement par un proxy si besoin :
       const proxyUrl= `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
 
       try {
@@ -1134,6 +1159,7 @@
       const productibleVal= parseFloat(productibleStr)||0;
 
       const surfaceUtile= surface*(1-(exclusionPercent/100));
+      // Hypothèse : 1 panneau = 2m²
       const nbPanels= Math.floor(surfaceUtile/2);
       const puissanceMaxW= nbPanels* panelPower;
       const puissanceMaxKW= Math.round(puissanceMaxW/1000);
@@ -1375,11 +1401,10 @@
     // (C) Récupération du tarif de rachat et prime
     function getTarifRachatAndPrime(S, territory){
       if(!primeTarifsData) {
-        console.warn("primeTarifsData introuvable, on retourne par défaut le 0.0761 et prime=0");
+        console.warn("primeTarifsData introuvable, on retourne par défaut 0.0761 et prime=0");
         return {tarif:0.0761, primeByWc:0};
       }
       const tData= primeTarifsData[territory] || primeTarifsData["France Metropolitaine"];
-      // trouver la plage
       let foundTarif= 0.0761;
       let foundPrime= 0;
       if(tData){
@@ -1405,8 +1430,7 @@
       return {tarif: foundTarif, primeByWc: foundPrime};
     }
 
-    // (D) Calcule le GAIN total (auto + revente) en tenant compte "jours fermés"
-    // On utilisera "globalTarif" (déjà déterminé via getTarifRachatAndPrime)
+    // (D) Calcule le GAIN total (auto + revente)
     function computeAutoAndSurplusForPower(S, globalTarif){
       const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
       const ratioD= parseFloat(ratioDStr)||50;
@@ -1425,7 +1449,7 @@
 
         // fraction forcée en revente
         const forcedSurplus= fractionClosed* production;
-        const leftover= production- forcedSurplus;
+        const leftover= production - forcedSurplus;
 
         // conso diurne => ratio
         const consoKwhDiurne= consoKwh*(ratioD/100);
@@ -1643,7 +1667,6 @@
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100, (year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100, (year-1));
         const gainsRev= surplusYear1;
-        // prime => uniquement année 2
         let primeYear=0;
         if(year===2){
           primeYear= primeTotal;
@@ -1708,12 +1731,10 @@
         return;
       }
 
-      // On va chercher la plage => on calc le tarif & prime
       let bestS=1, bestTotalGain=0;
       let bestTerritoryObj= {tarif:0.0761, primeByWc:0};
 
       for(let s=1; s<=maxPower; s++){
-        // recup tarif, prime
         const tObj= getTarifRachatAndPrime(s, territory);
         const totalGain= computeAutoAndSurplusForPower(s, tObj.tarif);
         if(totalGain> bestTotalGain){
@@ -1724,7 +1745,7 @@
       }
       calculatePreconisationWithPower(bestS, bestTotalGain, bestTerritoryObj);
 
-      // On affiche le tarif rachat dans l'input "tarifRachat"
+      // Affiche le tarif rachat dans l'input "tarifRachat"
       document.getElementById("tarifRachat").value= bestTerritoryObj.tarif.toFixed(4);
     });
 
@@ -1992,7 +2013,6 @@
         alert("Veuillez saisir une valeur > 0 pour l'installation choisie (kWc).");
         return;
       }
-      // Recup tarif & prime
       const territoryObj= getTarifRachatAndPrime(S, territory);
       fillMonthlyPreconisationForced(S, territoryObj.tarif);
       const totalGain= computeAutoAndSurplusForPower(S, territoryObj.tarif);
