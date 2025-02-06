@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v5</title>
+  <title>FRH PRO formulaire  - v6</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1749,7 +1749,7 @@
 
       // recap final
       document.getElementById("puissanceReco").textContent= S.toLocaleString('fr-FR');
-      const costInst= costInstallation(S);
+      const costInst= costInstallation(S, territory);
       document.getElementById("coutInstallation").textContent= costInst.toLocaleString('fr-FR');
       document.getElementById("primeValue").textContent= primeTotal.toLocaleString('fr-FR');
 
@@ -2032,7 +2032,7 @@
       document.getElementById("totalEconomiesForced").textContent= totalEco.toFixed(2)+" €";
 
       document.getElementById("puissanceRecoForced").textContent= S.toLocaleString('fr-FR');
-      const forcedCost= costInstallation(S);
+      const forcedCost= costInstallation(S, territory);
       document.getElementById("coutInstallationForced").textContent= forcedCost.toLocaleString('fr-FR');
       document.getElementById("primeValueForced").textContent= primeTotal.toLocaleString('fr-FR');
 
