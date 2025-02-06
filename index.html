@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  -  Territoires + Primes</title>
+  <title>FRH PRO formulaire  - Gestion Territoires + Primes+rachat</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -260,7 +260,7 @@
       <!-- TAB 1 : Localisation & Données Irradiation -->
       <div id="tab1" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Localisation & Données Irradiation</h2>
         </div>
 
@@ -325,7 +325,7 @@
       <!-- TAB 2 : Potentiel de production -->
       <div id="tab2" class="tabContent">
         <div class="tabLogo">
-           <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Potentiel de Production</h2>
         </div>
         <div class="form-section">
@@ -360,7 +360,7 @@
       <!-- TAB 3 : Production mensuel -->
       <div id="tab3" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Production mensuel</h2>
         </div>
         <div class="form-section">
@@ -373,7 +373,7 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Rempli dynamiquement -->
+              <!-- Rempli dynamiquement via fillMonthlyProductionTable -->
             </tbody>
           </table>
         </div>
@@ -382,7 +382,7 @@
       <!-- TAB 4 : Infos société -->
       <div id="tab4" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Informations sur la société</h2>
         </div>
         <div class="form-section">
@@ -410,7 +410,7 @@
       <!-- TAB 5 : Infos toiture -->
       <div id="tab5" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Informations sur la toiture</h2>
         </div>
         <div class="form-section">
@@ -473,7 +473,7 @@
       <!-- TAB 6 : Périodes d'utilisation -->
       <div id="tab6" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Périodes d'utilisation</h2>
         </div>
         <div class="form-section">
@@ -523,7 +523,7 @@
       <!-- TAB 7 : Conso mensuelle -->
       <div id="tab7" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Consommation mensuelle</h2>
         </div>
         <div id="consumptionTableContainer" class="form-section">
@@ -537,41 +537,9 @@
                 <th style="width: 30%;">Coût par kWh (€)</th>
               </tr>
             </thead>
-            <tbody>
-              <script>
-                const months = [
-                  "Janvier","Février","Mars","Avril","Mai","Juin",
-                  "Juillet","Août","Septembre","Octobre","Novembre","Décembre",
-                ];
-                months.forEach((month, index) => {
-                  document.write(\`
-                    <tr>
-                      <td>\${month}</td>
-                      <td>
-                        <input
-                          type="number"
-                          id="euros_\${index}"
-                          name="euros_\${index}"
-                          placeholder="€"
-                          style="width: 90%;"
-                          oninput="calculateCost(\${index})"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          id="kwh_\${index}"
-                          name="kwh_\${index}"
-                          placeholder="kWh"
-                          style="width: 90%;"
-                          oninput="calculateCost(\${index})"
-                        />
-                      </td>
-                      <td id="costPerKwh_\${index}">-</td>
-                    </tr>
-                  \`);
-                });
-              </script>
+            <tbody id="consumptionTableBody">
+              <!-- Les lignes seront insérées dynamiquement -->
+              <!-- Ligne Totaux annuels en bas -->
               <tr>
                 <td><strong>Total annuel</strong></td>
                 <td id="totalEuros">-</td>
@@ -586,7 +554,7 @@
       <!-- TAB 8 : Préconisation -->
       <div id="tab8" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation</h2>
         </div>
         <div class="form-section">
@@ -679,7 +647,7 @@
       <!-- TAB 9 : Préconisation Forcée -->
       <div id="tab9" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation Forcée</h2>
         </div>
         <div class="form-section">
@@ -745,7 +713,7 @@
       <!-- TAB 10 : Commentaires -->
       <div id="tab10" class="tabContent">
         <div class="tabLogo">
-           <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Commentaires</h2>
         </div>
         <div class="form-section">
@@ -786,24 +754,18 @@
       evt.currentTarget.classList.add("activeTab");
 
       if (tabId === 'tab1') {
+        // On redonne le bon size à la map
         setTimeout(() => {
           map.invalidateSize();
         }, 300);
       }
     }
 
-    window.addEventListener("load", function() {
-      const firstTabButton = document.querySelector(".tabNav button");
-      if (firstTabButton) {
-        firstTabButton.click();
-      }
-    });
-
     /***************************************************
      *  VARIABLES GLOBALES & DONNÉES PRIMES INTÉGRÉES
      ***************************************************/
     let monthlyProductionData = [];
-    
+
     // On intègre directement le JSON dans une variable :
     const primeTarifsData = {
       "France Metropolitaine": {
@@ -858,6 +820,55 @@
       if(prefix2==="97") return "Reunion";
       return "France Metropolitaine";
     }
+
+    /***************************************************
+     *  INITIALISATION PAGE
+     ***************************************************/
+    window.addEventListener("load", function() {
+      // Ouvre le premier onglet par défaut
+      const firstTabButton = document.querySelector(".tabNav button");
+      if (firstTabButton) {
+        firstTabButton.click();
+      }
+
+      // === CRÉATION DYNAMIQUE DU TABLEAU DE CONSOMMATION MENSUELLE (onglet 7) ===
+      const consumptionTableBody = document.getElementById("consumptionTableBody");
+      const months = [
+        "Janvier","Février","Mars","Avril","Mai","Juin",
+        "Juillet","Août","Septembre","Octobre","Novembre","Décembre"
+      ];
+      // On insère les rangées juste avant la ligne "Totaux annuels"
+      const lastRow = consumptionTableBody.querySelector("tr"); // le <tr> de "Total annuel"
+
+      months.forEach((month, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${month}</td>
+          <td>
+            <input
+              type="number"
+              id="euros_${index}"
+              name="euros_${index}"
+              placeholder="€"
+              style="width: 90%;"
+              oninput="calculateCost(${index})"
+            />
+          </td>
+          <td>
+            <input
+              type="number"
+              id="kwh_${index}"
+              name="kwh_${index}"
+              placeholder="kWh"
+              style="width: 90%;"
+              oninput="calculateCost(${index})"
+            />
+          </td>
+          <td id="costPerKwh_${index}">-</td>
+        `;
+        consumptionTableBody.insertBefore(row, lastRow);
+      });
+    });
 
     /***************************************************
      * 1) INITIALISER LA CARTE
@@ -1066,7 +1077,8 @@
     async function getProductible(lat, lon, aspectValue){
       const angleValue= parseFloat(document.getElementById("angleIrr").value)||35;
       const originalUrl= `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=${angleValue}&aspect=${aspectValue}&usehorizon=1`;
-      // On passe éventuellement par un proxy si besoin :
+
+      // Proxy si besoin (sinon vous pouvez appeler l'URL direct)
       const proxyUrl= `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
 
       try {
@@ -1112,7 +1124,7 @@
         return;
       }
       const result= await getProductible(lat,lon,aspectValue);
-      if(result&& result.yearProduction!==null){
+      if(result && result.yearProduction!==null){
         document.getElementById("productible").value= result.yearProduction.toLocaleString('fr-FR');
         fillMonthlyProductionTable(result.monthlyProduction);
       }
@@ -1159,8 +1171,7 @@
       const productibleVal= parseFloat(productibleStr)||0;
 
       const surfaceUtile= surface*(1-(exclusionPercent/100));
-      // Hypothèse : 1 panneau = 2m²
-      const nbPanels= Math.floor(surfaceUtile/2);
+      const nbPanels= Math.floor(surfaceUtile/2); // hypothèse 1 panneau=2m²
       const puissanceMaxW= nbPanels* panelPower;
       const puissanceMaxKW= Math.round(puissanceMaxW/1000);
 
@@ -1300,12 +1311,14 @@
             }
           });
 
+          // Repositionner la carte
           if(jsonData["mapCenterLat"]!==undefined &&
              jsonData["mapCenterLng"]!==undefined &&
              jsonData["mapZoom"]!==undefined){
             map.setView([jsonData["mapCenterLat"], jsonData["mapCenterLng"]], jsonData["mapZoom"]);
           }
 
+          // Restaurer le dessin canvas
           if(jsonData["canvasImage"]){
             const image= new Image();
             image.onload= function(){
@@ -1315,6 +1328,7 @@
             image.src= jsonData["canvasImage"];
           }
 
+          // Restaurer les formes Leaflet
           if(jsonData["drawnShapes"]){
             drawnItems.clearLayers();
             L.geoJson(jsonData["drawnShapes"]).eachLayer(layer=>{
@@ -1322,11 +1336,13 @@
             });
           }
 
+          // Production mensuelle
           if(jsonData["monthlyProductionData"]){
             monthlyProductionData= jsonData["monthlyProductionData"];
             fillMonthlyProductionTable(monthlyProductionData);
           }
 
+          // Recalcule les coûts de conso
           for(let i=0; i<12; i++){
             calculateCost(i);
           }
@@ -1344,6 +1360,8 @@
       const kwhInput= document.getElementById(`kwh_${index}`);
       const costCell= document.getElementById(`costPerKwh_${index}`);
 
+      if(!eurosInput || !kwhInput || !costCell) return;
+
       const euros= parseFloat(eurosInput.value)||0;
       const kwh= parseFloat(kwhInput.value)||0;
 
@@ -1359,17 +1377,28 @@
     function calculateTotals(){
       let totalEuros=0, totalKwh=0;
       for(let i=0; i<12; i++){
-        const eVal= parseFloat(document.getElementById(`euros_${i}`).value)||0;
-        const kVal= parseFloat(document.getElementById(`kwh_${i}`).value)||0;
+        const eurosVal= document.getElementById(`euros_${i}`);
+        const kwhVal= document.getElementById(`kwh_${i}`);
+        if(!eurosVal || !kwhVal) continue;
+
+        const eVal= parseFloat(eurosVal.value)||0;
+        const kVal= parseFloat(kwhVal.value)||0;
         totalEuros+= eVal;
         totalKwh+= kVal;
       }
-      const averageCostPerKwh= totalKwh>0? (totalEuros/ totalKwh).toFixed(2): "-";
+      const averageCostPerKwh= totalKwh>0? (totalEuros / totalKwh).toFixed(2) : "-";
 
-      document.getElementById("totalEuros").textContent= totalEuros.toFixed(2).toLocaleString('fr-FR') + " €";
-      document.getElementById("totalKwh").textContent= totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
-      document.getElementById("totalCostPerKwh").textContent=
-        averageCostPerKwh!== "-" ? `${averageCostPerKwh} €` : "-";
+      const totalEurosCell= document.getElementById("totalEuros");
+      const totalKwhCell= document.getElementById("totalKwh");
+      const totalCostPerKwhCell= document.getElementById("totalCostPerKwh");
+
+      if(totalEurosCell) totalEurosCell.textContent= totalEuros.toFixed(2).toLocaleString('fr-FR') + " €";
+      if(totalKwhCell)   totalKwhCell.textContent= totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
+      if(totalCostPerKwhCell){
+        totalCostPerKwhCell.textContent = averageCostPerKwh !== "-"
+          ? `${averageCostPerKwh} €`
+          : "-";
+      }
     }
 
     /***************************************************
@@ -1440,11 +1469,11 @@
       for(let i=0; i<12; i++){
         const kwhInput= document.getElementById(`kwh_${i}`);
         const costCell= document.getElementById(`costPerKwh_${i}`);
-        if(!kwhInput|| !costCell|| !monthlyProductionData[i]) continue;
+        if(!kwhInput || !costCell || !monthlyProductionData[i]) continue;
 
         const consoKwh= parseFloat(kwhInput.value)||0;
         const p_kWh= parseFloat(costCell.textContent)||0;
-        const E_m1kW= monthlyProductionData[i].E_m;
+        const E_m1kW= monthlyProductionData[i].E_m || 0;
         const production= S* E_m1kW;
 
         // fraction forcée en revente
@@ -1500,18 +1529,18 @@
       table.innerHTML="";
 
       let headerRow= `<tr>
-      <th>Mois</th>
-      ${ showKwh?'<th>Conso kWh</th>':''}
-      <th>Facture Sans PV</th>
-      ${ showKwh?'<th>Autoconso kWh</th>':'' }
-      <th>Économies Autoconso</th>
-      ${ showKwh?'<th>Revente kWh</th>':'' }
-      <th>Gains Revente</th>
-      <th>Facture Avec PV</th>
-      <th>Total Économies</th>
-      <th>% Autoproduction</th>
-      <th>% Autoconsommation</th>
-      <th>% Revente</th>
+        <th>Mois</th>
+        ${ showKwh?'<th>Conso kWh</th>':''}
+        <th>Facture Sans PV</th>
+        ${ showKwh?'<th>Autoconso kWh</th>':'' }
+        <th>Économies Autoconso</th>
+        ${ showKwh?'<th>Revente kWh</th>':'' }
+        <th>Gains Revente</th>
+        <th>Facture Avec PV</th>
+        <th>Total Économies</th>
+        <th>% Autoproduction</th>
+        <th>% Autoconsommation</th>
+        <th>% Revente</th>
       </tr>`;
       const thead= document.createElement("thead");
       thead.innerHTML= headerRow;
@@ -1522,37 +1551,38 @@
 
       const tfoot= document.createElement("tfoot");
       let footRow= `<tr>
-      <th>Totaux</th>
-      ${ showKwh?'<td id="monthlySumKwhConso">-</td>':'' }
-      <td id="monthlyTotalSansPv">-</td>
-      ${ showKwh?'<td id="monthlySumKwhAuto">-</td>':'' }
-      <td id="monthlyTotalAuto">-</td>
-      ${ showKwh?'<td id="monthlySumKwhRevente">-</td>':'' }
-      <td id="monthlyTotalRevente">-</td>
-      <td id="monthlyTotalAvecPv">-</td>
-      <td id="monthlyTotalEconomies">-</td>
-      <td id="monthlyTotalAutoProdPerc">-</td>
-      <td id="monthlyTotalAutoConsoPerc">-</td>
-      <td id="monthlyTotalRevPerc">-</td>
+        <th>Totaux</th>
+        ${ showKwh?'<td id="monthlySumKwhConso">-</td>':'' }
+        <td id="monthlyTotalSansPv">-</td>
+        ${ showKwh?'<td id="monthlySumKwhAuto">-</td>':'' }
+        <td id="monthlyTotalAuto">-</td>
+        ${ showKwh?'<td id="monthlySumKwhRevente">-</td>':'' }
+        <td id="monthlyTotalRevente">-</td>
+        <td id="monthlyTotalAvecPv">-</td>
+        <td id="monthlyTotalEconomies">-</td>
+        <td id="monthlyTotalAutoProdPerc">-</td>
+        <td id="monthlyTotalAutoConsoPerc">-</td>
+        <td id="monthlyTotalRevPerc">-</td>
       </tr>`;
       tfoot.innerHTML= footRow;
       table.appendChild(tfoot);
 
       let sumSansPv=0, sumAuto=0, sumRev=0, sumAvecPv=0, sumEco=0;
       let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0;
-      const chartConso=[], chartAuto=[], chartRev=[];
 
       const moisNoms= ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
       const fractionClosed= getClosedDaysFraction();
       const ratioD= parseFloat(document.getElementById("ratioDiurne").value)||50;
 
+      const chartConso=[], chartAuto=[], chartRev=[];
+
       for(let i=0; i<12; i++){
-        const eurosStr= document.getElementById(`euros_${i}`).value||"0";
+        const eurosStr= document.getElementById(`euros_${i}`)?.value || "0";
         const factureSansPv= parseFloat(eurosStr)||0;
 
-        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`).value)||0;
-        const costText= document.getElementById(`costPerKwh_${i}`).textContent||"0";
+        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`)?.value)||0;
+        const costText= document.getElementById(`costPerKwh_${i}`)?.textContent || "0";
         const costUnit= parseFloat(costText)||0;
 
         if(!monthlyProductionData[i]) continue;
@@ -1671,8 +1701,8 @@
         if(year===2){
           primeYear= primeTotal;
         }
-        const totalEcos= econAuto+ gainsRev+ primeYear;
-        const factureAvecPv= factureSansPv- econAuto;
+        const totalEcos= econAuto + gainsRev + primeYear;
+        const factureAvecPv= factureSansPv - econAuto;
 
         totalSansPv+= factureSansPv;
         totalAuto+= econAuto;
@@ -1783,18 +1813,18 @@
       table.innerHTML="";
 
       let headerRow= `<tr>
-      <th>Mois</th>
-      ${showKwh?'<th>Conso kWh</th>':''}
-      <th>Facture Sans PV</th>
-      ${showKwh?'<th>Autoconso kWh</th>':''}
-      <th>Économies Autoconso</th>
-      ${showKwh?'<th>Revente kWh</th>':''}
-      <th>Gains Revente</th>
-      <th>Facture Avec PV</th>
-      <th>Total Économies</th>
-      <th>% Autoproduction</th>
-      <th>% Autoconsommation</th>
-      <th>% Revente</th>
+        <th>Mois</th>
+        ${showKwh?'<th>Conso kWh</th>':''}
+        <th>Facture Sans PV</th>
+        ${showKwh?'<th>Autoconso kWh</th>':''}
+        <th>Économies Autoconso</th>
+        ${showKwh?'<th>Revente kWh</th>':''}
+        <th>Gains Revente</th>
+        <th>Facture Avec PV</th>
+        <th>Total Économies</th>
+        <th>% Autoproduction</th>
+        <th>% Autoconsommation</th>
+        <th>% Revente</th>
       </tr>`;
       const thead= document.createElement("thead");
       thead.innerHTML= headerRow;
@@ -1805,18 +1835,18 @@
 
       const tfoot= document.createElement("tfoot");
       let footRow= `<tr>
-      <th>Totaux</th>
-      ${showKwh?'<td id="monthlySumKwhConsoForced">-</td>':''}
-      <td id="monthlyTotalSansPvForced">-</td>
-      ${showKwh?'<td id="monthlySumKwhAutoForced">-</td>':''}
-      <td id="monthlyTotalAutoForced">-</td>
-      ${showKwh?'<td id="monthlySumKwhReventeForced">-</td>':''}
-      <td id="monthlyTotalReventeForced">-</td>
-      <td id="monthlyTotalAvecPvForced">-</td>
-      <td id="monthlyTotalEconomiesForced">-</td>
-      <td id="monthlyTotalAutoProdPercForced">-</td>
-      <td id="monthlyTotalAutoConsoPercForced">-</td>
-      <td id="monthlyTotalRevPercForced">-</td>
+        <th>Totaux</th>
+        ${showKwh?'<td id="monthlySumKwhConsoForced">-</td>':''}
+        <td id="monthlyTotalSansPvForced">-</td>
+        ${showKwh?'<td id="monthlySumKwhAutoForced">-</td>':''}
+        <td id="monthlyTotalAutoForced">-</td>
+        ${showKwh?'<td id="monthlySumKwhReventeForced">-</td>':''}
+        <td id="monthlyTotalReventeForced">-</td>
+        <td id="monthlyTotalAvecPvForced">-</td>
+        <td id="monthlyTotalEconomiesForced">-</td>
+        <td id="monthlyTotalAutoProdPercForced">-</td>
+        <td id="monthlyTotalAutoConsoPercForced">-</td>
+        <td id="monthlyTotalRevPercForced">-</td>
       </tr>`;
       tfoot.innerHTML= footRow;
       table.appendChild(tfoot);
@@ -1831,17 +1861,17 @@
       const ratioD= parseFloat(document.getElementById("ratioDiurne").value)||50;
 
       for(let i=0; i<12; i++){
-        const eurosStr= document.getElementById(`euros_${i}`).value||"0";
+        const eurosStr= document.getElementById(`euros_${i}`)?.value || "0";
         const factureSansPv= parseFloat(eurosStr)||0;
 
-        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`).value)||0;
-        const costText= document.getElementById(`costPerKwh_${i}`).textContent||"0";
+        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`)?.value)||0;
+        const costText= document.getElementById(`costPerKwh_${i}`)?.textContent || "0";
         const costUnit= parseFloat(costText)||0;
 
         if(!monthlyProductionData[i]) continue;
-        const E_m1kW= monthlyProductionData[i].E_m;
-
+        const E_m1kW= monthlyProductionData[i].E_m || 0;
         const production= S* E_m1kW;
+
         const forcedSurplus= fractionClosed* production;
         const leftover= production- forcedSurplus;
 
