@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v2</title>
+  <title>FRH PRO formulaire  - v3</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1415,7 +1415,7 @@
     function costInstallation(S){
       // ≤100 kWc => formule 1, >100 => 1.15 k€/kWc
       if (S <= 100) {
-        const raw = S * ((1.8093 - (0.00659 * S))) * 1000;
+        const raw = S * ((1.9093 - (0.00659 * S))) * 1000;
         return Math.round(raw / 100) * 100;
       } else {
         const raw = S * 1.15 * 1000;
