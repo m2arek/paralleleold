@@ -251,7 +251,7 @@
       <button type="button" class="tablinks" onclick="openTab(event, 'tab6')">6. Périodes d'utilisation</button>
       <button type="button" class="tablinks" onclick="openTab(event, 'tab7')">7. Conso mensuelle</button>
       <button type="button" class="tablinks" onclick="openTab(event, 'tab8')">8. Préconisation</button>
-      <button type="button" class="tablinks" onclick="openTab(event, 'tab9')">9. Préconisation Forcée</button>
+      <button type="button" class="tablinks" onclick="openTab(event, 'tab9')">9. Préconisation Sélection</button>
       <button type="button" class="tablinks" onclick="openTab(event, 'tab10')">10. Commentaires</button>
     </div>
 
@@ -644,14 +644,14 @@
         </div>
       </div><!-- fin tab8 -->
 
-      <!-- TAB 9 : Préconisation Forcée -->
+      <!-- TAB 9 : Préconisation Sélection -->
       <div id="tab9" class="tabContent">
         <div class="tabLogo">
           <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
-          <h2>Préconisation Forcée</h2>
+          <h2>Préconisation Sélection</h2>
         </div>
         <div class="form-section">
-          <h3>Préconisation Forcée</h3>
+          <h3>Préconisation Sélection</h3>
 
           <label for="forcedPower">Installation choisie (kWc) :</label>
           <input
@@ -665,13 +665,13 @@
             Calculer la préconisation choisie
           </button>
 
-          <h4>Détails par mois (année 1) - Forcé</h4>
+          <h4>Détails par mois (année 1) - Sélection</h4>
           <table id="preconisationMonthlyTableForced"></table>
 
-          <h4>Graphique (Détails par mois) - Forcé</h4>
+          <h4>Graphique (Détails par mois) - Sélection</h4>
           <canvas id="monthlyBarChartForced" width="600" height="300"></canvas>
 
-          <h4>Projection sur 20 ans - Forcé</h4>
+          <h4>Projection sur 20 ans - Sélection</h4>
           <table id="preconisationTableForced">
             <thead>
               <tr>
@@ -699,8 +699,8 @@
           </table>
 
           <div id="preconisationSummaryForced" style="margin-top:10px;">
-            <p><strong>Puissance préconisée (forcée) :</strong> <span id="puissanceRecoForced">-</span> kWc</p>
-            <p><strong>Coût de l'installation (forcé) :</strong> <span id="coutInstallationForced">-</span> €</p>
+            <p><strong>Puissance préconisée (Sélection) :</strong> <span id="puissanceRecoForced">-</span> kWc</p>
+            <p><strong>Coût de l'installation (Sélection) :</strong> <span id="coutInstallationForced">-</span> €</p>
             <p><strong>Prime :</strong> <span id="primeValueForced">-</span> €</p>
             <p><strong>Coût réel de l'installation :</strong> <span id="coutReelInstallationForced">-</span> €</p>
             <p><strong>Gain total (sans inv.) :</strong> <span id="gainSansInvForced">-</span> €</p>
@@ -1481,7 +1481,7 @@
         const E_m1kW= monthlyProductionData[i].E_m || 0;
         const production= S* E_m1kW;
 
-        // fraction forcée en revente
+        // fraction Sélection en revente
         const forcedSurplus= fractionClosed* production;
         const leftover= production - forcedSurplus;
 
@@ -1594,7 +1594,7 @@
         const E_m1kW= monthlyProductionData[i].E_m;
         const production= S* E_m1kW;
 
-        // fraction forcée en revente
+        // fraction Sélection en revente
         const forcedSurplus= fractionClosed* production;
         const leftover= production - forcedSurplus;
 
@@ -1785,7 +1785,7 @@
     });
 
     /***************************************************
-     * 8) PRÉCONISATION FORCÉE
+     * 8) PRÉCONISATION Sélection
      ***************************************************/
     let monthlyBarChartForced=null;
     function createMonthlyBarChartForced(monthLabels, consoData, autoData, revData){
@@ -2038,7 +2038,7 @@
       document.getElementById("roiResultForced").textContent= payback.toFixed(1);
     }
 
-    // Bouton => Préconisation forcée
+    // Bouton => Préconisation Sélection
     const applyForcedPreconisationBtn= document.getElementById("applyForcedPreconisationBtn");
     applyForcedPreconisationBtn.addEventListener("click", ()=>{
       const territory= document.getElementById("territory").value|| "France Metropolitaine";
