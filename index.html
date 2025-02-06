@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v1</title>
+  <title>FRH PRO formulaire  - v2</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -666,6 +666,7 @@
           </button>
 
           <h4>Détails par mois (année 1) - Sélection</h4>
+          <!-- Ajout des colonnes kWh conditionnellement (showKwh) -->
           <table id="preconisationMonthlyTableForced"></table>
 
           <h4>Graphique (Détails par mois) - Sélection</h4>
@@ -768,55 +769,55 @@
 
     // On intègre directement le JSON dans une variable :
     const primeTarifsData = {
-  "France Metropolitaine": {
-    "tarif_rachat": [
-      { "min": 0, "max": 3, "tarif": 0.1269 },
-      { "min": 4, "max": 9, "tarif": 0.1269 },
-      { "min": 10, "max": 36, "tarif": 0.0761 },
-      { "min": 37, "max": 100, "tarif": 0.0761 },
-      { "min": 101, "max": 500, "tarif": 0.0761 }
-    ],
-    "primes": [
-      { "min": 0, "max": 3, "montant_euros_par_wc": 0.22 },
-      { "min": 4, "max": 9, "montant_euros_par_wc": 0.16 },
-      { "min": 10, "max": 36, "montant_euros_par_wc": 0.19 },
-      { "min": 37, "max": 100, "montant_euros_par_wc": 0.10 },
-      { "min": 101, "max": 500, "montant_euros_par_wc": 0.10 }
-    ]
-  },
-  "Corse": {
-    "tarif_rachat": [
-      { "min": 0, "max": 3, "tarif": 0.1645 },
-      { "min": 4, "max": 9, "tarif": 0.1645 },
-      { "min": 10, "max": 36, "tarif": 0.0893 },
-      { "min": 37, "max": 100, "tarif": 0.0893 },
-      { "min": 101, "max": 500, "tarif": 0.1319 }
-    ],
-    "primes": [
-      { "min": 0, "max": 3, "montant_euros_par_wc": 1.27 },
-      { "min": 4, "max": 9, "montant_euros_par_wc": 0.72 },
-      { "min": 10, "max": 36, "montant_euros_par_wc": 0.37 },
-      { "min": 37, "max": 100, "montant_euros_par_wc": 0.48 },
-      { "min": 101, "max": 500, "montant_euros_par_wc": 0.00 }
-    ]
-  },
-  "Reunion": {
-    "tarif_rachat": [
-      { "min": 0, "max": 3, "tarif": 0.1739 },
-      { "min": 4, "max": 9, "tarif": 0.1739 },
-      { "min": 10, "max": 36, "tarif": 0.0893 },
-      { "min": 37, "max": 100, "tarif": 0.0893 },
-      { "min": 101, "max": 500, "tarif": 0.1465 }
-    ],
-    "primes": [
-      { "min": 0, "max": 3, "montant_euros_par_wc": 1.64 },
-      { "min": 4, "max": 9, "montant_euros_par_wc": 0.98 },
-      { "min": 10, "max": 36, "montant_euros_par_wc": 0.58 },
-      { "min": 37, "max": 100, "montant_euros_par_wc": 0.40 },
-      { "min": 101, "max": 500, "montant_euros_par_wc": 0.00 }
-    ]
-  }
-};
+      "France Metropolitaine": {
+        "tarif_rachat": [
+          { "min": 0, "max": 3, "tarif": 0.1269 },
+          { "min": 4, "max": 9, "tarif": 0.1269 },
+          { "min": 10, "max": 36, "tarif": 0.0761 },
+          { "min": 37, "max": 100, "tarif": 0.0761 },
+          { "min": 101, "max": 500, "tarif": 0.0761 }
+        ],
+        "primes": [
+          { "min": 0, "max": 3, "montant_euros_par_wc": 0.22 },
+          { "min": 4, "max": 9, "montant_euros_par_wc": 0.16 },
+          { "min": 10, "max": 36, "montant_euros_par_wc": 0.19 },
+          { "min": 37, "max": 100, "montant_euros_par_wc": 0.10 },
+          { "min": 101, "max": 500, "montant_euros_par_wc": 0.10 }
+        ]
+      },
+      "Corse": {
+        "tarif_rachat": [
+          { "min": 0, "max": 3, "tarif": 0.1645 },
+          { "min": 4, "max": 9, "tarif": 0.1645 },
+          { "min": 10, "max": 36, "tarif": 0.0893 },
+          { "min": 37, "max": 100, "tarif": 0.0893 },
+          { "min": 101, "max": 500, "tarif": 0.1319 }
+        ],
+        "primes": [
+          { "min": 0, "max": 3, "montant_euros_par_wc": 1.27 },
+          { "min": 4, "max": 9, "montant_euros_par_wc": 0.72 },
+          { "min": 10, "max": 36, "montant_euros_par_wc": 0.37 },
+          { "min": 37, "max": 100, "montant_euros_par_wc": 0.48 },
+          { "min": 101, "max": 500, "montant_euros_par_wc": 0.00 }
+        ]
+      },
+      "Reunion": {
+        "tarif_rachat": [
+          { "min": 0, "max": 3, "tarif": 0.1739 },
+          { "min": 4, "max": 9, "tarif": 0.1739 },
+          { "min": 10, "max": 36, "tarif": 0.0893 },
+          { "min": 37, "max": 100, "tarif": 0.0893 },
+          { "min": 101, "max": 500, "tarif": 0.1465 }
+        ],
+        "primes": [
+          { "min": 0, "max": 3, "montant_euros_par_wc": 1.64 },
+          { "min": 4, "max": 9, "montant_euros_par_wc": 0.98 },
+          { "min": 10, "max": 36, "montant_euros_par_wc": 0.58 },
+          { "min": 37, "max": 100, "montant_euros_par_wc": 0.40 },
+          { "min": 101, "max": 500, "montant_euros_par_wc": 0.00 }
+        ]
+      }
+    };
 
     function detectTerritoryFromZip(cpStr) {
       if(!cpStr || cpStr.length<2) return "France Metropolitaine";
@@ -1813,6 +1814,7 @@
     }
 
     function fillMonthlyPreconisationForced(S, globalTarif){
+      // On utilise la même checkbox "showKwhColumns"
       const showKwh= document.getElementById("showKwhColumns").checked;
       const table= document.getElementById("preconisationMonthlyTableForced");
       table.innerHTML="";
@@ -1878,7 +1880,7 @@
         const production= S* E_m1kW;
 
         const forcedSurplus= fractionClosed* production;
-        const leftover= production- forcedSurplus;
+        const leftover= production - forcedSurplus;
 
         const consoKwhDiurne= consoKwh*(ratioD/100);
         const autoCons= Math.min(leftover, consoKwhDiurne);
