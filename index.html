@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v6</title>
+  <title>FRH PRO formulaire  - v7</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1411,26 +1411,23 @@
      * 7) CALCUL DE LA PRÉCONISATION
      ***************************************************/
 
-    // (A) COÛT INSTALLATION
-    function costInstallation(S, territory) {
-  let raw;
-  // Si ≤100 kWc => formule 1, sinon >100 => 1.15 k€/kWc
-  if (S <= 100) {
-    raw = S * ((1.8093 - (0.00659 * S))) * 1000;
-  } else {
-    raw = S * 1.15 * 1000;
-  }
+    // (A) COÛT INSTALLATION (modifié pour tenir compte du territoire)
+    function costInstallation(S, territory){
+      let raw;
+      // ≤100 kWc => formule 1, sinon >100 => 1.15 k€/kWc
+      if (S <= 100) {
+        raw = S * ((1.9093 - (0.00659 * S))) * 1000;
+      } else {
+        raw = S * 1.15 * 1000;
+      }
 
-  // Ajout du coefficient multiplicateur selon le territoire
-  if (territory === "Corse") {
-    raw *= 1.10; // +10%
-  } else if (territory === "Reunion") {
-    raw *= 1.13; // +13%
-  }
-  
-  // Arrondi final au cent le plus proche
-  return Math.round(raw / 100) * 100;
-}
+      // Multiplicateur selon le territoire
+      if (territory === "Corse") {
+        raw *= 1.10; // +10%
+      } else if (territory === "Reunion") {
+        raw *= 1.13; // +13%
+      }
+      return Math.round(raw / 100) * 100;
     }
 
     // (B) FRACTION DE JOURS FERMÉS
@@ -1749,6 +1746,11 @@
 
       // recap final
       document.getElementById("puissanceReco").textContent= S.toLocaleString('fr-FR');
+
+      // On récupère le territoire à l'instant T
+      const territory = document.getElementById("territory").value || "France Metropolitaine";
+
+      // On calcule le coût d'installation en passant le territoire
       const costInst= costInstallation(S, territory);
       document.getElementById("coutInstallation").textContent= costInst.toLocaleString('fr-FR');
       document.getElementById("primeValue").textContent= primeTotal.toLocaleString('fr-FR');
@@ -2032,6 +2034,11 @@
       document.getElementById("totalEconomiesForced").textContent= totalEco.toFixed(2)+" €";
 
       document.getElementById("puissanceRecoForced").textContent= S.toLocaleString('fr-FR');
+
+      // On récupère le territoire à l'instant T
+      const territory = document.getElementById("territory").value || "France Metropolitaine";
+
+      // On calcule le coût d'installation en passant le territoire
       const forcedCost= costInstallation(S, territory);
       document.getElementById("coutInstallationForced").textContent= forcedCost.toLocaleString('fr-FR');
       document.getElementById("primeValueForced").textContent= primeTotal.toLocaleString('fr-FR');
