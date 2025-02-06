@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v3</title>
+  <title>FRH PRO formulaire  - v4</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1412,15 +1412,25 @@
      ***************************************************/
 
     // (A) COÛT INSTALLATION
-    function costInstallation(S){
-      // ≤100 kWc => formule 1, >100 => 1.15 k€/kWc
-      if (S <= 100) {
-        const raw = S * ((1.9093 - (0.00659 * S))) * 1000;
-        return Math.round(raw / 100) * 100;
-      } else {
-        const raw = S * 1.15 * 1000;
-        return Math.round(raw / 100) * 100;
-      }
+    function costInstallation(S, territory) {
+  let raw;
+  // Si ≤100 kWc => formule 1, sinon >100 => 1.15 k€/kWc
+  if (S <= 100) {
+    raw = S * ((1.8093 - (0.00659 * S))) * 1000;
+  } else {
+    raw = S * 1.15 * 1000;
+  }
+
+  // Ajout du coefficient multiplicateur selon le territoire
+  if (territory === "Corse") {
+    raw *= 1.10; // +10%
+  } else if (territory === "Reunion") {
+    raw *= 1.13; // +13%
+  }
+  
+  // Arrondi final au cent le plus proche
+  return Math.round(raw / 100) * 100;
+}
     }
 
     // (B) FRACTION DE JOURS FERMÉS
@@ -1739,7 +1749,7 @@
 
       // recap final
       document.getElementById("puissanceReco").textContent= S.toLocaleString('fr-FR');
-      const costInst= costInstallation(S);
+      const costInst= costInstallation(S, territory);
       document.getElementById("coutInstallation").textContent= costInst.toLocaleString('fr-FR');
       document.getElementById("primeValue").textContent= primeTotal.toLocaleString('fr-FR');
 
