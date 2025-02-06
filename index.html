@@ -848,7 +848,7 @@
 
       months.forEach((month, index) => {
         const row = document.createElement("tr");
-        row.innerHTML = 
+        row.innerHTML = `
           <td>${month}</td>
           <td>
             <input
@@ -871,7 +871,7 @@
             />
           </td>
           <td id="costPerKwh_${index}">-</td>
-        ;
+        `;
         consumptionTableBody.insertBefore(row, lastRow);
       });
     });
@@ -999,7 +999,7 @@
         const area = L.GeometryUtil.geodesicArea(latLngs);
         const areaInt = Math.round(area);
 
-        alert(Surface mesurée : ${areaInt.toLocaleString('fr-FR')} m²);
+        alert(`Surface mesurée : ${areaInt.toLocaleString('fr-FR')} m²`);
         document.getElementById("Surface toiture").value = areaInt;
 
         updateProductionPotential();
@@ -1019,7 +1019,7 @@
         document.getElementById("orientationIrr").value = aspectVal.toFixed(1);
         document.getElementById("orientation").value = aspectVal.toFixed(1);
 
-        alert(Orientation déterminée: ${aspectVal.toFixed(1)}° (0 = Sud));
+        alert(`Orientation déterminée: ${aspectVal.toFixed(1)}° (0 = Sud)`);
         drawnItems.removeLayer(layer);
       }
     });
@@ -1033,7 +1033,7 @@
     function searchAddress() {
       const address = document.getElementById("address").value;
       if(!address) return;
-      fetch(https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)})
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
         .then(r => r.json())
         .then(data => {
           if(data.length>0){
@@ -1045,7 +1045,7 @@
               map.removeLayer(searchMarker);
             }
             searchMarker= L.marker([lat, lon]).addTo(map);
-            searchMarker.bindPopup(Adresse trouvée : ${address}).openPopup();
+            searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
 
             document.getElementById("latitudeIrr").value= lat;
             document.getElementById("longitudeIrr").value= lon;
@@ -1082,10 +1082,10 @@
      ***************************************************/
     async function getProductible(lat, lon, aspectValue){
       const angleValue= parseFloat(document.getElementById("angleIrr").value)||35;
-      const originalUrl= https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=${angleValue}&aspect=${aspectValue}&usehorizon=1;
+      const originalUrl= `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=${angleValue}&aspect=${aspectValue}&usehorizon=1`;
 
       // Proxy si besoin (sinon vous pouvez appeler l'URL direct)
-      const proxyUrl= https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)};
+      const proxyUrl= `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
 
       try {
         const response= await fetch(proxyUrl);
@@ -1151,7 +1151,7 @@
         const productionCell= document.createElement("td");
         const idx= item.month-1;
 
-        monthCell.textContent= (idx>=0 && idx<12)? moisNoms[idx]: Mois ${item.month};
+        monthCell.textContent= (idx>=0 && idx<12)? moisNoms[idx]: `Mois ${item.month}`;
         productionCell.textContent= item.E_m?.toLocaleString('fr-FR')|| "-";
 
         row.appendChild(monthCell);
@@ -1220,7 +1220,7 @@
         const formData= new FormData(userForm);
         formData.forEach((value,key)=>{
           if(value){
-            pdf.text(${key} : ${value},10,yOffset);
+            pdf.text(`${key} : ${value}`,10,yOffset);
             yOffset+=10;
           }
         });
@@ -1233,7 +1233,7 @@
           pdf.addImage(tableImage,"PNG",10,20,190,0);
 
           const companyName= document.getElementById("companyName").value;
-          const pdfFileName= companyName? Formulaire_${companyName}.pdf : "Formulaire.pdf";
+          const pdfFileName= companyName? `Formulaire_${companyName}.pdf` : "Formulaire.pdf";
           pdf.save(pdfFileName);
         });
       });
@@ -1274,7 +1274,7 @@
       formObject["monthlyProductionData"]= monthlyProductionData;
 
       const companyName= formObject["companyName"]|| "Formulaire";
-      const fileName= Formulaire_${companyName}.json;
+      const fileName= `Formulaire_${companyName}.json`;
 
       const jsonString= JSON.stringify(formObject,null,2);
       const blob= new Blob([jsonString],{ type:"application/json" });
@@ -1304,13 +1304,13 @@
             const dataValue= jsonData[key];
             if(Array.isArray(dataValue)){
               dataValue.forEach(val=>{
-                const checkbox= form.querySelector([name="${key}"][value="${val}"]);
+                const checkbox= form.querySelector(`[name="${key}"][value="${val}"]`);
                 if(checkbox){
                   checkbox.checked=true;
                 }
               });
             } else {
-              const input= form.querySelector([name="${key}"]);
+              const input= form.querySelector(`[name="${key}"]`);
               if(input){
                 input.value= dataValue;
               }
@@ -1362,9 +1362,9 @@
      * 6) CALCUL DU COÛT PAR kWh
      ***************************************************/
     function calculateCost(index){
-      const eurosInput= document.getElementById(euros_${index});
-      const kwhInput= document.getElementById(kwh_${index});
-      const costCell= document.getElementById(costPerKwh_${index});
+      const eurosInput= document.getElementById(`euros_${index}`);
+      const kwhInput= document.getElementById(`kwh_${index}`);
+      const costCell= document.getElementById(`costPerKwh_${index}`);
 
       if(!eurosInput || !kwhInput || !costCell) return;
 
@@ -1373,7 +1373,7 @@
 
       if(kwh>0){
         const costPerKwh= (euros/kwh).toFixed(2);
-        costCell.textContent= ${costPerKwh} €;
+        costCell.textContent= `${costPerKwh} €`;
       } else {
         costCell.textContent= "-";
       }
@@ -1383,8 +1383,8 @@
     function calculateTotals(){
       let totalEuros=0, totalKwh=0;
       for(let i=0; i<12; i++){
-        const eurosVal= document.getElementById(euros_${i});
-        const kwhVal= document.getElementById(kwh_${i});
+        const eurosVal= document.getElementById(`euros_${i}`);
+        const kwhVal= document.getElementById(`kwh_${i}`);
         if(!eurosVal || !kwhVal) continue;
 
         const eVal= parseFloat(eurosVal.value)||0;
@@ -1402,7 +1402,7 @@
       if(totalKwhCell)   totalKwhCell.textContent= totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
       if(totalCostPerKwhCell){
         totalCostPerKwhCell.textContent = averageCostPerKwh !== "-"
-          ? ${averageCostPerKwh} €
+          ? `${averageCostPerKwh} €`
           : "-";
       }
     }
@@ -1473,8 +1473,8 @@
 
       let totalGain= 0;
       for(let i=0; i<12; i++){
-        const kwhInput= document.getElementById(kwh_${i});
-        const costCell= document.getElementById(costPerKwh_${i});
+        const kwhInput= document.getElementById(`kwh_${i}`);
+        const costCell= document.getElementById(`costPerKwh_${i}`);
         if(!kwhInput || !costCell || !monthlyProductionData[i]) continue;
 
         const consoKwh= parseFloat(kwhInput.value)||0;
@@ -1534,7 +1534,7 @@
       const table= document.getElementById("preconisationMonthlyTable");
       table.innerHTML="";
 
-      let headerRow= <tr>
+      let headerRow= `<tr>
         <th>Mois</th>
         ${ showKwh?'<th>Conso kWh</th>':''}
         <th>Facture Sans PV</th>
@@ -1547,7 +1547,7 @@
         <th>% Autoproduction</th>
         <th>% Autoconsommation</th>
         <th>% Revente</th>
-      </tr>;
+      </tr>`;
       const thead= document.createElement("thead");
       thead.innerHTML= headerRow;
       table.appendChild(thead);
@@ -1556,7 +1556,7 @@
       table.appendChild(tbody);
 
       const tfoot= document.createElement("tfoot");
-      let footRow= <tr>
+      let footRow= `<tr>
         <th>Totaux</th>
         ${ showKwh?'<td id="monthlySumKwhConso">-</td>':'' }
         <td id="monthlyTotalSansPv">-</td>
@@ -1569,7 +1569,7 @@
         <td id="monthlyTotalAutoProdPerc">-</td>
         <td id="monthlyTotalAutoConsoPerc">-</td>
         <td id="monthlyTotalRevPerc">-</td>
-      </tr>;
+      </tr>`;
       tfoot.innerHTML= footRow;
       table.appendChild(tfoot);
 
@@ -1584,11 +1584,11 @@
       const chartConso=[], chartAuto=[], chartRev=[];
 
       for(let i=0; i<12; i++){
-        const eurosStr= document.getElementById(euros_${i})?.value || "0";
+        const eurosStr= document.getElementById(`euros_${i}`)?.value || "0";
         const factureSansPv= parseFloat(eurosStr)||0;
 
-        const consoKwh= parseFloat(document.getElementById(kwh_${i})?.value)||0;
-        const costText= document.getElementById(costPerKwh_${i})?.textContent || "0";
+        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`)?.value)||0;
+        const costText= document.getElementById(`costPerKwh_${i}`)?.textContent || "0";
         const costUnit= parseFloat(costText)||0;
 
         if(!monthlyProductionData[i]) continue;
@@ -1630,18 +1630,18 @@
         }
 
         let row= document.createElement("tr");
-        let rowHTML= <td>${moisNoms[i]}</td>;
-        if(showKwh) { rowHTML+= <td>${consoKwh.toFixed(1)}</td>; }
-        rowHTML+= <td>${factureSansPv.toFixed(2)} €</td>;
-        if(showKwh){ rowHTML+= <td>${autoCons.toFixed(1)}</td>; }
-        rowHTML+= <td>${economies.toFixed(2)} €</td>;
-        if(showKwh){ rowHTML+= <td>${finalSurplus.toFixed(1)}</td>; }
-        rowHTML+= <td>${revente.toFixed(2)} €</td>;
-        rowHTML+= <td>${factureAvecPv.toFixed(2)} €</td>;
-        rowHTML+= <td>${totalEco.toFixed(2)} €</td>;
-        rowHTML+= <td>${autoprodPerc.toFixed(1)}%</td>;
-        rowHTML+= <td>${percAutoConsoGlobal.toFixed(1)}%</td>;
-        rowHTML+= <td>${percReventeGlobal.toFixed(1)}%</td>;
+        let rowHTML= `<td>${moisNoms[i]}</td>`;
+        if(showKwh) { rowHTML+= `<td>${consoKwh.toFixed(1)}</td>`; }
+        rowHTML+= `<td>${factureSansPv.toFixed(2)} €</td>`;
+        if(showKwh){ rowHTML+= `<td>${autoCons.toFixed(1)}</td>`; }
+        rowHTML+= `<td>${economies.toFixed(2)} €</td>`;
+        if(showKwh){ rowHTML+= `<td>${finalSurplus.toFixed(1)}</td>`; }
+        rowHTML+= `<td>${revente.toFixed(2)} €</td>`;
+        rowHTML+= `<td>${factureAvecPv.toFixed(2)} €</td>`;
+        rowHTML+= `<td>${totalEco.toFixed(2)} €</td>`;
+        rowHTML+= `<td>${autoprodPerc.toFixed(1)}%</td>`;
+        rowHTML+= `<td>${percAutoConsoGlobal.toFixed(1)}%</td>`;
+        rowHTML+= `<td>${percReventeGlobal.toFixed(1)}%</td>`;
 
         row.innerHTML= rowHTML;
         tbody.appendChild(row);
@@ -1718,7 +1718,7 @@
         totalEco+= totalEcos;
 
         const row= document.createElement("tr");
-        row.innerHTML= 
+        row.innerHTML= `
           <td>${year}</td>
           <td>${factureSansPv.toFixed(2)} €</td>
           <td>${econAuto.toFixed(2)} €</td>
@@ -1726,7 +1726,7 @@
           <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
-        ;
+        `;
         preconTableBody.appendChild(row);
       }
 
@@ -1819,7 +1819,7 @@
       const table= document.getElementById("preconisationMonthlyTableForced");
       table.innerHTML="";
 
-      let headerRow= <tr>
+      let headerRow= `<tr>
         <th>Mois</th>
         ${showKwh?'<th>Conso kWh</th>':''}
         <th>Facture Sans PV</th>
@@ -1832,7 +1832,7 @@
         <th>% Autoproduction</th>
         <th>% Autoconsommation</th>
         <th>% Revente</th>
-      </tr>;
+      </tr>`;
       const thead= document.createElement("thead");
       thead.innerHTML= headerRow;
       table.appendChild(thead);
@@ -1841,7 +1841,7 @@
       table.appendChild(tbody);
 
       const tfoot= document.createElement("tfoot");
-      let footRow= <tr>
+      let footRow= `<tr>
         <th>Totaux</th>
         ${showKwh?'<td id="monthlySumKwhConsoForced">-</td>':''}
         <td id="monthlyTotalSansPvForced">-</td>
@@ -1854,7 +1854,7 @@
         <td id="monthlyTotalAutoProdPercForced">-</td>
         <td id="monthlyTotalAutoConsoPercForced">-</td>
         <td id="monthlyTotalRevPercForced">-</td>
-      </tr>;
+      </tr>`;
       tfoot.innerHTML= footRow;
       table.appendChild(tfoot);
 
@@ -1868,11 +1868,11 @@
       const ratioD= parseFloat(document.getElementById("ratioDiurne").value)||50;
 
       for(let i=0; i<12; i++){
-        const eurosStr= document.getElementById(euros_${i})?.value || "0";
+        const eurosStr= document.getElementById(`euros_${i}`)?.value || "0";
         const factureSansPv= parseFloat(eurosStr)||0;
 
-        const consoKwh= parseFloat(document.getElementById(kwh_${i})?.value)||0;
-        const costText= document.getElementById(costPerKwh_${i})?.textContent || "0";
+        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`)?.value)||0;
+        const costText= document.getElementById(`costPerKwh_${i}`)?.textContent || "0";
         const costUnit= parseFloat(costText)||0;
 
         if(!monthlyProductionData[i]) continue;
@@ -1912,18 +1912,18 @@
         }
 
         let row= document.createElement("tr");
-        let rowHTML= <td>${moisNoms[i]}</td>;
-        if(showKwh) { rowHTML+= <td>${consoKwh.toFixed(1)}</td>; }
-        rowHTML+= <td>${factureSansPv.toFixed(2)} €</td>;
-        if(showKwh){ rowHTML+= <td>${autoCons.toFixed(1)}</td>; }
-        rowHTML+= <td>${economies.toFixed(2)} €</td>;
-        if(showKwh){ rowHTML+= <td>${finalSurplus.toFixed(1)}</td>; }
-        rowHTML+= <td>${revente.toFixed(2)} €</td>;
-        rowHTML+= <td>${factureAvecPv.toFixed(2)} €</td>;
-        rowHTML+= <td>${totalEco.toFixed(2)} €</td>;
-        rowHTML+= <td>${autoprodPerc.toFixed(1)}%</td>;
-        rowHTML+= <td>${percAutoConsoGlobal.toFixed(1)}%</td>;
-        rowHTML+= <td>${percReventeGlobal.toFixed(1)}%</td>;
+        let rowHTML= `<td>${moisNoms[i]}</td>`;
+        if(showKwh) { rowHTML+= `<td>${consoKwh.toFixed(1)}</td>`; }
+        rowHTML+= `<td>${factureSansPv.toFixed(2)} €</td>`;
+        if(showKwh){ rowHTML+= `<td>${autoCons.toFixed(1)}</td>`; }
+        rowHTML+= `<td>${economies.toFixed(2)} €</td>`;
+        if(showKwh){ rowHTML+= `<td>${finalSurplus.toFixed(1)}</td>`; }
+        rowHTML+= `<td>${revente.toFixed(2)} €</td>`;
+        rowHTML+= `<td>${factureAvecPv.toFixed(2)} €</td>`;
+        rowHTML+= `<td>${totalEco.toFixed(2)} €</td>`;
+        rowHTML+= `<td>${autoprodPerc.toFixed(1)}%</td>`;
+        rowHTML+= `<td>${percAutoConsoGlobal.toFixed(1)}%</td>`;
+        rowHTML+= `<td>${percReventeGlobal.toFixed(1)}%</td>`;
 
         row.innerHTML= rowHTML;
         tbody.appendChild(row);
@@ -2002,7 +2002,7 @@
         totalEco+= totalEcos;
 
         const row= document.createElement("tr");
-        row.innerHTML= 
+        row.innerHTML= `
           <td>${year}</td>
           <td>${factureSansPv.toFixed(2)} €</td>
           <td>${econAuto.toFixed(2)} €</td>
@@ -2010,7 +2010,7 @@
           <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
-        ;
+        `;
         preconTableBody.appendChild(row);
       }
 
