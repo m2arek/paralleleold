@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v7</title>
+  <title>FRH PRO formulaire  - v8</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -733,6 +733,11 @@
           <button type="button" id="saveToFile">Télécharger les données</button>
           <input type="file" id="loadFromFile" style="display: none;" />
           <button type="button" id="uploadFile">Charger un fichier</button>
+
+          <!-- NOUVEAU BOUTON POUR LE RAPPORT ÉTENDU -->
+          <button type="button" id="exportStudyReportBtn" style="background-color:#16a085;">
+            Exporter le rapport d'étude PDF
+          </button>
         </div>
       </div><!-- fin tab10 -->
     </form><!-- fin userForm -->
@@ -821,7 +826,7 @@
 
     function detectTerritoryFromZip(cpStr) {
       if(!cpStr || cpStr.length<2) return "France Metropolitaine";
-      let prefix2= cpStr.substring(0,2); 
+      let prefix2= cpStr.substring(0,2);
       if(prefix2==="20") return "Corse";
       if(prefix2==="97") return "Reunion";
       return "France Metropolitaine";
@@ -1200,7 +1205,7 @@
     productibleInput.addEventListener("input", updateProductionPotential);
 
     /***************************************************
-     * 4) EXPORT PDF
+     * 4) EXPORT PDF (BOUTON EXISTANT)
      ***************************************************/
     const exportPDFBtn= document.getElementById("exportPDFBtn");
     exportPDFBtn.addEventListener("click", saveMapAsPDF);
@@ -1414,7 +1419,7 @@
     // (A) COÛT INSTALLATION (modifié pour tenir compte du territoire)
     function costInstallation(S, territory){
       let raw;
-      // ≤100 kWc => formule 1, sinon >100 => 1.15 k€/kWc
+      // ≤100 kWc => formule, sinon >100 => 1.15 k€/kWc
       if (S <= 100) {
         raw = S * ((1.9093 - (0.00659 * S))) * 1000;
       } else {
@@ -1423,7 +1428,7 @@
 
       // Multiplicateur selon le territoire
       if (territory === "Corse") {
-        raw *= 1.00; // +0%
+        raw *= 1.00; // (exemple) +0%
       } else if (territory === "Reunion") {
         raw *= 1.13; // +13%
       }
@@ -2004,7 +2009,7 @@
           primeYear= primeTotal;
         }
         const totalEcos= econAuto+ gainsRev+ primeYear;
-        const factureAvecPv= factureSansPv- econAuto;
+        const factureAvecPv= factureSansPv - econAuto;
 
         totalSansPv+= factureSansPv;
         totalAuto+= econAuto;
@@ -2035,10 +2040,8 @@
 
       document.getElementById("puissanceRecoForced").textContent= S.toLocaleString('fr-FR');
 
-      // On récupère le territoire à l'instant T
+      // On récupère le territoire
       const territory = document.getElementById("territory").value || "France Metropolitaine";
-
-      // On calcule le coût d'installation en passant le territoire
       const forcedCost= costInstallation(S, territory);
       document.getElementById("coutInstallationForced").textContent= forcedCost.toLocaleString('fr-FR');
       document.getElementById("primeValueForced").textContent= primeTotal.toLocaleString('fr-FR');
@@ -2072,6 +2075,159 @@
       const totalGain= computeAutoAndSurplusForPower(S, territoryObj.tarif);
       fill20YearsPreconisationForced(S, totalGain, territoryObj);
     });
+
+
+    /***************************************************
+     * NOUVELLE FONCTION : exportStudyReportPDF
+     * => Génère un rapport d'étude PDF complet
+     ***************************************************/
+    const exportStudyReportBtn = document.getElementById("exportStudyReportBtn");
+    exportStudyReportBtn.addEventListener("click", exportStudyReportPDF);
+
+    async function exportStudyReportPDF(){
+      // 1) On demande à l'utilisateur quelle préconisation choisir
+      //    (standard => Onglet 8, ou sélection => Onglet 9)
+      let scenarioChoice = prompt(
+        "Quel scénario utiliser pour le rapport ?\n" +
+        "Tapez '1' pour la préconisation (standard),\n" +
+        "'2' pour la préconisation sélection."
+      );
+      if(!scenarioChoice) return;
+      scenarioChoice = scenarioChoice.trim();
+
+      // On détermine les IDs qu'on utilisera pour récupérer les infos
+      let monthlyTableId, barChartId, table20Id, summaryId;
+      if(scenarioChoice === "2"){
+        monthlyTableId = "preconisationMonthlyTableForced";
+        barChartId     = "monthlyBarChartForced";
+        table20Id      = "preconisationTableForced";
+        summaryId      = "preconisationSummaryForced";
+      } else {
+        monthlyTableId = "preconisationMonthlyTable";
+        barChartId     = "monthlyBarChart";
+        table20Id      = "preconisationTable";
+        summaryId      = "preconisationSummary";
+      }
+
+      // 2) Récupération de quelques champs (pour la 1ère page)
+      const companyName   = document.getElementById("companyName").value || "";
+      const clientAddress = document.getElementById("address").value || "";
+      const latValue      = document.getElementById("latitudeIrr").value || "";
+      const lonValue      = document.getElementById("longitudeIrr").value || "";
+      const productible   = document.getElementById("productible").value || "";
+
+      // 3) Capture de la carte (page 1)
+      // On prend un screenshot du #map-container
+      const mapCanvas = await html2canvas(document.getElementById("map-container"), {
+        useCORS:true, scale:2
+      });
+      const mapImage = mapCanvas.toDataURL("image/png");
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p","mm","a4"); // format A4 portrait
+
+      // *** PAGE 1 ***
+      pdf.setFontSize(14);
+      pdf.text("Rapport d'étude photovoltaïque", 10, 10);
+
+      // On insère la carte
+      pdf.addImage(mapImage, "PNG", 10, 20, 190, 90);
+
+      let yPos = 115; // On continue en dessous de l'image
+      pdf.setFontSize(11);
+      pdf.text(`Client / Société : ${companyName}`, 10, yPos); yPos+=8;
+      pdf.text(`Adresse saisie : ${clientAddress}`, 10, yPos); yPos+=8;
+      pdf.text(`Coordonnées : lat=${latValue}, lon=${lonValue}`, 10, yPos); yPos+=8;
+      pdf.text(`Productible (PVGIS) : ${productible} kWh/kWc/an`, 10, yPos); yPos+=8;
+
+      // Petit texte de présentation
+      yPos += 5;
+      pdf.setFontSize(10);
+      pdf.text("Le présent rapport d'étude vise à présenter le potentiel photovoltaïque, les préconisations",10,yPos); yPos+=5;
+      pdf.text("et les projections financières associées au projet. Les données ci-dessous résultent d'une",10,yPos+5); yPos+=5;
+      pdf.text("analyse détaillée et sont susceptibles d'être ajustées lors d'une visite sur site.",10,yPos+5); yPos+=10;
+
+      // *** PAGE 2 : TABLEAU mensuel + GRAPHIQUE ***
+      pdf.addPage();
+      pdf.setFontSize(12);
+      pdf.text("Détails par mois (année 1)", 10, 10);
+
+      // 3A) Capture du tableau mensuel (standard ou forced)
+      let monthlyTableEl = document.getElementById(monthlyTableId);
+      if(!monthlyTableEl){
+        pdf.text("Le tableau mensuel n'a pas été trouvé.",10,20);
+      } else {
+        const monthlyTableCanvas = await html2canvas(monthlyTableEl, { useCORS:true, scale:2 });
+        const tableImgData = monthlyTableCanvas.toDataURL("image/png");
+        pdf.addImage(tableImgData, "PNG", 10, 20, 190, 0);
+      }
+
+      // 3B) Capture du graphique mensuel
+      let barChartCanvas = document.getElementById(barChartId);
+      if(barChartCanvas){
+        pdf.addPage();
+        pdf.setFontSize(12);
+        pdf.text("Graphique mensuel", 10, 10);
+
+        const chartCanvasImg = await html2canvas(barChartCanvas, { useCORS:true, scale:2 });
+        const chartImgData = chartCanvasImg.toDataURL("image/png");
+        // Ajuster la taille de l'image selon vos préférences
+        pdf.addImage(chartImgData, "PNG", 10, 20, 190, 90);
+      }
+
+      // *** PAGE 3 : PROJECTION SUR 20 ANS, chiffres clés ***
+      pdf.addPage();
+      pdf.setFontSize(12);
+      pdf.text("Projection sur 20 ans", 10, 10);
+
+      // 4A) Capture du tableau sur 20 ans
+      let twentyYearsTableEl = document.getElementById(table20Id);
+      if(twentyYearsTableEl){
+        const yearsTableCanvas = await html2canvas(twentyYearsTableEl, { useCORS:true, scale:2 });
+        const yearsTableImg = yearsTableCanvas.toDataURL("image/png");
+        pdf.addImage(yearsTableImg, "PNG", 10, 20, 190, 0);
+      } else {
+        pdf.text("Le tableau de projection (20 ans) n'a pas été trouvé.",10,20);
+      }
+
+      // 4B) Les chiffres clés : puissance, coût, prime...
+      pdf.addPage();
+      pdf.text("Chiffres Clés de l'installation :",10,10);
+
+      let summaryDiv = document.getElementById(summaryId);
+      if(summaryDiv){
+        // On va capturer le bloc HTML (ou extraire son contenu)
+        // Option 1 : capture en image
+        const summaryCanvas = await html2canvas(summaryDiv, {useCORS:true, scale:2});
+        const summaryImg = summaryCanvas.toDataURL("image/png");
+        pdf.addImage(summaryImg, "PNG", 10, 20, 190, 0);
+
+        // Option 2 (alternatif) : on aurait pu relire chaque span dans summaryDiv pour faire du pdf.text
+      } else {
+        pdf.text("Impossible de trouver le résumé (summary).",10,20);
+      }
+
+      // On ajoute un paragraphe "avantages" en texte pur
+      let lastY = pdf.lastAutoTable ? pdf.lastAutoTable.finalY + 10 : 120;
+      if(!lastY || typeof lastY!=='number') lastY = 120;
+
+      pdf.setFontSize(10);
+      pdf.text("Conclusion et avantages :",10,lastY);
+      pdf.text([
+        " - Réduction de la facture énergétique grâce à l'autoconsommation.",
+        " - Revenus complémentaires via la revente du surplus.",
+        " - Prime à l'investissement en vigueur selon la puissance et le territoire.",
+        " - Protection contre l'augmentation des tarifs de l'électricité."
+      ],10,lastY+8);
+
+      // *** FIN ***
+      // Nom du PDF
+      let pdfFileName = "Rapport_Etude.pdf";
+      if(companyName) {
+        pdfFileName = `Rapport_${companyName}.pdf`;
+      }
+      pdf.save(pdfFileName);
+    }
   </script>
 </body>
 </html>
