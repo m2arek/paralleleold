@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v15</title>
+  <title>FRH PRO formulaire  - v16</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -2118,149 +2118,150 @@ function captureMap() {
 
   const exportStudyReportBtn = document.getElementById("exportStudyReportBtn");
   exportStudyReportBtn.addEventListener("click", exportStudyReportPDF);
-
-  function exportStudyReportPDF() {
-    // 1) On demande à l'utilisateur quel scénario choisir
-    const scenarioChoice = prompt(
-      "Choisir la préconisation à utiliser dans ce rapport:\n" +
+function exportStudyReportPDF() {
+  // 1) On demande à l'utilisateur quel scénario choisir
+  const scenarioChoice = prompt(
+    "Choisir la préconisation à utiliser dans ce rapport:\n" +
       "'1' = Préconisation standard\n" +
       "'2' = Préconisation Sélection"
-    );
-    if (!scenarioChoice) {
-      return; // Annulation
-    }
-    // On définit les IDs qui changent selon le scénario
-    let monthlyTableId, barChartId, table20Id, summaryId;
-    if (scenarioChoice.trim() === "2") {
-      monthlyTableId = "preconisationMonthlyTableForced";
-      barChartId     = "monthlyBarChartForced";
-      table20Id      = "preconisationTableForced";
-      summaryId      = "preconisationSummaryForced";
-    } else {
-      monthlyTableId = "preconisationMonthlyTable";
-      barChartId     = "monthlyBarChart";
-      table20Id      = "preconisationTable";
-      summaryId      = "preconisationSummary";
-    }
+  );
+  if (!scenarioChoice) {
+    return; // Annulation
+  }
+  // On définit les IDs qui changent selon le scénario
+  let monthlyTableId, barChartId, table20Id, summaryId;
+  if (scenarioChoice.trim() === "2") {
+    monthlyTableId = "preconisationMonthlyTableForced";
+    barChartId     = "monthlyBarChartForced";
+    table20Id      = "preconisationTableForced";
+    summaryId      = "preconisationSummaryForced";
+  } else {
+    monthlyTableId = "preconisationMonthlyTable";
+    barChartId     = "monthlyBarChart";
+    table20Id      = "preconisationTable";
+    summaryId      = "preconisationSummary";
+  }
 
-    // 2) On capture la carte (mapContainer) en premier
-    const mapContainer = document.getElementById("map-container");
-    html2canvas(mapContainer, { useCORS: true, scale: 2 })
-      .then((mapCanvas) => {
-        // On crée le PDF
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
+  // === Au lieu de capturer la carte via html2canvas(mapContainer), on réutilise l'image déjà stockée ===
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
 
-        // Ajout de la carte en page 1
-        const mapImage = mapCanvas.toDataURL("image/png");
-        pdf.setFontSize(14);
-        pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
-        pdf.addImage(mapImage, "PNG", 10, 20, 190, 90);
+  // Page 1 => Titre + image carte (si déjà capturée)
+  pdf.setFontSize(14);
+  pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
 
-        // On ajoute en dessous quelques champs form
-        let yPos = 115;
-        pdf.setFontSize(12);
+  // On va lire <img id="mapCaptureImg">, qui doit déjà contenir la carte
+  const mapCaptureImgEl = document.getElementById("mapCaptureImg");
+  if (mapCaptureImgEl && mapCaptureImgEl.src) {
+    // On insère cette image dataURL base64 dans le PDF
+    pdf.addImage(mapCaptureImgEl.src, "PNG", 10, 20, 190, 90);
+  } else {
+    // Si l'utilisateur n'a pas cliqué sur "Capturer la carte"
+    pdf.text("Aucune capture de la carte n'a été réalisée.", 10, 30);
+  }
 
-        // Récupération de quelques infos
-        const companyName = document.getElementById("companyName").value || "";
-        const addressVal  = document.getElementById("address").value || "";
-        const latVal      = document.getElementById("latitudeIrr").value || "";
-        const lonVal      = document.getElementById("longitudeIrr").value || "";
-        const productibleVal = document.getElementById("productible").value || "";
+  let yPos = 115;
+  pdf.setFontSize(12);
 
-        pdf.text(`Client/Société : ${companyName}`, 10, yPos);     yPos += 8;
-        pdf.text(`Adresse : ${addressVal}`, 10, yPos);             yPos += 8;
-        pdf.text(`Coordonnées lat/lon : ${latVal}, ${lonVal}`, 10, yPos); yPos += 8;
-        pdf.text(`Productible (PVGIS) : ${productibleVal}`, 10, yPos);    yPos += 10;
+  // Récupération de quelques infos
+  const companyName = document.getElementById("companyName").value || "";
+  const addressVal  = document.getElementById("address").value || "";
+  const latVal      = document.getElementById("latitudeIrr").value || "";
+  const lonVal      = document.getElementById("longitudeIrr").value || "";
+  const productibleVal = document.getElementById("productible").value || "";
 
-        // 3) Page 2 => Détails par mois
-        pdf.addPage();
-        pdf.text("Détails par mois (année 1)", 10, 10);
+  pdf.text(`Client/Société : ${companyName}`, 10, yPos);     yPos += 8;
+  pdf.text(`Adresse : ${addressVal}`, 10, yPos);             yPos += 8;
+  pdf.text(`Coordonnées lat/lon : ${latVal}, ${lonVal}`, 10, yPos); yPos += 8;
+  pdf.text(`Productible (PVGIS) : ${productibleVal}`, 10, yPos);    yPos += 10;
 
-        // On capture le tableau mensuel (selon scenario)
-        const monthlyTableEl = document.getElementById(monthlyTableId);
-        if (!monthlyTableEl) {
-          // Si l'élément n'existe pas => message
-          pdf.text("Tableau mensuel introuvable pour ce scénario.", 10, 20);
-          // On saute la suite
-          finalizePDF(pdf, companyName);
-          return;
-        }
+  // === Ensuite, on enchaîne la capture du tableau mensuel (avec .then) ===
+  pdf.addPage();
+  pdf.text("Détails par mois (année 1)", 10, 10);
 
-        return html2canvas(monthlyTableEl, { useCORS: true, scale: 2 })
-          .then((tableCanvas) => {
-            const tableImage = tableCanvas.toDataURL("image/png");
-            pdf.addImage(tableImage, "PNG", 10, 20, 190, 0);
+  const monthlyTableEl = document.getElementById(monthlyTableId);
+  if (!monthlyTableEl) {
+    pdf.text("Tableau mensuel introuvable pour ce scénario.", 10, 20);
+    finalizePDF(pdf, companyName);
+    return;
+  }
 
-            // 4) Page 3 => Graphique mensuel
-            pdf.addPage();
-            pdf.text("Graphique (Détails par mois)", 10, 10);
+  // On capture le tableau mensuel
+  return html2canvas(monthlyTableEl, { useCORS: true, scale: 2 })
+    .then((tableCanvas) => {
+      const tableImage = tableCanvas.toDataURL("image/png");
+      pdf.addImage(tableImage, "PNG", 10, 20, 190, 0);
 
-            const barCanvas = document.getElementById(barChartId);
-            if (!barCanvas) {
-              pdf.text("Graphique introuvable pour ce scénario.", 10, 20);
-              finalizePDF(pdf, companyName);
-              return;
-            }
+      // Page 3 => Graphique mensuel
+      pdf.addPage();
+      pdf.text("Graphique (Détails par mois)", 10, 10);
 
-            return html2canvas(barCanvas, { useCORS: true, scale: 2 })
-              .then((barCanvasImg) => {
-                const chartImg = barCanvasImg.toDataURL("image/png");
-                pdf.addImage(chartImg, "PNG", 10, 20, 190, 90);
+      const barCanvas = document.getElementById(barChartId);
+      if (!barCanvas) {
+        pdf.text("Graphique introuvable pour ce scénario.", 10, 20);
+        finalizePDF(pdf, companyName);
+        return;
+      }
 
-                // 5) Page 4 => Tableau projection sur 20 ans
-                pdf.addPage();
-                pdf.text("Projection sur 20 ans", 10, 10);
+      return html2canvas(barCanvas, { useCORS: true, scale: 2 })
+        .then((barCanvasImg) => {
+          const chartImg = barCanvasImg.toDataURL("image/png");
+          pdf.addImage(chartImg, "PNG", 10, 20, 190, 90);
 
-                const table20El = document.getElementById(table20Id);
-                if (!table20El) {
-                  pdf.text("Projection 20 ans introuvable pour ce scénario.", 10, 20);
+          // Page 4 => Tableau projection sur 20 ans
+          pdf.addPage();
+          pdf.text("Projection sur 20 ans", 10, 10);
+
+          const table20El = document.getElementById(table20Id);
+          if (!table20El) {
+            pdf.text("Projection 20 ans introuvable pour ce scénario.", 10, 20);
+            finalizePDF(pdf, companyName);
+            return;
+          }
+
+          return html2canvas(table20El, { useCORS: true, scale: 2 })
+            .then((table20Canvas) => {
+              const table20Img = table20Canvas.toDataURL("image/png");
+              pdf.addImage(table20Img, "PNG", 10, 20, 190, 0);
+
+              // Page 5 => Chiffres clés (Résumé)
+              pdf.addPage();
+              pdf.text("Chiffres Clés (Résumé)", 10, 10);
+
+              const summaryDiv = document.getElementById(summaryId);
+              if (!summaryDiv) {
+                pdf.text("Résumé introuvable pour ce scénario.", 10, 20);
+                finalizePDF(pdf, companyName);
+                return;
+              }
+
+              return html2canvas(summaryDiv, { useCORS: true, scale: 2 })
+                .then((summaryCanvas) => {
+                  const summaryImg = summaryCanvas.toDataURL("image/png");
+                  pdf.addImage(summaryImg, "PNG", 10, 20, 190, 0);
+
+                  // Enfin, on sauvegarde
                   finalizePDF(pdf, companyName);
-                  return;
-                }
+                });
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Erreur exportStudyReportPDF:", err);
+      alert("Une erreur est survenue lors de l'export multi-pages. Voir console.");
+    });
+}
 
-                return html2canvas(table20El, { useCORS: true, scale: 2 })
-                  .then((table20Canvas) => {
-                    const table20Img = table20Canvas.toDataURL("image/png");
-                    pdf.addImage(table20Img, "PNG", 10, 20, 190, 0);
-
-                    // 6) Page 5 => Chiffres clés (Résumé)
-                    pdf.addPage();
-                    pdf.text("Chiffres Clés (Résumé)", 10, 10);
-
-                    const summaryDiv = document.getElementById(summaryId);
-                    if (!summaryDiv) {
-                      pdf.text("Résumé introuvable pour ce scénario.", 10, 20);
-                      finalizePDF(pdf, companyName);
-                      return;
-                    }
-
-                    return html2canvas(summaryDiv, { useCORS: true, scale: 2 })
-                      .then((summaryCanvas) => {
-                        const summaryImg = summaryCanvas.toDataURL("image/png");
-                        pdf.addImage(summaryImg, "PNG", 10, 20, 190, 0);
-
-                        // Enfin, on sauvegarde
-                        finalizePDF(pdf, companyName);
-                      });
-                  });
-              });
-          });
-      })
-      .catch((err) => {
-        console.error("Erreur exportStudyReportPDF:", err);
-        alert("Une erreur est survenue lors de l'export multi-pages. Voir console.");
-      });
+// Petite fonction finale pour sauvegarder le PDF
+function finalizePDF(pdf, companyName) {
+  let pdfFileName = "Rapport_Etude.pdf";
+  if (companyName) {
+    pdfFileName = `Rapport_${companyName}.pdf`;
   }
+  pdf.save(pdfFileName);
+}
 
-  // Petite fonction finale pour sauvegarder le PDF
-  function finalizePDF(pdf, companyName) {
-    let pdfFileName = "Rapport_Etude.pdf";
-    if (companyName) {
-      pdfFileName = `Rapport_${companyName}.pdf`;
-    }
-    pdf.save(pdfFileName);
-  }
+  
 </script>
 </body>
 </html>
