@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v13</title>
+  <title>FRH PRO formulaire  - v14</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -282,6 +282,9 @@
 
         <button type="button" id="toggleDrawingButton">Activer le dessin (main levée)</button>
         <button type="button" id="toggleMeasureButton">Mesurer une surface</button>
+        <button type="button" id="captureMapBtn">Capturer la carte</button>
+<img id="mapCaptureImg" style="display: none;" alt="Capture Carte"/>
+
 
         <div id="map-container">
           <div id="map"></div>
@@ -1248,6 +1251,33 @@ tileLayer.addTo(map);
         });
       });
     }
+<script>
+// ... (tout votre code existant) ...
+
+// On attend que le DOM soit prêt. 
+// Soit via window.addEventListener("load", ...), 
+// soit directement si on est en bas de la page.
+
+// 1) On attache l'écouteur de clic sur le bouton capture
+document.getElementById("captureMapBtn").addEventListener("click", captureMap);
+
+// 2) La fonction captureMap()
+function captureMap() {
+  const mapContainer = document.getElementById("map-container");
+  html2canvas(mapContainer, { useCORS: true, scale: 2 })
+    .then(canvas => {
+      // On récupère le base64
+      const dataURL = canvas.toDataURL("image/png");
+      // On l'affecte à l'img cachée mapCaptureImg
+      document.getElementById("mapCaptureImg").src = dataURL;
+      alert("La carte a été capturée ! Elle servira lors de l'export PDF.");
+    })
+    .catch(err => {
+      console.error("Erreur lors de la capture de la carte:", err);
+      alert("Impossible de capturer la carte. Voir console.");
+    });
+}
+</script>
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
