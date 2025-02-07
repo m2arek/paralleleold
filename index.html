@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v12</title>
+  <title>FRH PRO formulaire  - v13</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -886,12 +886,16 @@
      * 1) INITIALISER LA CARTE
      ***************************************************/
     const map = L.map("map").setView([48.8566, 2.3522], 18);
-    const tileLayer = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-      maxZoom: 20,
-      subdomains: ["mt0", "mt1", "mt2", "mt3"],
-      attribution: "© Google",
-    });
-    tileLayer.addTo(map);
+    const tileLayer = L.tileLayer(
+  "https://corsproxy.io/?key=a32495b2&url=https://mt{s}.google.com/vt/lyrs=s%26x={x}%26y={y}%26z={z}",
+  {
+    subdomains: ["0","1","2","3"], // pour remplacer le {s} dans "mt{s}"
+    maxZoom: 20,
+    attribution: "© Google"
+  }
+);
+
+tileLayer.addTo(map);
 
     let searchMarker = null;
 
