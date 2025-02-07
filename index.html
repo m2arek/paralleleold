@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v7</title>
+  <title>FRH PRO formulaire  - vp</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1202,42 +1202,47 @@
     /***************************************************
      * 4) EXPORT PDF
      ***************************************************/
-    const exportPDFBtn= document.getElementById("exportPDFBtn");
-    exportPDFBtn.addEventListener("click", saveMapAsPDF);
+        function saveMapAsPDF() {
+      const mapContainer = document.getElementById("map-container");
+      const userForm = document.getElementById("userForm");
 
-    function saveMapAsPDF(){
-      const mapContainer= document.getElementById("map-container");
-      const userForm= document.getElementById("userForm");
+      html2canvas(mapContainer, {
+        useCORS: true,
+        scale: 2,
+      }).then((canvas) => {
+        const mapImage = canvas.toDataURL("image/png");
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
 
-      html2canvas(mapContainer,{ useCORS:true, scale:2 })
-      .then(canvas=>{
-        const mapImage= canvas.toDataURL("image/png");
-        const {jsPDF}= window.jspdf;
-        const pdf= new jsPDF();
-        pdf.addImage(mapImage,"PNG",10,10,190,100);
+        pdf.addImage(mapImage, "PNG", 10, 10, 190, 100);
 
-        let yOffset=120;
-        const formData= new FormData(userForm);
-        formData.forEach((value,key)=>{
-          if(value){
-            pdf.text(`${key} : ${value}`,10,yOffset);
-            yOffset+=10;
+        let yOffset = 120;
+        const formData = new FormData(userForm);
+        formData.forEach((value, key) => {
+          if (value) {
+            pdf.text(`${key} : ${value}`, 10, yOffset);
+            yOffset += 10;
           }
         });
 
         pdf.addPage();
-        pdf.text("Consommation mensuelle",10,10);
-        html2canvas(document.getElementById("consumptionTableContainer"),{ useCORS:true, scale:2 })
-        .then(tableCanvas=>{
-          const tableImage= tableCanvas.toDataURL("image/png");
-          pdf.addImage(tableImage,"PNG",10,20,190,0);
+        pdf.text("Consommation mensuelle", 10, 10);
+        html2canvas(document.getElementById("consumptionTableContainer"), {
+          useCORS: true,
+          scale: 2,
+        }).then((tableCanvas) => {
+          const tableImage = tableCanvas.toDataURL("image/png");
+          pdf.addImage(tableImage, "PNG", 10, 20, 190, 0);
 
-          const companyName= document.getElementById("companyName").value;
-          const pdfFileName= companyName? `Formulaire_${companyName}.pdf` : "Formulaire.pdf";
+          const companyName = document.getElementById("companyName").value;
+          const pdfFileName = companyName
+            ? `Formulaire_${companyName}.pdf`
+            : "Formulaire.pdf";
           pdf.save(pdfFileName);
         });
       });
     }
+
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
