@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v26</title>
+  <title>FRH PRO formulaire  - v27</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -260,7 +260,7 @@
       <!-- TAB 1 : Localisation & Données Irradiation -->
       <div id="tab1" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Localisation & Données Irradiation</h2>
         </div>
 
@@ -714,7 +714,7 @@
       <!-- TAB 10 : Commentaires -->
       <div id="tab10" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Commentaires</h2>
         </div>
         <div class="form-section">
@@ -726,7 +726,21 @@
             placeholder="Entrez vos commentaires"
           ></textarea>
         </div>
+           <!-- Exemple : Input file caché ou non + label cliquable -->
+  <input 
+    type="file" 
+    id="uploadedCaptureFile" 
+    accept="image/png, image/jpeg" 
+    style="display:none;"
+  />
+  <label 
+    for="uploadedCaptureFile" 
+    style="cursor:pointer; color:blue; text-decoration:underline;"
+  >
+    Sélectionner la capture
+  </label>
 
+  <br/><br/>
         <!-- Boutons PDF + gestion JSON -->
         <div style="margin-bottom:15px;">
           <button type="button" id="exportPDFBtn">Exporter en PDF</button>
@@ -1202,65 +1216,70 @@
     /***************************************************
      * 4) EXPORT PDF
      ***************************************************/
-   <!-- Exemple simplifié pour la démo -->
-<input type="file" id="imageFileInput" accept="image/png, image/jpeg" />
-<button type="button" id="exportPDFBtn">Exporter en PDF</button>
+    const fileInput = document.getElementById("uploadedCaptureFile");
+const exportPDFBtn = document.getElementById("exportPDFBtn");
 
+// Variable globale pour stocker le dataURL
+let userCaptureDataURL = null;
 
-  // Variable globale pour stocker le dataURL de l'image (capture)
-  let capturedDataURL = null;
-
-  // 1) Gérer la sélection du fichier
-  const fileInput = document.getElementById("imageFileInput");
-  fileInput.addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      capturedDataURL = null;
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      capturedDataURL = e.target.result; // dataURL
-      // (Facultatif) On peut afficher un aperçu dans un <img> si besoin
-      // document.getElementById("previewImg").src = capturedDataURL;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // 2) Au clic sur le bouton => on crée le PDF seulement avec l'image sélectionnée
-  const exportPDFBtn = document.getElementById("exportPDFBtn");
-  exportPDFBtn.addEventListener("click", saveMapAsPDF);
-
-  function saveMapAsPDF() {
-    // Vérifier qu'on a bien une image
-    if (!capturedDataURL) {
-      alert("Veuillez d'abord sélectionner une image !");
-      return;
-    }
-
-    // On récupère jsPDF (UMD)
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p","mm","a4");
-
-    // On insère l'image (largeur max 190 mm pour être dans les marges)
-    const img = new Image();
-    img.src = capturedDataURL;
-    img.onload = () => {
-      const pdfWidth = 190;
-      const ratio = img.height / img.width;
-      const pdfHeight = pdfWidth * ratio;
-
-      pdf.addImage(capturedDataURL, "PNG", 10, 10, pdfWidth, pdfHeight);
-
-      // Nom de fichier : "Rapport" + "companyName" si besoin
-      const companyName = document.getElementById("companyName")?.value || "";
-      const fileName = companyName ? `Rapport_${companyName}.pdf` : "Rapport.pdf";
-      pdf.save(fileName);
-    };
+// On lit le fichier choisi par l’utilisateur
+fileInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    userCaptureDataURL = null;
+    return;
   }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    userCaptureDataURL = e.target.result; // dataURL
+    alert("Capture sélectionnée !");
+  };
+  reader.readAsDataURL(file);
+});
 
+// Au clic sur le bouton PDF, on génère
+exportPDFBtn.addEventListener("click", () => {
+  if (!userCaptureDataURL) {
+    alert("Veuillez sélectionner d'abord une capture !");
+    return;
+  }
+  saveMapAsPDF();
+});
 
+function saveMapAsPDF() {
+  // On utilise jsPDF
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
 
+  // Ajout de l'image
+  const img = new Image();
+  img.src = userCaptureDataURL;
+  img.onload = () => {
+    const pdfWidth = 190; 
+    const ratio = img.height / img.width;
+    const pdfHeight = pdfWidth * ratio;
+
+    pdf.addImage(userCaptureDataURL, "PNG", 10, 10, pdfWidth, pdfHeight);
+
+    let yOffset = 10 + pdfHeight + 10;
+    pdf.setFontSize(12);
+
+    // Optionnel : Ajouter quelques infos du form
+    const formData = new FormData(document.getElementById("userForm"));
+    formData.forEach((value, key) => {
+      if (value) {
+        pdf.text(`${key} : ${value}`, 10, yOffset);
+        yOffset += 10;
+      }
+    });
+
+    // Sauvegarde
+    const companyName = document.getElementById("companyName").value || "";
+    const pdfFileName = companyName ? `Rapport_${companyName}.pdf` : "RapportEtude.pdf";
+    pdf.save(pdfFileName);
+  };
+}
+    
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
      ***************************************************/
