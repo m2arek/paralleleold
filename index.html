@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v29</title>
+  <title>FRH PRO formulaire  - v30</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1213,36 +1213,58 @@
     panelSelect.addEventListener("change", updateProductionPotential);
     productibleInput.addEventListener("input", updateProductionPotential);
 
-    /***************************************************
-     * 4) EXPORT PDF
-     ***************************************************/
-    // On cible l'input file (capture de carte) + le bouton export
+   /***************************************************
+ * PARTIE : EXPORT PDF AVEC CAPTURE CARTE
+ ***************************************************/
+
+// 1) On cible l'input file (capture de carte) + le bouton export
 const mapCaptureFileInput = document.getElementById("mapCaptureFile");
 const exportPDFBtn        = document.getElementById("exportPDFBtn");
 
-// Variable globale pour stocker le dataURL de la carte
-let mapCaptureDataURL = null;
+// Variables globales pour stocker le dataURL et le format (PNG/JPEG)
+let mapCaptureDataURL   = null;
+let mapCaptureFormat    = null;
 
-// 1) Lecture du fichier image (capture) dès qu'il est sélectionné
+// 2) Lecture du fichier image (capture) dès qu'il est sélectionné
 mapCaptureFileInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) {
     mapCaptureDataURL = null;
+    mapCaptureFormat  = null;
     return;
   }
-  // On lit le fichier en dataURL
+
   const reader = new FileReader();
   reader.onload = (e) => {
-    mapCaptureDataURL = e.target.result; // base64
+    // e.target.result = base64 (ex: "data:image/png;base64,...")
+    mapCaptureDataURL = e.target.result;
+
+    // Déterminer le format à partir du type MIME du fichier
+    // si le navigateur le détecte : file.type = "image/png" ou "image/jpeg" etc.
+    if (file.type.toLowerCase().includes("jpeg")) {
+      mapCaptureFormat = "JPEG";
+    } else if (file.type.toLowerCase().includes("png")) {
+      mapCaptureFormat = "PNG";
+    } else {
+      // Si on veut forcer "PNG" par défaut, par exemple :
+      mapCaptureFormat = "PNG";
+    }
+
+    // (Option) Vérifier aussi par l'entête data:image/ si vous le souhaitez :
+    // if (mapCaptureDataURL.startsWith("data:image/jpeg")) { mapCaptureFormat = "JPEG"; }
+    // else if (mapCaptureDataURL.startsWith("data:image/png")) { mapCaptureFormat = "PNG"; }
+
     alert("Capture de carte sélectionnée !");
   };
   reader.readAsDataURL(file);
 });
 
-// 2) Au clic sur le bouton PDF, on lance l'export
+// 3) Au clic sur le bouton PDF, on lance l'export
 exportPDFBtn.addEventListener("click", exportStudyReportPDF);
 
-// 3) La fonction exportStudyReportPDF
+/***************************************************
+ * FONCTION : exportStudyReportPDF
+ ***************************************************/
 async function exportStudyReportPDF(){
   try {
     // Vérif si l'image de la carte est dispo
@@ -1250,8 +1272,8 @@ async function exportStudyReportPDF(){
       alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
       return;
     }
-    
-    // Création du PDF
+
+    // On récupère l'objet jsPDF depuis l'UMD
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p","mm","a4");
 
@@ -1259,49 +1281,48 @@ async function exportStudyReportPDF(){
     pdf.setFontSize(14);
     pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
 
-    // On insère la capture (stockée en base64)
-    // Largeur choisie : 190 mm => correspond ~ au format A4 - marges 10 mm
-    const pdfWidth = 190;
-    // Pour calculer la hauteur (proportionnelle) on crée un <img> virtuel
+    // On calcule la taille d'affichage (proportionnelle) pour l'image
+    const pdfWidth = 190; // la largeur max qu'on veut occuper dans la page
     const imgTemp = new Image();
     imgTemp.src = mapCaptureDataURL;
 
-    // On attend que l'image se charge (indispensable pour connaître width/height)
+    // On attend le chargement de l'image pour connaître ses dimensions
     await new Promise((resolve) => {
       imgTemp.onload = resolve;
     });
     const ratio = imgTemp.height / imgTemp.width;
     const pdfHeight = pdfWidth * ratio;
 
-    // On insère
-    pdf.addImage(mapCaptureDataURL, "PNG", 10, 20, pdfWidth, pdfHeight);
+    // On insère l'image (en PNG ou JPEG selon mapCaptureFormat)
+    pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 10, 20, pdfWidth, pdfHeight);
 
-    let yPos = 20 + pdfHeight + 10; // On descend en-dessous de l'image
+    // Position Y après l'image
+    let yPos = 20 + pdfHeight + 10;
     pdf.setFontSize(12);
 
-    // On récupère quelques champs pour la 1ère page
+    // Exemple de récupération de quelques champs depuis le DOM
     const companyName   = document.getElementById("companyName")?.value || "";
     const addressVal    = document.getElementById("address")?.value || "";
     const latVal        = document.getElementById("latitudeIrr")?.value || "";
     const lonVal        = document.getElementById("longitudeIrr")?.value || "";
     const productibleVal= document.getElementById("productible")?.value || "";
 
-    pdf.text(`Client / Société : ${companyName}`, 10, yPos);   
+    pdf.text(`Client / Société : ${companyName}`, 10, yPos);
     yPos += 8;
-    pdf.text(`Adresse saisie : ${addressVal}`, 10, yPos);      
+    pdf.text(`Adresse saisie : ${addressVal}`, 10, yPos);
     yPos += 8;
-    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 10, yPos); 
+    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 10, yPos);
     yPos += 8;
     pdf.text(`Productible (PVGIS) : ${productibleVal} kWh/kWc/an`, 10, yPos);
     yPos += 12;
 
-    // 4) On demande le scénario (1 ou 2)
+    // (Option) Choix du scénario (1 ou 2)
     let scenarioChoice = prompt(
       "Choisir la préconisation à utiliser dans le rapport\n" +
       "'1' => Préconisation standard\n" +
       "'2' => Préconisation Sélection"
     );
-    if(!scenarioChoice) return; // Annulation
+    if(!scenarioChoice) return; // Annulation si l'utilisateur fait "Annuler"
     scenarioChoice = scenarioChoice.trim();
 
     // IDs variables (tables, graph, résumé)
@@ -1318,20 +1339,26 @@ async function exportStudyReportPDF(){
       summaryId      = "preconisationSummary";
     }
 
-    // 5) PAGE 2 => Tableau mensuel
+    /***************************************************************
+     * Page 2 : Tableau mensuel (si existe)
+     ***************************************************************/
     pdf.addPage();
     pdf.text("Détails par mois (année 1)", 10, 10);
 
     const monthlyTableEl = document.getElementById(monthlyTableId);
-    if(monthlyTableEl){
-      const tableCanvas = await html2canvas(monthlyTableEl, { useCORS:true, scale:2 });
+    if(monthlyTableEl) {
+      // Convertit le tableau HTML en image
+      const tableCanvas = await html2canvas(monthlyTableEl, { useCORS: true, scale: 2 });
       const tableImg = tableCanvas.toDataURL("image/png");
-      pdf.addImage(tableImg,"PNG",10,20,190,0);
+      // Ajout au PDF
+      pdf.addImage(tableImg, "PNG", 10, 20, 190, 0);
     } else {
-      pdf.text("Aucun tableau mensuel trouvé pour ce scénario.",10,20);
+      pdf.text("Aucun tableau mensuel trouvé pour ce scénario.", 10, 20);
     }
 
-    // 6) PAGE 3 => Graphique mensuel
+    /***************************************************************
+     * Page 3 : Graphique mensuel (chart.js)
+     ***************************************************************/
     pdf.addPage();
     pdf.text("Graphique (Détails par mois)", 10, 10);
 
@@ -1344,20 +1371,24 @@ async function exportStudyReportPDF(){
       pdf.text("Aucun graphique trouvé pour ce scénario.",10,20);
     }
 
-    // 7) PAGE 4 => Projection 20 ans
+    /***************************************************************
+     * Page 4 : Projection sur 20 ans
+     ***************************************************************/
     pdf.addPage();
     pdf.text("Projection sur 20 ans",10,10);
 
     const twentyYearsEl = document.getElementById(table20Id);
-    if(twentyYearsEl){
-      const yearsCanvas = await html2canvas(twentyYearsEl, { useCORS:true, scale:2 });
+    if(twentyYearsEl) {
+      const yearsCanvas = await html2canvas(twentyYearsEl, { useCORS: true, scale:2 });
       const yearsImg = yearsCanvas.toDataURL("image/png");
-      pdf.addImage(yearsImg,"PNG",10,20,190,0);
+      pdf.addImage(yearsImg, "PNG", 10, 20, 190, 0);
     } else {
       pdf.text("Aucun tableau de projection trouvé pour ce scénario.",10,20);
     }
 
-    // 8) PAGE 5 => Chiffres clés
+    /***************************************************************
+     * Page 5 : Chiffres clés
+     ***************************************************************/
     pdf.addPage();
     pdf.text("Chiffres Clés", 10, 10);
 
@@ -1365,7 +1396,7 @@ async function exportStudyReportPDF(){
     if(summaryDiv){
       const summaryCanvas = await html2canvas(summaryDiv, { useCORS:true, scale:2 });
       const summaryImg = summaryCanvas.toDataURL("image/png");
-      pdf.addImage(summaryImg,"PNG",10,20,190,0);
+      pdf.addImage(summaryImg, "PNG", 10, 20, 190, 0);
     } else {
       pdf.text("Aucun résumé pour ce scénario.", 10, 20);
     }
