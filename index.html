@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v31</title>
+  <title>FRH PRO formulaire  - v32</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1276,7 +1276,7 @@ async function exportStudyReportPDF(){
     // On récupère l'objet jsPDF depuis l'UMD
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p","mm","a4");
-/*
+
     // Page 1 => titre + image de la carte
     pdf.setFontSize(14);
     pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
@@ -1338,7 +1338,7 @@ async function exportStudyReportPDF(){
       table20Id      = "preconisationTable";
       summaryId      = "preconisationSummary";
     }
-*/
+
     /***************************************************************
      * Page 2 : Tableau mensuel (si existe)
      ***************************************************************/
