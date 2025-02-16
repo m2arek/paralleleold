@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v44</title>
+  <title>FRH PRO formulaire  - v47</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1359,7 +1359,23 @@ async function exportStudyReportPDF(){
     alert("Une erreur s'est produite lors de l'export PDF (voir console).");
   }
 }
+     :/***************************************************************
+     * Page 4 : Projection sur 20 ans
+     ***************************************************************/
+    pdf.addPage();
+    pdf.text("Projection sur 20 ans", 10, 10);
 
+    const twentyYearsEl = document.getElementById(table20Id);
+    if (twentyYearsEl) {
+    const yearsCanvas = await html2canvas(twentyYearsEl, {
+    useCORS: true,
+    allowTaint: true,
+    scale: 2
+  });
+  pdf.addImage(yearsCanvas.toDataURL("image/png"), "PNG", 10, 20, 190, 0);
+} else {
+      pdf.text("Aucun tableau de projection trouvé pour ce scénario.", 10, 20);
+    }
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
