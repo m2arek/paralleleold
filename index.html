@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v50</title>
+  <title>FRH PRO formulaire  - v51</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1221,7 +1221,7 @@
  ***************************************************/
 
 // 1) On cible l'input file (capture de carte) + le bouton export
-const mapCaptureFileInput = document.getElementById("mapCaptureFile");
+const mapCaptureFile = document.getElementById("mapCaptureFile");
 const exportPDFBtn        = document.getElementById("exportPDFBtn");
 
 // Variables globales pour stocker le dataURL et le format (PNG/JPEG)
@@ -1229,7 +1229,7 @@ let mapCaptureDataURL   = null;
 let mapCaptureFormat    = null;
 
 // 2) Lecture du fichier image (capture) dès qu'il est sélectionné
-mapCaptureFileInput.addEventListener("change", (event) => {
+mapCaptureFile.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) {
     mapCaptureDataURL = null;
