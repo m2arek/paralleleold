@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v45</title>
+  <title>FRH PRO formulaire  - v46</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1213,48 +1213,63 @@
     panelSelect.addEventListener("change", updateProductionPotential);
     productibleInput.addEventListener("input", updateProductionPotential);
 
-/***************************************************
- * PARTIE : EXPORT PDF AVEC CAPTURE CARTE
- ***************************************************/
+const exportStudyReportBtn = document.getElementById("exportStudyReportBtn");
+    exportStudyReportBtn.addEventListener("click", exportStudyReportPDF);
 
-// 1) On cible l'input file (capture de carte) + le bouton export
-const mapCaptureFileInput = document.getElementById("mapCaptureFile");
-const exportPDFBtn        = document.getElementById("exportPDFBtn");
+    async function exportStudyReportPDF(){
+      try {
+        // 1) Capture de la carte EXACTEMENT comme dans saveMapAsPDF()
+        const mapContainer = document.getElementById("map-container");
+        const mapCanvas = await html2canvas(mapContainer, { useCORS:true, scale:2 });
+        const mapImage = mapCanvas.toDataURL("image/png");
 
-// Variables globales pour stocker le dataURL et le format (PNG/JPEG)
-let mapCaptureDataURL   = null;
-let mapCaptureFormat    = null;
+        // 2) Création du PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p","mm","a4");
 
-// 2) Lecture du fichier image (capture) dès qu'il est sélectionné
-mapCaptureFileInput.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    mapCaptureDataURL = null;
-    mapCaptureFormat  = null;
-    return;
-  }
+        // Page 1 => Titre + carte
+        pdf.setFontSize(14);
+        pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
+        pdf.addImage(mapImage, "PNG", 10, 20, 190, 90);
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    mapCaptureDataURL = e.target.result; // "data:image/...;base64,..."
+        let yPos = 115;
+        pdf.setFontSize(12);
 
-    // Déterminer le format à partir du type MIME du fichier
-    if (file.type.toLowerCase().includes("jpeg")) {
-      mapCaptureFormat = "JPEG";
-    } else if (file.type.toLowerCase().includes("png")) {
-      mapCaptureFormat = "PNG";
-    } else {
-      mapCaptureFormat = "PNG"; // par défaut
-    }
+        // On récupère quelques champs pour la 1ère page
+        const companyName   = document.getElementById("companyName").value || "";
+        const addressVal    = document.getElementById("address").value || "";
+        const latVal        = document.getElementById("latitudeIrr").value || "";
+        const lonVal        = document.getElementById("longitudeIrr").value || "";
+        const productibleVal= document.getElementById("productible").value || "";
 
-    alert("Capture de carte sélectionnée !");
-  };
-  reader.readAsDataURL(file);
-});
+        pdf.text(Client / Société : ${companyName}, 10, yPos);   yPos+=8;
+        pdf.text(Adresse saisie : ${addressVal}, 10, yPos);      yPos+=8;
+        pdf.text(Coordonnées : lat=${latVal}, lon=${lonVal}, 10, yPos); yPos+=8;
+        pdf.text(Productible (PVGIS) : ${productibleVal} kWh/kWc/an, 10, yPos); yPos+=10;
 
-// 3) Au clic sur le bouton PDF, on lance l'export
-exportPDFBtn.addEventListener("click", exportStudyReportPDF);
+        // On interrompt la suite si on veut
+        // 3) On utilise prompt() pour choisir le scénario
+        let scenarioChoice = prompt(
+          "Choisir la préconisation à utiliser dans le rapport\n" +
+          "'1' => Préconisation standard\n" +
+          "'2' => Préconisation Sélection"
+        );
+        if(!scenarioChoice) return;
+        scenarioChoice = scenarioChoice.trim();
 
+        // IDs variables
+        let monthlyTableId, barChartId, table20Id, summaryId;
+        if(scenarioChoice === "2"){
+          monthlyTableId = "preconisationMonthlyTableForced";
+          barChartId     = "monthlyBarChartForced";
+          table20Id      = "preconisationTableForced";
+          summaryId      = "preconisationSummaryForced";
+        } else {
+          monthlyTableId = "preconisationMonthlyTable";
+          barChartId     = "monthlyBarChart";
+          table20Id      = "preconisationTable";
+          summaryId      = "preconisationSummary";
+        }
 /***************************************************
  * FONCTION : exportStudyReportPDF
  ***************************************************/
