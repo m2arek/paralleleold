@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v44</title>
+  <title>FRH PRO formulaire  - v48</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1326,20 +1326,32 @@ async function exportStudyReportPDF(){
     );
     if(!scenarioChoice) return;
     scenarioChoice = scenarioChoice.trim();
-
-    let monthlyTableId, barChartId, table20Id, summaryId;
+    let table20Id;
     if(scenarioChoice === "2"){
-      monthlyTableId = "preconisationMonthlyTableForced";
-      barChartId     = "monthlyBarChartForced";
-      table20Id      = "preconisationTableForced";
-      summaryId      = "preconisationSummaryForced";
+      table20Id = "preconisationTableForced";
     } else {
-      monthlyTableId = "preconisationMonthlyTable";
-      barChartId     = "monthlyBarChart";
-      table20Id      = "preconisationTable";
-      summaryId      = "preconisationSummary";
+      table20Id = "preconisationTable";
     }
+        /*******************************************************
+     * PAGE 2 => Tableau 20 ans (avec allowTaint)
+     *******************************************************/
+    pdf.addPage();
+    pdf.setFontSize(14);
+    pdf.text("Projection sur 20 ans", 10, 10);
 
+    const table20El = document.getElementById(table20Id);
+    if(table20El) {
+      // On capture le tableau 20 ans avec html2canvas
+      const table20Canvas = await html2canvas(table20El, {
+        useCORS: true,
+        allowTaint: true,  // <-- Permet d'autoriser le rendu même s'il y a suspicion
+        scale: 2
+      });
+      const table20DataURL = table20Canvas.toDataURL("image/png");
+      pdf.addImage(table20DataURL, "PNG", 10, 20, 190, 0);
+    } else {
+      pdf.text("Aucun tableau de projection trouvé pour ce scénario.", 10, 20);
+    }
 
     // 9) Sauvegarde finale
     let pdfFileName = "Rapport_Etude.pdf";
