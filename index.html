@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v48</title>
+  <title>FRH PRO formulaire  - v49</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -19,9 +19,11 @@
   <!-- (6) html2canvas + jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-
+  
   <!-- Chart.js pour le diagramme en barres -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     /****************************************************
@@ -1213,7 +1215,7 @@
     panelSelect.addEventListener("change", updateProductionPotential);
     productibleInput.addEventListener("input", updateProductionPotential);
 
-/***************************************************
+    /***************************************************
  * PARTIE : EXPORT PDF AVEC CAPTURE CARTE
  ***************************************************/
 
@@ -1260,49 +1262,47 @@ exportPDFBtn.addEventListener("click", exportStudyReportPDF);
  ***************************************************/
 async function exportStudyReportPDF(){
   try {
-    // Vérif si l'image de la carte est dispo
+    // Vérif si l'image de la carte est dispo (comme auparavant)
     if (!mapCaptureDataURL) {
       alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
       return;
     }
 
-    // (A) Retirer ou masquer le drawingCanvas
-    //     pour éviter que html2canvas le détecte et le considère tainté.
+    // (A) Retirer / masquer le drawingCanvas pour éviter le tainting
     const drawingCanvas = document.getElementById("drawingCanvas");
     let drawingCanvasParent = null;
     if (drawingCanvas) {
-      // Soit on retire complètement l'élément :
       drawingCanvasParent = drawingCanvas.parentNode;
       drawingCanvasParent.removeChild(drawingCanvas);
-
-      // -- OU alternative : on le masque simplement
-      // drawingCanvas.style.display = "none";
+      // OU alternative : drawingCanvas.style.display = "none";
     }
 
-    // (B) Création PDF
+    // (B) Création du PDF (Page 1)
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p","mm","a4");
 
-    // Page 1 => titre + image de la carte
+    // Page 1 => titre + image de la carte (inchangé)
     pdf.setFontSize(14);
     pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
 
-    const pdfWidth = 190; 
+    const pdfWidth = 190; // Largeur max disponible
     const imgTemp = new Image();
     imgTemp.src = mapCaptureDataURL;
 
+    // On attend le chargement de l'image
     await new Promise((resolve) => {
       imgTemp.onload = resolve;
     });
     const ratio = imgTemp.height / imgTemp.width;
     const pdfHeight = pdfWidth * ratio;
 
+    // Ajout de la carte
     pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 10, 20, pdfWidth, pdfHeight);
 
     let yPos = 20 + pdfHeight + 10;
     pdf.setFontSize(12);
 
-    // Exemple récupération de champs depuis le DOM
+    // Exemple de récupération de champs
     const companyName   = document.getElementById("companyName")?.value || "";
     const addressVal    = document.getElementById("address")?.value || "";
     const latVal        = document.getElementById("latitudeIrr")?.value || "";
@@ -1318,52 +1318,61 @@ async function exportStudyReportPDF(){
     pdf.text(`Productible (PVGIS) : ${productibleVal} kWh/kWc/an`, 10, yPos);
     yPos += 12;
 
-    // (Option) Choix scénario
+    // (C) Choix du scénario
     let scenarioChoice = prompt(
       "Choisir la préconisation à utiliser dans le rapport\n" +
       "'1' => Préconisation standard\n" +
       "'2' => Préconisation Sélection"
     );
-    if(!scenarioChoice) return;
+    if(!scenarioChoice) return; // Annulation
     scenarioChoice = scenarioChoice.trim();
+
+    // Déterminer l'ID du tableau 20 ans
     let table20Id;
-    if(scenarioChoice === "2"){
+    if (scenarioChoice === "2") {
       table20Id = "preconisationTableForced";
     } else {
       table20Id = "preconisationTable";
     }
-        /*******************************************************
-     * PAGE 2 => Tableau 20 ans (avec allowTaint)
+
+    /*******************************************************
+     * PAGE 2 => Tableau 20 ans (vectoriel, via autoTable)
      *******************************************************/
     pdf.addPage();
     pdf.setFontSize(14);
-    pdf.text("Projection sur 20 ans", 10, 10);
+    pdf.text("Projection sur 20 ans (Version Vectorielle)", 10, 10);
 
-    const table20El = document.getElementById(table20Id);
-    if(table20El) {
-      // On capture le tableau 20 ans avec html2canvas
-      const table20Canvas = await html2canvas(table20El, {
-        useCORS: true,
-        allowTaint: true,  // <-- Permet d'autoriser le rendu même s'il y a suspicion
-        scale: 2
+    const tableEl = document.getElementById(table20Id);
+    if (tableEl) {
+      // On insère le tableau en PDF vectoriel via autoTable
+      pdf.autoTable({
+        html: `#${table20Id}`, // ou html: tableEl
+        startY: 20, // on descend un peu pour pas coller le titre
+        styles: {
+          fontSize: 9,
+          cellPadding: 2
+        },
+        headStyles: {
+          fillColor: [0, 102, 204], // par exemple, un bleu
+          textColor: 255,
+          fontSize: 9
+        },
       });
-      const table20DataURL = table20Canvas.toDataURL("image/png");
-      pdf.addImage(table20DataURL, "PNG", 10, 20, 190, 0);
     } else {
       pdf.text("Aucun tableau de projection trouvé pour ce scénario.", 10, 20);
     }
 
-    // 9) Sauvegarde finale
+    // (D) Sauvegarde finale
     let pdfFileName = "Rapport_Etude.pdf";
     if (companyName) {
       pdfFileName = `Rapport_${companyName}.pdf`;
     }
     pdf.save(pdfFileName);
 
-    // (C) Une fois fini, si besoin on rétablit le drawingCanvas :
+    // (E) Rétablit le drawingCanvas si besoin
     if (drawingCanvas && drawingCanvasParent) {
-      // drawingCanvas.style.display = "";
       drawingCanvasParent.appendChild(drawingCanvas);
+      // OU drawingCanvas.style.display = "";
     }
 
   } catch (e) {
@@ -1371,7 +1380,6 @@ async function exportStudyReportPDF(){
     alert("Une erreur s'est produite lors de l'export PDF (voir console).");
   }
 }
-
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
