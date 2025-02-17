@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v64</title>
+  <title>FRH PRO formulaire  - v65</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1425,6 +1425,26 @@ if (scenarioChoice === "2") {
       pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
       nextY = 35;
     }
+
+// B) Graphique
+pdf.setFontSize(14);
+pdf.text("Graphique (Détails par mois)", 10, nextY);
+nextY += 5;
+
+const monthlyChartCanvas = document.getElementById(monthlyChartId);
+if (monthlyChartCanvas) {
+  // Capture via html2canvas
+  const chartCanvasImg = await html2canvas(monthlyChartCanvas, { useCORS:false, scale:2 });
+  const chartDataURL = chartCanvasImg.toDataURL("image/png");
+  pdf.addImage(chartDataURL, "PNG", 10, nextY, 150, 80);
+  nextY += 85;
+} else {
+  pdf.setFontSize(12);
+  pdf.text("Aucun graphique trouvé.", 10, nextY);
+  nextY += 10;
+}
+
+    
 /*******************************************************
  * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
  *******************************************************/
