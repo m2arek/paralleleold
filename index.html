@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v73</title>
+  <title>FRH PRO formulaire  - v74</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1553,8 +1553,8 @@ async function page2_TableauEtGraphique(pdf, scenarioChoice) {
   pdf.text("Graphique (Détails par mois)", 10, nextY);
   nextY += 10;
 
-  // 5) Appel de la fonction de dessin vectoriel
-  drawVectorBarChart(pdf, 10, nextY, 180, 80, moisLabels, consoData, autoData, revData);
+  // 5) Appel de la fonction de dessin vectoriel appel de drawVectorBarChart avec chartX=10(pousse a gauche), chartWidth=170, chartHeight=70 
+  drawVectorBarChart(pdf, 10, nextY, 170, 70, moisLabels, consoData, autoData, revData);
 
   // On met à jour nextY si on veut enchaîner
   nextY += 80 + 15; 
