@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v63</title>
+  <title>FRH PRO formulaire  - v64</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1358,13 +1358,38 @@ async function exportStudyReportPDF(){
     if(!scenarioChoice) return; // Annulation
     scenarioChoice = scenarioChoice.trim();
 
-    // Déterminer l'ID du tableau 20 ans
-    let table20Id;
-    if (scenarioChoice === "2") {
-      table20Id = "preconisationTableForced";
-    } else {
-      table20Id = "preconisationTable";
-    }
+  /*******************************************************
+ * Selon le choix, on définit les IDs pour le tableau mensuel,
+ * le canvas du graphique et le tableau de projection 20 ans
+ *******************************************************/
+let monthlyTableId, monthlyChartId, twentyYearsId;
+let puissanceId, coutInstId, primeId, coutReelId, gainSansId, gainAvecId, roiId;
+
+if (scenarioChoice === "2") {
+  // Scénario "Sélection"
+  monthlyTableId   = "preconisationMonthlyTableForced";
+  monthlyChartId   = "monthlyBarChartForced";
+  twentyYearsId    = "preconisationTableForced";
+  puissanceId      = "puissanceRecoForced";
+  coutInstId       = "coutInstallationForced";
+  primeId          = "primeValueForced";
+  coutReelId       = "coutReelInstallationForced";
+  gainSansId       = "gainSansInvForced";
+  gainAvecId       = "gainAvecInvForced";
+  roiId            = "roiResultForced";
+} else {
+  // Par défaut, scénario "standard" (1)
+  monthlyTableId   = "preconisationMonthlyTable";
+  monthlyChartId   = "monthlyBarChart";
+  twentyYearsId    = "preconisationTable";
+  puissanceId      = "puissanceReco";
+  coutInstId       = "coutInstallation";
+  primeId          = "primeValue";
+  coutReelId       = "coutReelInstallation";
+  gainSansId       = "gainSansInv";
+  gainAvecId       = "gainAvecInv";
+  roiId            = "roiResult";
+}
 
     /*******************************************************
      * PAGE 2 : TABLEAU MENSUEL + GRAPHIQUE
@@ -1400,7 +1425,77 @@ async function exportStudyReportPDF(){
       pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
       nextY = 35;
     }
+/*******************************************************
+ * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
+ *******************************************************/
+pdf.addPage();
+pdf.setFontSize(14);
+pdf.setTextColor(40, 40, 40);
+pdf.text("Projection sur 20 ans", 10, 15);
 
+let nextY3 = 20;
+// A) Tableau vectoriel => preconisationTable ou preconisationTableForced
+const twentyTableEl = document.getElementById(twentyYearsId);
+if (twentyTableEl) {
+  pdf.autoTable({
+    html: twentyTableEl,
+    startY: nextY3,
+    styles: {
+      fontSize: 8,
+      cellPadding: 2
+    },
+    headStyles: {
+      fillColor: [22, 160, 133],
+      textColor: 255,
+      fontSize: 9
+    }
+  });
+  const lastAuto = pdf.lastAutoTable;
+  if (lastAuto) {
+    nextY3 = lastAuto.finalY + 10;
+  }
+} else {
+  pdf.setFontSize(12);
+  pdf.text("Aucun tableau de projection trouvé.", 10, nextY3 + 5);
+  nextY3 += 15;
+}
+
+// B) Chiffres clés
+pdf.setFontSize(14);
+pdf.text("Chiffres Clés", 10, nextY3);
+nextY3 += 8;
+pdf.setFontSize(12);
+
+// On va chercher les infos selon l'ID choisi
+const pReco   = document.getElementById(puissanceId)?.textContent || "-";
+const cInst   = document.getElementById(coutInstId)?.textContent || "-";
+const cPrime  = document.getElementById(primeId)?.textContent || "-";
+const cReel   = document.getElementById(coutReelId)?.textContent || "-";
+const gSans   = document.getElementById(gainSansId)?.textContent || "-";
+const gAvec   = document.getElementById(gainAvecId)?.textContent || "-";
+const roiVal  = document.getElementById(roiId)?.textContent || "-";
+
+pdf.text(`Puissance préconisée : ${pReco} kWc`, 10, nextY3); nextY3+=6;
+pdf.text(`Coût de l'installation : ${cInst} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Prime : ${cPrime} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Coût réel de l'installation : ${cReel} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Gain total (sans inv.) : ${gSans} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Gain total (avec inv.) : ${gAvec} €`, 10, nextY3); nextY3+=6;
+pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3);
+nextY3 += 12;
+
+// C) Paragraphe final
+pdf.setFontSize(12);
+const finalText = 
+  "Ce projet photovoltaïque vous apporte des bénéfices financiers tout " +
+  "en valorisant votre toiture et en participant à la transition énergétique. " +
+  "Grâce à une expertise FRH PRO, vous bénéficiez d'un accompagnement complet " +
+  "et de conseils personnalisés pour optimiser votre retour sur investissement.\n\n" +
+  "L'autoconsommation et la revente du surplus vous permettent de réduire vos " +
+  "factures d'électricité et de profiter d'une source de revenu durable.";
+const finalLines = pdf.splitTextToSize(finalText, 180);
+pdf.text(finalLines, 10, nextY3);
+nextY3 += 20;
    
 
 
