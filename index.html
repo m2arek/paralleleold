@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v66</title>
+  <title>FRH PRO formulaire  - v67</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1434,7 +1434,7 @@ nextY += 5;
 const monthlyChartCanvas = document.getElementById(monthlyChartId);
 if (monthlyChartCanvas) {
   // Capture via html2canvas
-  const chartCanvasImg = await html2canvas(monthlyChartCanvas, { useCORS:true, scale:2 });
+  const chartCanvasImg = await html2canvas(monthlyChartCanvas, { useCORS:true,allowTaint: true, scale:2 });
   const chartDataURL = chartCanvasImg.toDataURL("image/png");
   pdf.addImage(chartDataURL, "PNG", 10, nextY, 150, 80);
   nextY += 85;
