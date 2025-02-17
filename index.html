@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v52</title>
+  <title>FRH PRO formulaire  - v53</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1308,7 +1308,7 @@ async function exportStudyReportPDF(){
 
     // D) Image de la carte
     const imgTemp = new Image();
-    imgTemp.src = window.mapCaptureDataURL;
+    imgTemp.src = mapCaptureDataURL;
     await new Promise((resolve) => { imgTemp.onload = resolve; });
 
     const pdfWidth = 180; 
@@ -1316,8 +1316,8 @@ async function exportStudyReportPDF(){
     const pdfHeight = pdfWidth * ratio;
 
     pdf.addImage(
-      window.mapCaptureDataURL,
-      window.mapCaptureFormat,
+      mapCaptureDataURL,
+      mapCaptureFormat,
       15, // x
       yPos, // y
       pdfWidth,
