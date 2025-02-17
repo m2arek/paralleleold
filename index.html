@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v49</title>
+  <title>FRH PRO formulaire  - v60</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1278,45 +1278,76 @@ async function exportStudyReportPDF(){
     }
 
     // (B) Création du PDF (Page 1)
-    const { jsPDF } = window.jspdf;
+     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p","mm","a4");
 
-    // Page 1 => titre + image de la carte (inchangé)
-    pdf.setFontSize(14);
-    pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
+    /*******************************************************
+     * PAGE 1 : EN-TÊTE + LOGO + TITRE + CARTE
+     *******************************************************/
+    // A) En-tête coloré
+    pdf.setFillColor(0, 92, 160); // un bleu
+    pdf.rect(0, 0, 210, 25, "F"); // rectangle en haut (toute la largeur)
 
-    const pdfWidth = 190; // Largeur max disponible
+    // B) Logo FRH PRO (depuis GitHub)
+    const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
+    const frhProLogo = new Image();
+    frhProLogo.crossOrigin = "Anonymous"; 
+    frhProLogo.src = frhProLogoUrl;
+    await new Promise((resolve) => { frhProLogo.onload = resolve; });
+
+    // On met "FRH PRO" en blanc
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(20);
+
+    // On ajoute le logo en haut (x=10, y=5, w=15, h=15)
+    pdf.addImage(frhProLogo, "PNG", 10, 5, 15, 15);
+    // Le texte "FRH PRO" à côté
+    pdf.text("FRH PRO", 30, 15);
+
+    // C) Titre sous l'en-tête
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+
+    let yPos = 35; // on descend sous l'en-tête
+    const companyName   = document.getElementById("companyName")?.value || "";
+    const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
+    const titleLines = pdf.splitTextToSize(mainTitle, 180);
+    pdf.text(titleLines, 10, yPos);
+    yPos += 15;
+
+    // D) Image de la carte
     const imgTemp = new Image();
     imgTemp.src = mapCaptureDataURL;
+    await new Promise((resolve) => { imgTemp.onload = resolve; });
 
-    // On attend le chargement de l'image
-    await new Promise((resolve) => {
-      imgTemp.onload = resolve;
-    });
+    const pdfWidth = 180; 
     const ratio = imgTemp.height / imgTemp.width;
     const pdfHeight = pdfWidth * ratio;
 
-    // Ajout de la carte
-    pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 10, 20, pdfWidth, pdfHeight);
+    pdf.addImage(
+     mapCaptureDataURL,
+     mapCaptureFormat,
+      15, // x
+      yPos, // y
+      pdfWidth,
+      pdfHeight
+    );
+    yPos += pdfHeight + 10; // on descend en-dessous de la carte
 
-    let yPos = 20 + pdfHeight + 10;
+    // E) Infos sous la carte
     pdf.setFontSize(12);
 
-    // Exemple de récupération de champs
-    const companyName   = document.getElementById("companyName")?.value || "";
     const addressVal    = document.getElementById("address")?.value || "";
     const latVal        = document.getElementById("latitudeIrr")?.value || "";
     const lonVal        = document.getElementById("longitudeIrr")?.value || "";
     const productibleVal= document.getElementById("productible")?.value || "";
 
-    pdf.text(`Client / Société : ${companyName}`, 10, yPos);
-    yPos += 8;
-    pdf.text(`Adresse saisie : ${addressVal}`, 10, yPos);
-    yPos += 8;
-    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 10, yPos);
-    yPos += 8;
-    pdf.text(`Productible (PVGIS) : ${productibleVal} kWh/kWc/an`, 10, yPos);
-    yPos += 12;
+    pdf.text(`Client : ${companyName}`, 15, yPos); yPos += 6;
+    pdf.text(`Adresse : ${addressVal}`, 15, yPos); yPos += 6;
+    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos); yPos += 6;
+    pdf.text(`Productible : ${productibleVal} kWh/kWc/an`, 15, yPos);
+    yPos += 10;
+
 
     // (C) Choix du scénario
     let scenarioChoice = prompt(
