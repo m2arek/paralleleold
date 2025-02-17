@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v72</title>
+  <title>FRH PRO formulaire  - v73</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1391,156 +1391,176 @@ if (scenarioChoice === "2") {
   roiId            = "roiResult";
 }
 
+await page2_TableauEtGraphique(pdf, scenarioChoice);
+
+    
     /*******************************************************
-     * PAGE 2 : TABLEAU MENSUEL + GRAPHIQUE
-     *******************************************************/
-    pdf.addPage();
-    pdf.setFontSize(14);
-    pdf.setTextColor(40, 40, 40);
-    pdf.text("Détails par mois (année 1)", 10, 15);
-
-    // A) Tableau vectoriel => #preconisationMonthlyTable
-    let nextY = 20;
-    const monthlyTableEl = document.getElementById("preconisationMonthlyTable");
-    if (monthlyTableEl) {
-      pdf.autoTable({
-        html: monthlyTableEl,
-        startY: nextY,
-        styles: {
-          fontSize: 8,
-          cellPadding: 2
-        },
-        headStyles: {
-          fillColor: [0, 92, 160],
-          textColor: 255,
-          fontSize: 9
-        }
-      });
-      const lastAutoTable = pdf.lastAutoTable;
-      if (lastAutoTable) {
-        nextY = lastAutoTable.finalY + 10;
-      }
-    } else {
-      pdf.setFontSize(12);
-      pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
-      nextY = 35;
-    }
-
-       // B) Graphique vectoriel (rouge=Conso, vert=Autoconso, bleu=Revente)
-pdf.setFontSize(14);
-pdf.text("Graphique (Détails par mois) - Vectoriel", 10, nextY);
-nextY += 10;
-
-/***********************************************************
- * RÉCUPÉRER LES DONNÉES KWH DEPUIS LE TABLEAU
- ***********************************************************/
-const moisLabels = [];
-const consoData = [];
-const autoData  = [];
-const revData   = [];
-
-// On suppose que le tableau a un <thead> du genre :
-//   <th>Mois</th>
-//   <th>Conso kWh</th>
-//   <th>...</th>
-//   <th>Autoconso kWh</th>
-//   <th>...</th>
-//   <th>Revente kWh</th>
-//
-// => Il faut adapter en fonction de la structure réelle de votre table.
-
-if (monthlyTableEl) {
-  const rows = monthlyTableEl.querySelectorAll("tbody tr");
-  rows.forEach((tr) => {
-    // Exemple : on cherche les colonnes par index (ex: 0=Mois, 1=Conso kWh, 3=Autoconso, 5=Revente)
-    // Adaptez selon votre HTML.
-    const tds = tr.querySelectorAll("td");
-    if (tds.length >= 6) {
-      const moisTxt  = tds[0].textContent.trim();
-      const consoTxt = tds[1].textContent.trim(); // ex: "350.00 kWh" ou "350"
-      const autoTxt  = tds[3].textContent.trim(); 
-      const revTxt   = tds[5].textContent.trim();
-
-      // Nettoyage => extraire un float
-      const consoVal = parseFloat(consoTxt.replace(/[^\d.]/g, "")) || 0;
-      const autoVal  = parseFloat(autoTxt.replace(/[^\d.]/g, ""))  || 0;
-      const revVal   = parseFloat(revTxt.replace(/[^\d.]/g, ""))   || 0;
-
-      moisLabels.push(moisTxt);
-      consoData.push(consoVal);
-      autoData.push(autoVal);
-      revData.push(revVal);
-    }
-  });
-}
-
-/***********************************************************
- * DESSIN VECTORIEL DES BARRES
- ***********************************************************/
-// Paramètres de placement
-const chartX = 10;         // coin gauche du chart
-let   chartY = nextY;      // coin haut du chart
-const chartWidth  = 180;   // largeur maxi
-const chartHeight = 80;    // hauteur maxi
-
-// 1) Calcul du max
-const allValues = [...consoData, ...autoData, ...revData];
-const maxValue = Math.max(...allValues, 0);
-
-// Sécurité si tout est 0
-if (maxValue <= 0) {
-  pdf.setFontSize(12);
-  pdf.text("Aucune donnée kWh valide pour tracer le graphique.", chartX, chartY + 10);
-} else {
-  // 2) Dessin de l'axe X et Y (simplement 2 traits)
-  pdf.setDrawColor(0, 0, 0);
-  pdf.setLineWidth(0.2);
-
-  // Axe Y : vertical
-  pdf.line(chartX, chartY, chartX, chartY + chartHeight);
-  // Axe X : horizontal
-  pdf.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
-
-  // 3) On place 3 barres par mois (rouge, vert, bleu).
-  const nbMois = moisLabels.length;
-  const barGroupWidth = (chartWidth - 10) / nbMois; // -10 => petite marge droite
-  const barWidth = barGroupWidth / 3; // on place 3 barres (conso/auto/rev) dans le group
-
-  for (let i = 0; i < nbMois; i++) {
-    const baseX = chartX + i * barGroupWidth;
-    // Position de la "ligne de base" des barres
-    const baseY = chartY + chartHeight;
-
-    // Conso => rouge
-    const hConso = (consoData[i] / maxValue) * chartHeight;
-    pdf.setFillColor(255, 80, 80); // rouge
-    // x, y, w, h (y = baseY - hauteur)
-    pdf.rect(baseX, baseY - hConso, barWidth, hConso, "F");
-
-    // Autoconso => vert
-    const hAuto = (autoData[i] / maxValue) * chartHeight;
-    pdf.setFillColor(80, 200, 80); // vert
-    pdf.rect(baseX + barWidth, baseY - hAuto, barWidth, hAuto, "F");
-
-    // Revente => bleu
-    const hRev = (revData[i] / maxValue) * chartHeight;
-    pdf.setFillColor(80, 80, 255); // bleu
-    pdf.rect(baseX + 2*barWidth, baseY - hRev, barWidth, hRev, "F");
-
-    // Option : écrire le mois sous le group
-    pdf.setFontSize(7);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(moisLabels[i], baseX, baseY + 3); // 3 px en dessous de l'axe
+ * FONCTION : dessiner un diagramme en barres vectoriel
+ *******************************************************/
+function drawVectorBarChart(pdf, chartX, chartY, chartWidth, chartHeight,
+                            moisLabels, consoData, autoData, revData) {
+  // 1) Trouve la valeur max
+  const allValues = [...consoData, ...autoData, ...revData];
+  const maxValue = Math.max(...allValues, 0);
+  if (maxValue <= 0) {
+    pdf.setFontSize(12);
+    pdf.text("Pas de données valides pour tracer le graphique.", chartX, chartY + 10);
+    return;
   }
 
-  // On peut mettre un titre "kWh" sur l'axe Y, ou dessiner un label
+  // 2) Nombre de lignes de quadrillage
+  const nbGridLines = 5;
+  const stepValue   = maxValue / nbGridLines;
+  const stepHeight  = chartHeight / nbGridLines;
+
+  // Couleur du quadrillage
+  pdf.setDrawColor(200, 200, 200);
+  pdf.setLineWidth(0.2);
+
+  // 3) Quadrillage horizontal + labels Y
+  pdf.setFontSize(8);
+  for (let i = 0; i <= nbGridLines; i++) {
+    const y = chartY + chartHeight - i * stepHeight; 
+    // ligne horizontale
+    pdf.line(chartX, y, chartX + chartWidth, y);
+    // label
+    const val = i * stepValue;
+    const labelStr = Math.round(val).toLocaleString() + " kWh";
+    pdf.text(labelStr, chartX - 2, y, { align: "right" });
+  }
+
+  // 4) Barres
+  const nbMois     = moisLabels.length;
+  const groupWidth = chartWidth / nbMois;
+  const barWidth   = groupWidth / 3;
+
+  // Couleurs pastel (rouge/vert/bleu)
+  const colorConso = [255, 159, 159];
+  const colorAuto  = [159, 235, 159];
+  const colorRev   = [159, 189, 255];
+
+  pdf.setFontSize(7);
+  for (let i = 0; i < nbMois; i++) {
+    const baseX = chartX + i * groupWidth;
+    const baseY = chartY + chartHeight;
+
+    // Conso
+    const hConso = (consoData[i] / maxValue) * chartHeight;
+    pdf.setFillColor(...colorConso);
+    pdf.rect(baseX, baseY - hConso, barWidth, hConso, "F");
+
+    // Autoconso
+    const hAuto = (autoData[i] / maxValue) * chartHeight;
+    pdf.setFillColor(...colorAuto);
+    pdf.rect(baseX + barWidth, baseY - hAuto, barWidth, hAuto, "F");
+
+    // Revente
+    const hRev = (revData[i] / maxValue) * chartHeight;
+    pdf.setFillColor(...colorRev);
+    pdf.rect(baseX + 2 * barWidth, baseY - hRev, barWidth, hRev, "F");
+
+    // Label du mois sous les barres
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(moisLabels[i], baseX + barWidth, baseY + 3, { align: "center" });
+  }
+
+  // (Option) label "kWh" en haut
   pdf.setFontSize(9);
-  pdf.text("kWh", chartX + 1, chartY + 4); 
+  pdf.text("kWh", chartX + 2, chartY + 5);
 }
 
-// On met à jour le nextY en fonction du chart
-nextY += chartHeight + 10;
-    
+/*******************************************************
+ * EXEMPLE : PAGE 2 AVEC TABLEAU + GRAPHIQUE
+ *******************************************************/
+async function page2_TableauEtGraphique(pdf, scenarioChoice) {
+  // On ajoute la page
+  pdf.addPage();
+  pdf.setFontSize(14);
+  pdf.setTextColor(40, 40, 40);
+  pdf.text("Détails par mois (année 1)", 10, 15);
+
+  let nextY = 20;
+
+  // 1) Récupère l'ID du tableau mensuel selon scenario
+  let monthlyTableId;
+  if (scenarioChoice === "2") {
+    monthlyTableId = "preconisationMonthlyTableForced";
+  } else {
+    monthlyTableId = "preconisationMonthlyTable";
+  }
+
+  // 2) Tableau vectoriel
+  const monthlyTableEl = document.getElementById(monthlyTableId);
+  if (monthlyTableEl) {
+    pdf.autoTable({
+      html: monthlyTableEl,
+      startY: nextY,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2
+      },
+      headStyles: {
+        fillColor: [0, 92, 160],
+        textColor: 255,
+        fontSize: 9
+      }
+    });
+    const lastAutoTable = pdf.lastAutoTable;
+    if (lastAutoTable) {
+      nextY = lastAutoTable.finalY + 10;
+    }
+  } else {
+    pdf.setFontSize(12);
+    pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
+    nextY = 35;
+  }
+
+  // 3) Préparation des données du graphique
+  // On parcourt le tableau HTML pour extraire
+  // ex: <td>Mois</td> <td>Conso</td> <td>FactureSansPV</td> <td>AutoCons kWh</td> <td>Economies €</td> <td>Revente kWh</td> ...
+  // Adaptez selon votre structure
+  const moisLabels = [];
+  const consoData  = [];
+  const autoData   = [];
+  const revData    = [];
+
+  if (monthlyTableEl) {
+    const rows = monthlyTableEl.querySelectorAll("tbody tr");
+    rows.forEach((tr) => {
+      const tds = tr.querySelectorAll("td");
+      // Adaptez l'index selon l'ordre de vos colonnes
+      // Ici on suppose : 
+      //  tds[0] = Mois
+      //  tds[1] = Conso kWh
+      //  tds[3] = Autoconso kWh
+      //  tds[5] = Revente kWh
+      if (tds.length >= 6) {
+        const moisTxt = tds[0].textContent.trim();
+        const cVal    = parseFloat(tds[1].textContent) || 0; 
+        const aVal    = parseFloat(tds[3].textContent) || 0;
+        const rVal    = parseFloat(tds[5].textContent) || 0;
+
+        moisLabels.push(moisTxt);
+        consoData.push(cVal);
+        autoData.push(aVal);
+        revData.push(rVal);
+      }
+    });
+  }
+
+  // 4) Titre pour le graphique
+  pdf.setFontSize(14);
+  pdf.text("Graphique (Détails par mois)", 10, nextY);
+  nextY += 10;
+
+  // 5) Appel de la fonction de dessin vectoriel
+  drawVectorBarChart(pdf, 10, nextY, 180, 80, moisLabels, consoData, autoData, revData);
+
+  // On met à jour nextY si on veut enchaîner
+  nextY += 80 + 15; 
+}
+
+
 /*******************************************************
  * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
  *******************************************************/
