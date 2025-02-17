@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v68</title>
+  <title>FRH PRO formulaire  - v69</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1433,16 +1433,7 @@ nextY += 5;
 
 const monthlyChartCanvas = document.getElementById(monthlyChartId);
 if (monthlyChartCanvas) {
-// Test avant de faire pdf.addImage
-      const testCanvas = await html2canvas(monthlyChartCanvas, { useCORS: true });
-      const dataUrl = testCanvas.toDataURL("image/png");
-      console.log("dataUrl length:", dataUrl.length);
-
-      // On peut insérer un <img> dans la page pour vérifier visuellement
-      const imgTest = document.createElement("img");
-      imgTest.src = dataUrl;
-      document.body.appendChild(imgTest);
-
+document.getElementById('map-container').style.display = 'none';
 
 
 
