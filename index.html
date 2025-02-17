@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v50</title>
+  <title>FRH PRO formulaire  - v52</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1263,7 +1263,7 @@ exportPDFBtn.addEventListener("click", exportStudyReportPDF);
 async function exportStudyReportPDF(){
   try {
     // 1) Vérif si la capture est dispo
-    if (!window.mapCaptureDataURL || !window.mapCaptureFormat) {
+    if (!mapCaptureDataURL || !mapCaptureFormat) {
       alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
       return;
     }
