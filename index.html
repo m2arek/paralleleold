@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v60</title>
+  <title>FRH PRO formulaire  - v61</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1367,31 +1367,58 @@ async function exportStudyReportPDF(){
     }
 
     /*******************************************************
-     * PAGE 2 => Tableau 20 ans (vectoriel, via autoTable)
+     * PAGE 2 : TABLEAU MENSUEL + GRAPHIQUE
      *******************************************************/
     pdf.addPage();
     pdf.setFontSize(14);
-    pdf.text("Projection sur 20 ans (Version Vectorielle)", 10, 10);
+    pdf.setTextColor(40, 40, 40);
+    pdf.text("Détails par mois (année 1)", 10, 15);
 
-    const tableEl = document.getElementById(table20Id);
-    if (tableEl) {
-      // On insère le tableau en PDF vectoriel via autoTable
+    // A) Tableau vectoriel => #preconisationMonthlyTable
+    let nextY = 20;
+    const monthlyTableEl = document.getElementById("preconisationMonthlyTable");
+    if (monthlyTableEl) {
       pdf.autoTable({
-        html: `#${table20Id}`, // ou html: tableEl
-        startY: 20, // on descend un peu pour pas coller le titre
+        html: monthlyTableEl,
+        startY: nextY,
         styles: {
-          fontSize: 9,
+          fontSize: 8,
           cellPadding: 2
         },
         headStyles: {
-          fillColor: [0, 102, 204], // par exemple, un bleu
+          fillColor: [0, 92, 160],
           textColor: 255,
           fontSize: 9
-        },
+        }
       });
+      const lastAutoTable = pdf.lastAutoTable;
+      if (lastAutoTable) {
+        nextY = lastAutoTable.finalY + 10;
+      }
     } else {
-      pdf.text("Aucun tableau de projection trouvé pour ce scénario.", 10, 20);
+      pdf.setFontSize(12);
+      pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
+      nextY = 35;
     }
+
+    // B) Graphique (canvas id="monthlyBarChart")
+    pdf.setFontSize(14);
+    pdf.text("Graphique (Détails par mois)", 10, nextY);
+    nextY += 5;
+
+    const monthlyChartCanvas = document.getElementById("monthlyBarChart");
+    if (monthlyChartCanvas) {
+      // Capture via html2canvas
+      const chartCanvasImg = await html2canvas(monthlyChartCanvas, { useCORS:true, scale:2 });
+      const chartDataURL = chartCanvasImg.toDataURL("image/png");
+      pdf.addImage(chartDataURL, "PNG", 10, nextY, 150, 80);
+      nextY += 85;
+    } else {
+      pdf.setFontSize(12);
+      pdf.text("Aucun graphique trouvé.", 10, nextY);
+      nextY += 10;
+    }
+
 
     // (D) Sauvegarde finale
     let pdfFileName = "Rapport_Etude.pdf";
