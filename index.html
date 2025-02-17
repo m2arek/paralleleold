@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v51</title>
+  <title>FRH PRO formulaire  - v50</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -24,7 +24,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     /****************************************************
@@ -1221,7 +1220,7 @@
  ***************************************************/
 
 // 1) On cible l'input file (capture de carte) + le bouton export
-const mapCaptureFile = document.getElementById("mapCaptureFile");
+const mapCaptureFileInput = document.getElementById("mapCaptureFile");
 const exportPDFBtn        = document.getElementById("exportPDFBtn");
 
 // Variables globales pour stocker le dataURL et le format (PNG/JPEG)
@@ -1229,7 +1228,7 @@ let mapCaptureDataURL   = null;
 let mapCaptureFormat    = null;
 
 // 2) Lecture du fichier image (capture) dès qu'il est sélectionné
-mapCaptureFile.addEventListener("change", (event) => {
+mapCaptureFileInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) {
     mapCaptureDataURL = null;
@@ -1256,83 +1255,77 @@ mapCaptureFile.addEventListener("change", (event) => {
 });
 
 // 3) Au clic sur le bouton PDF, on lance l'export
-exportPDFBtn.addEventListener("click", exportProfessionalPDF);
+exportPDFBtn.addEventListener("click", exportStudyReportPDF);
 
 /***************************************************
  * FONCTION : exportStudyReportPDF
  ***************************************************/
-async function exportProfessionalPDF() {
+async function exportStudyReportPDF(){
   try {
-    // 1) Récupération des classes jsPDF + l'instance PDF
+    // 1) Vérif si la capture est dispo
+    if (!window.mapCaptureDataURL || !window.mapCaptureFormat) {
+      alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
+      return;
+    }
+
+    // 2) Création du PDF
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p","mm","a4");
 
-    /**********************************************
-     * PAGE 1 => EN-TÊTE + LOGO + TITRE + CARTE
-     **********************************************/
+    /*******************************************************
+     * PAGE 1 : EN-TÊTE + LOGO + TITRE + CARTE
+     *******************************************************/
+    // A) En-tête coloré
+    pdf.setFillColor(0, 92, 160); // un bleu
+    pdf.rect(0, 0, 210, 25, "F"); // rectangle en haut (toute la largeur)
 
-    // (A) En-tête coloré + logo FRH PRO
-    //     On dessine un rectangle de couleur en haut
-    pdf.setFillColor(0, 92, 160);   // un bleu turquoise
-    pdf.rect(0, 0, 210, 25, "F");   // toute la largeur de la page (210mm), hauteur 25mm
-
-    // On insère le logo via l'URL GitHub
-    // NB: on charge l'image en local (Image()), puis on l'ajoute
+    // B) Logo FRH PRO (depuis GitHub)
     const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
     const frhProLogo = new Image();
-    frhProLogo.crossOrigin = "Anonymous";  // pour éviter le tainting 
+    frhProLogo.crossOrigin = "Anonymous"; 
     frhProLogo.src = frhProLogoUrl;
-
-    // On attend qu'il charge
     await new Promise((resolve) => { frhProLogo.onload = resolve; });
 
-    // On ajoute ce logo en blanc
-    // Couleur de texte en blanc pour "FRH PRO"
+    // On met "FRH PRO" en blanc
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
 
-    // On l'insère à x=10, y=5, taille 15mm x 15mm environ
+    // On ajoute le logo en haut (x=10, y=5, w=15, h=15)
     pdf.addImage(frhProLogo, "PNG", 10, 5, 15, 15);
-
-    // On écrit "FRH PRO" à côté (x=30mm)
+    // Le texte "FRH PRO" à côté
     pdf.text("FRH PRO", 30, 15);
 
-    // (B) Sous-titre => "Rapport d'étude photovoltaïque + société"
-    pdf.setTextColor(0, 0, 0);    // on repasse le texte en noir
+    // C) Titre sous l'en-tête
+    pdf.setTextColor(0, 0, 0);
     pdf.setFontSize(14);
 
-    let yPos = 35; // on se place un peu plus bas
-    const companyName = document.getElementById("companyName")?.value || "";
-    const mainTitle = `Rapport d'étude photovoltaïque \n${companyName}`;
-    // On scinde le texte en lignes si besoin
-    const lines = pdf.splitTextToSize(mainTitle, 180);
-    pdf.text(lines, 10, yPos); 
+    let yPos = 35; // on descend sous l'en-tête
+    const companyName   = document.getElementById("companyName")?.value || "";
+    const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
+    const titleLines = pdf.splitTextToSize(mainTitle, 180);
+    pdf.text(titleLines, 10, yPos);
     yPos += 15;
 
-    // (C) Image de la carte => mapCaptureDataURL
-    if (!window.mapCaptureDataURL || !window.mapCaptureFormat) {
-      alert("Pas de capture de carte disponible !");
-      return;
-    }
+    // D) Image de la carte
     const imgTemp = new Image();
     imgTemp.src = window.mapCaptureDataURL;
     await new Promise((resolve) => { imgTemp.onload = resolve; });
 
-    const pdfWidth = 180;
+    const pdfWidth = 180; 
     const ratio = imgTemp.height / imgTemp.width;
     const pdfHeight = pdfWidth * ratio;
 
     pdf.addImage(
       window.mapCaptureDataURL,
       window.mapCaptureFormat,
-      15,          // x
-      yPos,        // y
+      15, // x
+      yPos, // y
       pdfWidth,
       pdfHeight
     );
-    yPos += pdfHeight + 10;
+    yPos += pdfHeight + 10; // on descend en-dessous de la carte
 
-    // (D) Infos client : lat, lon, productible
+    // E) Infos sous la carte
     pdf.setFontSize(12);
 
     const addressVal    = document.getElementById("address")?.value || "";
@@ -1340,23 +1333,24 @@ async function exportProfessionalPDF() {
     const lonVal        = document.getElementById("longitudeIrr")?.value || "";
     const productibleVal= document.getElementById("productible")?.value || "";
 
-    pdf.text(`Client: ${companyName}`, 15, yPos);         yPos+=6;
-    pdf.text(`Adresse: ${addressVal}`, 15, yPos);         yPos+=6;
-    pdf.text(`Coordonnées: lat=${latVal}, lon=${lonVal}`, 15, yPos); yPos+=6;
-    pdf.text(`Productible: ${productibleVal} kWh/kWc/an`, 15, yPos);
-    yPos+=10;
+    pdf.text(`Client : ${companyName}`, 15, yPos); yPos += 6;
+    pdf.text(`Adresse : ${addressVal}`, 15, yPos); yPos += 6;
+    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos); yPos += 6;
+    pdf.text(`Productible : ${productibleVal} kWh/kWc/an`, 15, yPos);
+    yPos += 10;
 
-    /**********************************************
-     * PAGE 2 => TABLEAU MENSUEL + GRAPHIQUE
-     **********************************************/
+
+    /*******************************************************
+     * PAGE 2 : TABLEAU MENSUEL + GRAPHIQUE
+     *******************************************************/
     pdf.addPage();
     pdf.setFontSize(14);
     pdf.setTextColor(40, 40, 40);
     pdf.text("Détails par mois (année 1)", 10, 15);
 
-    // (A) Tableau mensuel => supposons un <table id="preconisationMonthlyTable">
-    const monthlyTableEl = document.getElementById("preconisationMonthlyTable");
+    // A) Tableau vectoriel => #preconisationMonthlyTable
     let nextY = 20;
+    const monthlyTableEl = document.getElementById("preconisationMonthlyTable");
     if (monthlyTableEl) {
       pdf.autoTable({
         html: monthlyTableEl,
@@ -1371,7 +1365,6 @@ async function exportProfessionalPDF() {
           fontSize: 9
         }
       });
-      // On récupère la fin du tableau pour positionner le graphique
       const lastAutoTable = pdf.lastAutoTable;
       if (lastAutoTable) {
         nextY = lastAutoTable.finalY + 10;
@@ -1382,37 +1375,39 @@ async function exportProfessionalPDF() {
       nextY = 35;
     }
 
-    // (B) Graphique (Canvas) => #monthlyBarChart
+    // B) Graphique (canvas id="monthlyBarChart")
     pdf.setFontSize(14);
     pdf.text("Graphique (Détails par mois)", 10, nextY);
     nextY += 5;
-    const chartCanvas = document.getElementById("monthlyBarChart");
-    if (chartCanvas) {
-      // On capture via html2canvas
-      const chartCanvasImg = await html2canvas(chartCanvas, { useCORS:true, scale:2 });
+
+    const monthlyChartCanvas = document.getElementById("monthlyBarChart");
+    if (monthlyChartCanvas) {
+      // Capture via html2canvas
+      const chartCanvasImg = await html2canvas(monthlyChartCanvas, { useCORS:true, scale:2 });
       const chartDataURL = chartCanvasImg.toDataURL("image/png");
       pdf.addImage(chartDataURL, "PNG", 10, nextY, 150, 80);
       nextY += 85;
     } else {
       pdf.setFontSize(12);
       pdf.text("Aucun graphique trouvé.", 10, nextY);
-      nextY+=10;
+      nextY += 10;
     }
 
-    /**********************************************
-     * PAGE 3 => PROJECTION 20 ANS + CHIFFRES CLÉS
-     **********************************************/
+
+    /*******************************************************
+     * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
+     *******************************************************/
     pdf.addPage();
     pdf.setFontSize(14);
     pdf.setTextColor(40, 40, 40);
     pdf.text("Projection sur 20 ans", 10, 15);
-    let nextY3 = 20;
 
-    // (A) Tableau 20 ans => #preconisationTable
-    const twentyEl = document.getElementById("preconisationTable");
-    if (twentyEl) {
+    let nextY3 = 20;
+    // A) Tableau vectoriel => #preconisationTable
+    const twentyTableEl = document.getElementById("preconisationTable");
+    if (twentyTableEl) {
       pdf.autoTable({
-        html: twentyEl,
+        html: twentyTableEl,
         startY: nextY3,
         styles: {
           fontSize: 8,
@@ -1424,9 +1419,9 @@ async function exportProfessionalPDF() {
           fontSize: 9
         }
       });
-      const lastAutoTable = pdf.lastAutoTable;
-      if (lastAutoTable) {
-        nextY3 = lastAutoTable.finalY + 10;
+      const lastAuto = pdf.lastAutoTable;
+      if (lastAuto) {
+        nextY3 = lastAuto.finalY + 10;
       }
     } else {
       pdf.setFontSize(12);
@@ -1434,20 +1429,19 @@ async function exportProfessionalPDF() {
       nextY3 += 15;
     }
 
-    // (B) Chiffres Clés
+    // B) Chiffres clés
     pdf.setFontSize(14);
-    pdf.setTextColor(40, 40, 40);
     pdf.text("Chiffres Clés", 10, nextY3);
     nextY3 += 8;
     pdf.setFontSize(12);
 
-    const pReco     = document.getElementById("puissanceReco")?.textContent || "-";
-    const cInst     = document.getElementById("coutInstallation")?.textContent || "-";
-    const cPrime    = document.getElementById("primeValue")?.textContent || "-";
-    const cReel     = document.getElementById("coutReelInstallation")?.textContent || "-";
-    const gSans     = document.getElementById("gainSansInv")?.textContent || "-";
-    const gAvec     = document.getElementById("gainAvecInv")?.textContent || "-";
-    const roiVal    = document.getElementById("roiResult")?.textContent || "-";
+    const pReco   = document.getElementById("puissanceReco")?.textContent || "-";
+    const cInst   = document.getElementById("coutInstallation")?.textContent || "-";
+    const cPrime  = document.getElementById("primeValue")?.textContent || "-";
+    const cReel   = document.getElementById("coutReelInstallation")?.textContent || "-";
+    const gSans   = document.getElementById("gainSansInv")?.textContent || "-";
+    const gAvec   = document.getElementById("gainAvecInv")?.textContent || "-";
+    const roiVal  = document.getElementById("roiResult")?.textContent || "-";
 
     pdf.text(`Puissance préconisée : ${pReco} kWc`, 10, nextY3); nextY3+=6;
     pdf.text(`Coût de l'installation : ${cInst} €`, 10, nextY3); nextY3+=6;
@@ -1455,24 +1449,23 @@ async function exportProfessionalPDF() {
     pdf.text(`Coût réel de l'installation : ${cReel} €`, 10, nextY3); nextY3+=6;
     pdf.text(`Gain total (sans inv.) : ${gSans} €`, 10, nextY3); nextY3+=6;
     pdf.text(`Gain total (avec inv.) : ${gAvec} €`, 10, nextY3); nextY3+=6;
-    pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3); 
+    pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3);
     nextY3 += 12;
 
-    // (C) Paragraphe final
+    // C) Paragraphe final
     pdf.setFontSize(12);
-    const presentationText = 
-      "Ce projet photovoltaïque vous apporte des bénéfices financiers et contribue à " +
-      "la transition énergétique. Grâce à la forte expertise FRH PRO, vous êtes " +
-      "accompagné dans toutes les étapes, de l'étude à l'installation, avec un suivi régulier.\n\n" +
-      "En optant pour l'autoconsommation et la revente du surplus, vous valorisez durablement " +
-      "votre surface de toiture, réduisez vos factures et bénéficiez d'un meilleur retour " +
-      "sur investissement.";
-    const linesFinal = pdf.splitTextToSize(presentationText, 180);
-    pdf.text(linesFinal, 10, nextY3);
+    const finalText = 
+      "Ce projet photovoltaïque vous apporte des bénéfices financiers tout " +
+      "en valorisant votre toiture et en participant à la transition énergétique. " +
+      "Grâce à une expertise FRH PRO, vous bénéficiez d'un accompagnement complet " +
+      "et de conseils personnalisés pour optimiser votre retour sur investissement.\n\n" +
+      "L'autoconsommation et la revente du surplus vous permettent de réduire vos " +
+      "factures d'électricité et de profiter d'une source de revenu durable.";
+    const finalLines = pdf.splitTextToSize(finalText, 180);
+    pdf.text(finalLines, 10, nextY3);
+    nextY3 += 20;
 
-    /**********************************************
-     * SAUVEGARDE DU PDF
-     **********************************************/
+    // 4) Sauvegarde
     let pdfFileName = "Rapport_Etude.pdf";
     if (companyName) {
       pdfFileName = `Rapport_${companyName}.pdf`;
@@ -1480,10 +1473,11 @@ async function exportProfessionalPDF() {
     pdf.save(pdfFileName);
 
   } catch (err) {
-    console.error("Erreur exportProfessionalPDF:", err);
+    console.error("Erreur exportStudyReportPDF:", err);
     alert("Une erreur s'est produite lors de l'export PDF (voir console).");
   }
 }
+
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
