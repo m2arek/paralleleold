@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v77</title>
+  <title>FRH PRO formulaire  - v78</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1913,38 +1913,30 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
     
     
     // (D) Calcule le GAIN total (auto + revente)
-    function computeAutoAndSurplusForPower(S, globalTarif){
-      const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
-      const ratioD= parseFloat(ratioDStr)||50;
-      const fractionClosed= getClosedDaysFraction();
+function computeAutoAndSurplusForPower(S, globalTarif) {
+  const fractionClosed = getClosedDaysFraction();
+  let totalGain = 0;
+  for (let i = 0; i < 12; i++) {
+    if (!monthlyProductionData[i]) continue;
+    const costCell = document.getElementById(`costPerKwh_${i}`);
+    if (!costCell) continue;
+    const p_kWh = parseFloat(costCell.textContent) || 0;
+    const E_m1kW = monthlyProductionData[i].E_m || 0;
+    // Production mensuelle en kWh pour S kWc
+    const production = S * E_m1kW;
+    // Production pendant les jours congés
+    const forcedSurplus = fractionClosed * production;
+    // Autoconso = Production totale - production pendant les jours congés
+    const autoCons = production - forcedSurplus;
+    // Pour la revente, on considère que le surplus est exactement celui des jours fermés
+    const finalSurplus = forcedSurplus;
+    // Gain mensuel uniquement sur l'autoconsommation
+    const gainMonth = autoCons * p_kWh;
+    totalGain += gainMonth;
+  }
+  return totalGain;
+}
 
-      let totalGain= 0;
-      for(let i=0; i<12; i++){
-        const kwhInput= document.getElementById(`kwh_${i}`);
-        const costCell= document.getElementById(`costPerKwh_${i}`);
-        if(!kwhInput || !costCell || !monthlyProductionData[i]) continue;
-
-        const consoKwh= parseFloat(kwhInput.value)||0;
-        const p_kWh= parseFloat(costCell.textContent)||0;
-        const E_m1kW= monthlyProductionData[i].E_m || 0;
-        const production= S* E_m1kW;
-
-        // fraction Sélection en revente
-        const forcedSurplus= fractionClosed* production;
-        const leftover= production - forcedSurplus;
-
-        // conso diurne => ratio
-        const consoKwhDiurne= consoKwh*(ratioD/100);
-
-        const autoCons= Math.min(leftover, consoKwhDiurne);
-        const leftoverAfter= leftover- autoCons;
-        const finalSurplus= forcedSurplus + Math.max(leftoverAfter,0);
-
-        const gainMonth= (autoCons*p_kWh);
-        totalGain+= gainMonth;
-      }
-      return totalGain;
-    }
 
     // (E) Applique la puissance retenue => Fill Tables
     function calculatePreconisationWithPower(S, firstYearGain, territoryObj){
@@ -1977,153 +1969,142 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
     }
 
     function fillMonthlyPreconisation(S, globalTarif){
-      const showKwh= document.getElementById("showKwhColumns").checked;
-      const table= document.getElementById("preconisationMonthlyTable");
-      table.innerHTML="";
+  const showKwh = document.getElementById("showKwhColumns").checked;
+  const table = document.getElementById("preconisationMonthlyTable");
+  table.innerHTML = "";
 
-      let headerRow= `<tr>
-        <th>Mois</th>
-        ${ showKwh?'<th>Conso kWh</th>':''}
-        <th>Facture Sans PV</th>
-        ${ showKwh?'<th>Autoconso kWh</th>':'' }
-        <th>Économies Autoconso</th>
-        ${ showKwh?'<th>Revente kWh</th>':'' }
-        <th>Gains Revente</th>
-        <th>Facture Avec PV</th>
-        <th>Total Économies</th>
-        <th>% Autoproduction</th>
-        <th>% Autoconsommation</th>
-        <th>% Revente</th>
-      </tr>`;
-      const thead= document.createElement("thead");
-      thead.innerHTML= headerRow;
-      table.appendChild(thead);
+  let headerRow = `<tr>
+    <th>Mois</th>
+    ${ showKwh ? '<th>Conso kWh</th>' : '' }
+    <th>Facture Sans PV</th>
+    ${ showKwh ? '<th>Autoconso kWh</th>' : '' }
+    <th>Économies Autoconso</th>
+    ${ showKwh ? '<th>Revente kWh</th>' : '' }
+    <th>Gains Revente</th>
+    <th>Facture Avec PV</th>
+    <th>Total Économies</th>
+    <th>% Autoproduction</th>
+    <th>% Autoconsommation</th>
+    <th>% Revente</th>
+  </tr>`;
+  const thead = document.createElement("thead");
+  thead.innerHTML = headerRow;
+  table.appendChild(thead);
 
-      const tbody= document.createElement("tbody");
-      table.appendChild(tbody);
+  const tbody = document.createElement("tbody");
+  table.appendChild(tbody);
 
-      const tfoot= document.createElement("tfoot");
-      let footRow= `<tr>
-        <th>Totaux</th>
-        ${ showKwh?'<td id="monthlySumKwhConso">-</td>':'' }
-        <td id="monthlyTotalSansPv">-</td>
-        ${ showKwh?'<td id="monthlySumKwhAuto">-</td>':'' }
-        <td id="monthlyTotalAuto">-</td>
-        ${ showKwh?'<td id="monthlySumKwhRevente">-</td>':'' }
-        <td id="monthlyTotalRevente">-</td>
-        <td id="monthlyTotalAvecPv">-</td>
-        <td id="monthlyTotalEconomies">-</td>
-        <td id="monthlyTotalAutoProdPerc">-</td>
-        <td id="monthlyTotalAutoConsoPerc">-</td>
-        <td id="monthlyTotalRevPerc">-</td>
-      </tr>`;
-      tfoot.innerHTML= footRow;
-      table.appendChild(tfoot);
+  const tfoot = document.createElement("tfoot");
+  let footRow = `<tr>
+    <th>Totaux</th>
+    ${ showKwh ? '<td id="monthlySumKwhConso">-</td>' : '' }
+    <td id="monthlyTotalSansPv">-</td>
+    ${ showKwh ? '<td id="monthlySumKwhAuto">-</td>' : '' }
+    <td id="monthlyTotalAuto">-</td>
+    ${ showKwh ? '<td id="monthlySumKwhRevente">-</td>' : '' }
+    <td id="monthlyTotalRevente">-</td>
+    <td id="monthlyTotalAvecPv">-</td>
+    <td id="monthlyTotalEconomies">-</td>
+    <td id="monthlyTotalAutoProdPerc">-</td>
+    <td id="monthlyTotalAutoConsoPerc">-</td>
+    <td id="monthlyTotalRevPerc">-</td>
+  </tr>`;
+  tfoot.innerHTML = footRow;
+  table.appendChild(tfoot);
 
-      let sumSansPv=0, sumAuto=0, sumRev=0, sumAvecPv=0, sumEco=0;
-      let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0;
+  let sumSansPv = 0, sumAuto = 0, sumRev = 0, sumAvecPv = 0, sumEco = 0;
+  let sumKwhConso = 0, sumKwhAuto = 0, sumKwhRev = 0;
 
-      const moisNoms= ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  const moisNoms = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  const fractionClosed = getClosedDaysFraction();
 
-      const fractionClosed= getClosedDaysFraction();
-      const ratioD= parseFloat(document.getElementById("ratioDiurne").value)||50;
+  const chartConso = [], chartAuto = [], chartRev = [];
 
-      const chartConso=[], chartAuto=[], chartRev=[];
+  for (let i = 0; i < 12; i++){
+    const eurosStr = document.getElementById(`euros_${i}`)?.value || "0";
+    const factureSansPv = parseFloat(eurosStr) || 0;
 
-      for(let i=0; i<12; i++){
-        const eurosStr= document.getElementById(`euros_${i}`)?.value || "0";
-        const factureSansPv= parseFloat(eurosStr)||0;
+    // Ici, nous n'utilisons plus la saisie de consommation ni le ratio diurne
+    if (!monthlyProductionData[i]) continue;
+    const E_m1kW = monthlyProductionData[i].E_m || 0;
+    const production = S * E_m1kW;
+    const forcedSurplus = fractionClosed * production;
+    // L'autoconsommation est la production disponible en dehors des jours fermés
+    const autoCons = production - forcedSurplus;
+    const finalSurplus = forcedSurplus;
 
-        const consoKwh= parseFloat(document.getElementById(`kwh_${i}`)?.value)||0;
-        const costText= document.getElementById(`costPerKwh_${i}`)?.textContent || "0";
-        const costUnit= parseFloat(costText)||0;
+    // Récupération du coût par kWh (affiché dans la cellule correspondante)
+    const costText = document.getElementById(`costPerKwh_${i}`)?.textContent || "0";
+    const costUnit = parseFloat(costText) || 0;
 
-        if(!monthlyProductionData[i]) continue;
-        const E_m1kW= monthlyProductionData[i].E_m;
-        const production= S* E_m1kW;
+    const economies = autoCons * costUnit;
+    const revente = finalSurplus * globalTarif;
+    const totalEco = economies + revente;
+    // Facture avec PV : facture sans PV diminuée des économies d'autoconsommation
+    const factureAvecPv = factureSansPv - economies;
 
-        // fraction Sélection en revente
-        const forcedSurplus= fractionClosed* production;
-        const leftover= production - forcedSurplus;
+    sumSansPv += factureSansPv;
+    sumAuto += economies;
+    sumRev += revente;
+    sumAvecPv += factureAvecPv;
+    sumEco += totalEco;
 
-        const consoKwhDiurne= consoKwh*(ratioD/100);
-        const autoCons= Math.min(leftover, consoKwhDiurne);
+    // Pour le graphique, on peut par exemple utiliser la production totale en kWh
+    sumKwhConso += production;
+    sumKwhAuto += autoCons;
+    sumKwhRev += finalSurplus;
 
-        const leftoverAfter= leftover- autoCons;
-        const finalSurplus= forcedSurplus + Math.max(leftoverAfter,0);
+    // Calcul des pourcentages
+    let autoprodPerc = (production > 0) ? (100 * autoCons / production) : 0;
+    let totProd = production; // ici, total production
+    let percAutoConsoGlobal = (totProd > 0) ? (100 * autoCons / totProd) : 0;
+    let percReventeGlobal = (totProd > 0) ? (100 * finalSurplus / totProd) : 0;
 
-        const economies= autoCons* costUnit;
-        const revente= finalSurplus* globalTarif;
-        const totalEco= economies+ revente;
-        const factureAvecPv= factureSansPv- economies;
+    let row = document.createElement("tr");
+    let rowHTML = `<td>${moisNoms[i]}</td>`;
+    if (showKwh) { rowHTML += `<td>${production.toFixed(1)}</td>`; }
+    rowHTML += `<td>${factureSansPv.toFixed(2)} €</td>`;
+    if (showKwh) { rowHTML += `<td>${autoCons.toFixed(1)}</td>`; }
+    rowHTML += `<td>${economies.toFixed(2)} €</td>`;
+    if (showKwh) { rowHTML += `<td>${finalSurplus.toFixed(1)}</td>`; }
+    rowHTML += `<td>${revente.toFixed(2)} €</td>`;
+    rowHTML += `<td>${factureAvecPv.toFixed(2)} €</td>`;
+    rowHTML += `<td>${totalEco.toFixed(2)} €</td>`;
+    rowHTML += `<td>${autoprodPerc.toFixed(1)}%</td>`;
+    rowHTML += `<td>${percAutoConsoGlobal.toFixed(1)}%</td>`;
+    rowHTML += `<td>${percReventeGlobal.toFixed(1)}%</td>`;
+    row.innerHTML = rowHTML;
+    tbody.appendChild(row);
 
-        sumSansPv+= factureSansPv;
-        sumAuto+= economies;
-        sumRev+= revente;
-        sumAvecPv+= factureAvecPv;
-        sumEco+= totalEco;
+    chartConso.push(production);
+    chartAuto.push(autoCons);
+    chartRev.push(finalSurplus);
+  }
 
-        sumKwhConso+= consoKwh;
-        sumKwhAuto+= autoCons;
-        sumKwhRev+= finalSurplus;
+  document.getElementById("monthlyTotalSansPv").textContent = sumSansPv.toFixed(2) + " €";
+  document.getElementById("monthlyTotalAuto").textContent = sumAuto.toFixed(2) + " €";
+  document.getElementById("monthlyTotalRevente").textContent = sumRev.toFixed(2) + " €";
+  document.getElementById("monthlyTotalAvecPv").textContent = sumAvecPv.toFixed(2) + " €";
+  document.getElementById("monthlyTotalEconomies").textContent = sumEco.toFixed(2) + " €";
 
-        let autoprodPerc=0;
-        if(consoKwh>0) autoprodPerc= 100*(autoCons/consoKwh);
-        const totProd= production;
-        let percAutoConsoGlobal=0, percReventeGlobal=0;
-        if(totProd>0){
-          percAutoConsoGlobal= 100*(autoCons/totProd);
-          percReventeGlobal= 100*(finalSurplus/totProd);
-        }
+  if (showKwh) {
+    document.getElementById("monthlySumKwhConso").textContent = sumKwhConso.toFixed(1);
+    document.getElementById("monthlySumKwhAuto").textContent = sumKwhAuto.toFixed(1);
+    document.getElementById("monthlySumKwhRevente").textContent = sumKwhRev.toFixed(1);
+  }
 
-        let row= document.createElement("tr");
-        let rowHTML= `<td>${moisNoms[i]}</td>`;
-        if(showKwh) { rowHTML+= `<td>${consoKwh.toFixed(1)}</td>`; }
-        rowHTML+= `<td>${factureSansPv.toFixed(2)} €</td>`;
-        if(showKwh){ rowHTML+= `<td>${autoCons.toFixed(1)}</td>`; }
-        rowHTML+= `<td>${economies.toFixed(2)} €</td>`;
-        if(showKwh){ rowHTML+= `<td>${finalSurplus.toFixed(1)}</td>`; }
-        rowHTML+= `<td>${revente.toFixed(2)} €</td>`;
-        rowHTML+= `<td>${factureAvecPv.toFixed(2)} €</td>`;
-        rowHTML+= `<td>${totalEco.toFixed(2)} €</td>`;
-        rowHTML+= `<td>${autoprodPerc.toFixed(1)}%</td>`;
-        rowHTML+= `<td>${percAutoConsoGlobal.toFixed(1)}%</td>`;
-        rowHTML+= `<td>${percReventeGlobal.toFixed(1)}%</td>`;
+  let totProd = sumKwhAuto + sumKwhRev;
+  let finalAutoProdPerc = (sumKwhConso > 0) ? (100 * sumKwhAuto / sumKwhConso) : 0;
+  let finalAutoConsoPerc = (totProd > 0) ? (100 * sumKwhAuto / totProd) : 0;
+  let finalRevPerc = (totProd > 0) ? (100 * sumKwhRev / totProd) : 0;
 
-        row.innerHTML= rowHTML;
-        tbody.appendChild(row);
+  document.getElementById("monthlyTotalAutoProdPerc").textContent = finalAutoProdPerc.toFixed(1) + "%";
+  document.getElementById("monthlyTotalAutoConsoPerc").textContent = finalAutoConsoPerc.toFixed(1) + "%";
+  document.getElementById("monthlyTotalRevPerc").textContent = finalRevPerc.toFixed(1) + "%";
 
-        chartConso.push(consoKwh);
-        chartAuto.push(autoCons);
-        chartRev.push(finalSurplus);
-      }
+  createMonthlyBarChart(moisNoms, chartConso, chartAuto, chartRev);
+}
 
-      document.getElementById("monthlyTotalSansPv").textContent= sumSansPv.toFixed(2)+" €";
-      document.getElementById("monthlyTotalAuto").textContent= sumAuto.toFixed(2)+" €";
-      document.getElementById("monthlyTotalRevente").textContent= sumRev.toFixed(2)+" €";
-      document.getElementById("monthlyTotalAvecPv").textContent= sumAvecPv.toFixed(2)+" €";
-      document.getElementById("monthlyTotalEconomies").textContent= sumEco.toFixed(2)+" €";
-
-      if(showKwh){
-        document.getElementById("monthlySumKwhConso").textContent= sumKwhConso.toFixed(1);
-        document.getElementById("monthlySumKwhAuto").textContent= sumKwhAuto.toFixed(1);
-        document.getElementById("monthlySumKwhRevente").textContent= sumKwhRev.toFixed(1);
-      }
-
-      let totProd= sumKwhAuto + sumKwhRev;
-      let finalAutoProdPerc=0, finalAutoConsoPerc=0, finalRevPerc=0;
-      if(sumKwhConso>0) finalAutoProdPerc= 100*(sumKwhAuto/sumKwhConso);
-      if(totProd>0){
-        finalAutoConsoPerc= 100*(sumKwhAuto/totProd);
-        finalRevPerc= 100*(sumKwhRev/totProd);
-      }
-
-      document.getElementById("monthlyTotalAutoProdPerc").textContent= finalAutoProdPerc.toFixed(1)+"%";
-      document.getElementById("monthlyTotalAutoConsoPerc").textContent= finalAutoConsoPerc.toFixed(1)+"%";
-      document.getElementById("monthlyTotalRevPerc").textContent= finalRevPerc.toFixed(1)+"%";
-
-      createMonthlyBarChart(moisNoms, chartConso, chartAuto, chartRev);
-    }
 
     // (G) fill20YearsPreconisation
     function fill20YearsPreconisation(S, firstYearGain, territoryObj){
