@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v75</title>
+  <title>FRH PRO formulaire  - v76</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -618,6 +618,7 @@
                 <th>Prime (année 2)</th>
                 <th>Facture Avec PV</th>
                 <th>Total Économies</th>
+                <th>Cumul economies</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -685,6 +686,7 @@
                 <th>Prime (année 2)</th>
                 <th>Facture Avec PV</th>
                 <th>Total Économies</th>
+                <th>Cumul economies</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -2120,7 +2122,8 @@ nextY3 += 20;
       preconTableBody.innerHTML="";
 
       let totalSansPv=0, totalAuto=0, totalRev=0, totalPrime=0, totalAvecPv=0, totalEco=0;
-
+      let cumulativeEco = 0; // variable pour le cumul
+      
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100, (year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100, (year-1));
@@ -2139,6 +2142,8 @@ nextY3 += 20;
         totalAvecPv+= factureAvecPv;
         totalEco+= totalEcos;
 
+         cumulativeEco += totalEcos; // mise à jour du cumul
+
         const row= document.createElement("tr");
         row.innerHTML= `
           <td>${year}</td>
@@ -2148,6 +2153,7 @@ nextY3 += 20;
           <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
+          <td>${cumulativeEco.toFixed(2)} €</td>
         `;
         preconTableBody.appendChild(row);
       }
@@ -2409,7 +2415,8 @@ nextY3 += 20;
       preconTableBody.innerHTML="";
 
       let totalSansPv=0, totalAuto=0, totalRev=0, totalPrime=0, totalAvecPv=0, totalEco=0;
-
+      let cumulativeEco = 0; // pour le cumul
+      
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100,(year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100,(year-1));
@@ -2427,7 +2434,9 @@ nextY3 += 20;
         totalPrime+= primeYear;
         totalAvecPv+= factureAvecPv;
         totalEco+= totalEcos;
-
+        
+        cumulativeEco += totalEcos; // cumul des économies
+        
         const row= document.createElement("tr");
         row.innerHTML= `
           <td>${year}</td>
@@ -2437,6 +2446,7 @@ nextY3 += 20;
           <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
+          <td>${cumulativeEco.toFixed(2)} €</td>
         `;
         preconTableBody.appendChild(row);
       }
