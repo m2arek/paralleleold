@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v76</title>
+  <title>FRH PRO formulaire  - v77</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1889,6 +1889,29 @@ nextY3 += 20;
       return {tarif: foundTarif, primeByWc: foundPrime};
     }
 
+    // Ajoutez ici la fonction calculateROI
+function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, annualPriceIncrease) {
+  let cumulativeSavings = 0;
+  let roiYears = 0;
+  // On fixe une borne maximale pour éviter une boucle infinie (ici 100 ans)
+  while (roiYears < 100) {
+    roiYears++;
+    // Les économies d'autoconsommation augmentent chaque année
+    let econAuto = autoYear1 * Math.pow(1 + annualPriceIncrease / 100, roiYears - 1);
+    // On suppose que les gains de revente restent constants (vous pouvez adapter si nécessaire)
+    let gainsRev = surplusYear1;
+    // La prime est versée en année 2
+    let prime = (roiYears === 2) ? primeTotal : 0;
+    let totalYearSavings = econAuto + gainsRev + prime;
+    cumulativeSavings += totalYearSavings;
+    if (cumulativeSavings >= coutInstallation) {
+      break;
+    }
+  }
+  return roiYears;
+}
+    
+    
     // (D) Calcule le GAIN total (auto + revente)
     function computeAutoAndSurplusForPower(S, globalTarif){
       const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
@@ -2185,8 +2208,9 @@ nextY3 += 20;
       let gainAvecInvVal= totalEco - coutReel;
       document.getElementById("gainAvecInv").textContent= gainAvecInvVal.toFixed(2)+" €";
 
-      let payback= coutReel/(firstYearGain||1);
-      document.getElementById("roiResult").textContent= payback.toFixed(1);
+      // Nouveau calcul du ROI basé sur le cumul des économies
+let roiYears = calculateROI(costInst, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
+document.getElementById("roiResult").textContent = roiYears.toFixed(1);
     }
 
     // Écouteur => "Calculer la préconisation"
@@ -2478,8 +2502,9 @@ nextY3 += 20;
       let gainAvecInvVal= totalEco- coutReel;
       document.getElementById("gainAvecInvForced").textContent= gainAvecInvVal.toFixed(2)+" €";
 
-      let payback= coutReel/(firstYearGain||1);
-      document.getElementById("roiResultForced").textContent= payback.toFixed(1);
+      // Nouveau calcul du ROI basé sur le cumul des économies
+let roiYearsForced = calculateROI(forcedCost, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
+document.getElementById("roiResultForced").textContent = roiYearsForced.toFixed(1);
     }
 
     // Bouton => Préconisation Sélection
