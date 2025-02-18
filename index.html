@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v64</title>
+  <title>FRH PRO formulaire  - v44</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -19,11 +19,9 @@
   <!-- (6) html2canvas + jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-  
+
   <!-- Chart.js pour le diagramme en barres -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     /****************************************************
@@ -1215,7 +1213,7 @@
     panelSelect.addEventListener("change", updateProductionPotential);
     productibleInput.addEventListener("input", updateProductionPotential);
 
-    /***************************************************
+/***************************************************
  * PARTIE : EXPORT PDF AVEC CAPTURE CARTE
  ***************************************************/
 
@@ -1262,254 +1260,98 @@ exportPDFBtn.addEventListener("click", exportStudyReportPDF);
  ***************************************************/
 async function exportStudyReportPDF(){
   try {
-    // Vérif si l'image de la carte est dispo (comme auparavant)
+    // Vérif si l'image de la carte est dispo
     if (!mapCaptureDataURL) {
       alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
       return;
     }
 
-    // (A) Retirer / masquer le drawingCanvas pour éviter le tainting
+    // (A) Retirer ou masquer le drawingCanvas
+    //     pour éviter que html2canvas le détecte et le considère tainté.
     const drawingCanvas = document.getElementById("drawingCanvas");
     let drawingCanvasParent = null;
     if (drawingCanvas) {
+      // Soit on retire complètement l'élément :
       drawingCanvasParent = drawingCanvas.parentNode;
       drawingCanvasParent.removeChild(drawingCanvas);
-      // OU alternative : drawingCanvas.style.display = "none";
+
+      // -- OU alternative : on le masque simplement
+      // drawingCanvas.style.display = "none";
     }
 
-    // (B) Création du PDF (Page 1)
-     const { jsPDF } = window.jspdf;
+    // (B) Création PDF
+    const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p","mm","a4");
 
-    /*******************************************************
-     * PAGE 1 : EN-TÊTE + LOGO + TITRE + CARTE
-     *******************************************************/
-    // A) En-tête coloré
-    pdf.setFillColor(0, 92, 160); // un bleu
-    pdf.rect(0, 0, 210, 25, "F"); // rectangle en haut (toute la largeur)
-
-    // B) Logo FRH PRO (depuis GitHub)
-    const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
-    const frhProLogo = new Image();
-    frhProLogo.crossOrigin = "Anonymous"; 
-    frhProLogo.src = frhProLogoUrl;
-    await new Promise((resolve) => { frhProLogo.onload = resolve; });
-
-    // On met "FRH PRO" en blanc
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(20);
-
-    // On ajoute le logo en haut (x=10, y=5, w=15, h=15)
-    pdf.addImage(frhProLogo, "PNG", 10, 5, 15, 15);
-    // Le texte "FRH PRO" à côté
-    pdf.text("FRH PRO", 30, 15);
-
-    // C) Titre sous l'en-tête
-    pdf.setTextColor(0, 0, 0);
+    // Page 1 => titre + image de la carte
     pdf.setFontSize(14);
+    pdf.text("Rapport d'étude photovoltaïque (multi-pages)", 10, 10);
 
-    let yPos = 35; // on descend sous l'en-tête
-    const companyName   = document.getElementById("companyName")?.value || "";
-    const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
-    const titleLines = pdf.splitTextToSize(mainTitle, 180);
-    pdf.text(titleLines, 10, yPos);
-    yPos += 15;
-
-    // D) Image de la carte
+    const pdfWidth = 190; 
     const imgTemp = new Image();
     imgTemp.src = mapCaptureDataURL;
-    await new Promise((resolve) => { imgTemp.onload = resolve; });
 
-    const pdfWidth = 180; 
+    await new Promise((resolve) => {
+      imgTemp.onload = resolve;
+    });
     const ratio = imgTemp.height / imgTemp.width;
     const pdfHeight = pdfWidth * ratio;
 
-    pdf.addImage(
-     mapCaptureDataURL,
-     mapCaptureFormat,
-      15, // x
-      yPos, // y
-      pdfWidth,
-      pdfHeight
-    );
-    yPos += pdfHeight + 10; // on descend en-dessous de la carte
+    pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 10, 20, pdfWidth, pdfHeight);
 
-    // E) Infos sous la carte
+    let yPos = 20 + pdfHeight + 10;
     pdf.setFontSize(12);
 
+    // Exemple récupération de champs depuis le DOM
+    const companyName   = document.getElementById("companyName")?.value || "";
     const addressVal    = document.getElementById("address")?.value || "";
     const latVal        = document.getElementById("latitudeIrr")?.value || "";
     const lonVal        = document.getElementById("longitudeIrr")?.value || "";
     const productibleVal= document.getElementById("productible")?.value || "";
 
-    pdf.text(`Client : ${companyName}`, 15, yPos); yPos += 6;
-    pdf.text(`Adresse : ${addressVal}`, 15, yPos); yPos += 6;
-    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos); yPos += 6;
-    pdf.text(`Productible : ${productibleVal} kWh/kWc/an`, 15, yPos);
-    yPos += 10;
+    pdf.text(`Client / Société : ${companyName}`, 10, yPos);
+    yPos += 8;
+    pdf.text(`Adresse saisie : ${addressVal}`, 10, yPos);
+    yPos += 8;
+    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 10, yPos);
+    yPos += 8;
+    pdf.text(`Productible (PVGIS) : ${productibleVal} kWh/kWc/an`, 10, yPos);
+    yPos += 12;
 
-
-    // (C) Choix du scénario
+    // (Option) Choix scénario
     let scenarioChoice = prompt(
       "Choisir la préconisation à utiliser dans le rapport\n" +
       "'1' => Préconisation standard\n" +
       "'2' => Préconisation Sélection"
     );
-    if(!scenarioChoice) return; // Annulation
+    if(!scenarioChoice) return;
     scenarioChoice = scenarioChoice.trim();
 
-  /*******************************************************
- * Selon le choix, on définit les IDs pour le tableau mensuel,
- * le canvas du graphique et le tableau de projection 20 ans
- *******************************************************/
-let monthlyTableId, monthlyChartId, twentyYearsId;
-let puissanceId, coutInstId, primeId, coutReelId, gainSansId, gainAvecId, roiId;
-
-if (scenarioChoice === "2") {
-  // Scénario "Sélection"
-  monthlyTableId   = "preconisationMonthlyTableForced";
-  monthlyChartId   = "monthlyBarChartForced";
-  twentyYearsId    = "preconisationTableForced";
-  puissanceId      = "puissanceRecoForced";
-  coutInstId       = "coutInstallationForced";
-  primeId          = "primeValueForced";
-  coutReelId       = "coutReelInstallationForced";
-  gainSansId       = "gainSansInvForced";
-  gainAvecId       = "gainAvecInvForced";
-  roiId            = "roiResultForced";
-} else {
-  // Par défaut, scénario "standard" (1)
-  monthlyTableId   = "preconisationMonthlyTable";
-  monthlyChartId   = "monthlyBarChart";
-  twentyYearsId    = "preconisationTable";
-  puissanceId      = "puissanceReco";
-  coutInstId       = "coutInstallation";
-  primeId          = "primeValue";
-  coutReelId       = "coutReelInstallation";
-  gainSansId       = "gainSansInv";
-  gainAvecId       = "gainAvecInv";
-  roiId            = "roiResult";
-}
-
-    /*******************************************************
-     * PAGE 2 : TABLEAU MENSUEL + GRAPHIQUE
-     *******************************************************/
-    pdf.addPage();
-    pdf.setFontSize(14);
-    pdf.setTextColor(40, 40, 40);
-    pdf.text("Détails par mois (année 1)", 10, 15);
-
-    // A) Tableau vectoriel => #preconisationMonthlyTable
-    let nextY = 20;
-    const monthlyTableEl = document.getElementById("preconisationMonthlyTable");
-    if (monthlyTableEl) {
-      pdf.autoTable({
-        html: monthlyTableEl,
-        startY: nextY,
-        styles: {
-          fontSize: 8,
-          cellPadding: 2
-        },
-        headStyles: {
-          fillColor: [0, 92, 160],
-          textColor: 255,
-          fontSize: 9
-        }
-      });
-      const lastAutoTable = pdf.lastAutoTable;
-      if (lastAutoTable) {
-        nextY = lastAutoTable.finalY + 10;
-      }
+    let monthlyTableId, barChartId, table20Id, summaryId;
+    if(scenarioChoice === "2"){
+      monthlyTableId = "preconisationMonthlyTableForced";
+      barChartId     = "monthlyBarChartForced";
+      table20Id      = "preconisationTableForced";
+      summaryId      = "preconisationSummaryForced";
     } else {
-      pdf.setFontSize(12);
-      pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
-      nextY = 35;
+      monthlyTableId = "preconisationMonthlyTable";
+      barChartId     = "monthlyBarChart";
+      table20Id      = "preconisationTable";
+      summaryId      = "preconisationSummary";
     }
-/*******************************************************
- * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
- *******************************************************/
-pdf.addPage();
-pdf.setFontSize(14);
-pdf.setTextColor(40, 40, 40);
-pdf.text("Projection sur 20 ans", 10, 15);
-
-let nextY3 = 20;
-// A) Tableau vectoriel => preconisationTable ou preconisationTableForced
-const twentyTableEl = document.getElementById(twentyYearsId);
-if (twentyTableEl) {
-  pdf.autoTable({
-    html: twentyTableEl,
-    startY: nextY3,
-    styles: {
-      fontSize: 8,
-      cellPadding: 2
-    },
-    headStyles: {
-      fillColor: [22, 160, 133],
-      textColor: 255,
-      fontSize: 9
-    }
-  });
-  const lastAuto = pdf.lastAutoTable;
-  if (lastAuto) {
-    nextY3 = lastAuto.finalY + 10;
-  }
-} else {
-  pdf.setFontSize(12);
-  pdf.text("Aucun tableau de projection trouvé.", 10, nextY3 + 5);
-  nextY3 += 15;
-}
-
-// B) Chiffres clés
-pdf.setFontSize(14);
-pdf.text("Chiffres Clés", 10, nextY3);
-nextY3 += 8;
-pdf.setFontSize(12);
-
-// On va chercher les infos selon l'ID choisi
-const pReco   = document.getElementById(puissanceId)?.textContent || "-";
-const cInst   = document.getElementById(coutInstId)?.textContent || "-";
-const cPrime  = document.getElementById(primeId)?.textContent || "-";
-const cReel   = document.getElementById(coutReelId)?.textContent || "-";
-const gSans   = document.getElementById(gainSansId)?.textContent || "-";
-const gAvec   = document.getElementById(gainAvecId)?.textContent || "-";
-const roiVal  = document.getElementById(roiId)?.textContent || "-";
-
-pdf.text(`Puissance préconisée : ${pReco} kWc`, 10, nextY3); nextY3+=6;
-pdf.text(`Coût de l'installation : ${cInst} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Prime : ${cPrime} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Coût réel de l'installation : ${cReel} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Gain total (sans inv.) : ${gSans} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Gain total (avec inv.) : ${gAvec} €`, 10, nextY3); nextY3+=6;
-pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3);
-nextY3 += 12;
-
-// C) Paragraphe final
-pdf.setFontSize(12);
-const finalText = 
-  "Ce projet photovoltaïque vous apporte des bénéfices financiers tout " +
-  "en valorisant votre toiture et en participant à la transition énergétique. " +
-  "Grâce à une expertise FRH PRO, vous bénéficiez d'un accompagnement complet " +
-  "et de conseils personnalisés pour optimiser votre retour sur investissement.\n\n" +
-  "L'autoconsommation et la revente du surplus vous permettent de réduire vos " +
-  "factures d'électricité et de profiter d'une source de revenu durable.";
-const finalLines = pdf.splitTextToSize(finalText, 180);
-pdf.text(finalLines, 10, nextY3);
-nextY3 += 20;
-   
 
 
-    // (D) Sauvegarde finale
+    // 9) Sauvegarde finale
     let pdfFileName = "Rapport_Etude.pdf";
     if (companyName) {
       pdfFileName = `Rapport_${companyName}.pdf`;
     }
     pdf.save(pdfFileName);
 
-    // (E) Rétablit le drawingCanvas si besoin
+    // (C) Une fois fini, si besoin on rétablit le drawingCanvas :
     if (drawingCanvas && drawingCanvasParent) {
+      // drawingCanvas.style.display = "";
       drawingCanvasParent.appendChild(drawingCanvas);
-      // OU drawingCanvas.style.display = "";
     }
 
   } catch (e) {
@@ -1517,6 +1359,7 @@ nextY3 += 20;
     alert("Une erreur s'est produite lors de l'export PDF (voir console).");
   }
 }
+
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
