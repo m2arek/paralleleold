@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v77</title>
+  <title>FRH PRO formulaire  - v78</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -1264,90 +1264,76 @@ exportPDFBtn.addEventListener("click", exportStudyReportPDF);
  ***************************************************/
 async function exportStudyReportPDF(){
   try {
-    // Vérif si l'image de la carte est dispo (comme auparavant)
+    // Vérifier si la capture de la carte est sélectionnée
     if (!mapCaptureDataURL) {
       alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
       return;
     }
 
-    // (A) Retirer / masquer le drawingCanvas pour éviter le tainting
+    // (A) Retirer/másquer le drawingCanvas pour éviter le tainting
     const drawingCanvas = document.getElementById("drawingCanvas");
     let drawingCanvasParent = null;
     if (drawingCanvas) {
       drawingCanvasParent = drawingCanvas.parentNode;
       drawingCanvasParent.removeChild(drawingCanvas);
-      // OU alternative : drawingCanvas.style.display = "none";
     }
 
-    // (B) Création du PDF (Page 1)
-     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p","mm","a4");
+    // (B) Création du PDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
 
-    /*******************************************************
-     * PAGE 1 : EN-TÊTE + LOGO + TITRE + CARTE
-     *******************************************************/
-    // A) En-tête coloré
-    pdf.setFillColor(0, 92, 160); // un bleu
-    pdf.rect(0, 0, 210, 25, "F"); // rectangle en haut (toute la largeur)
+    /************* PAGE 1 : EN-TÊTE, LOGO, TITRE, CARTE, INFOS CLIENT *************/
+    // En-tête coloré
+    pdf.setFillColor(0, 92, 160);
+    pdf.rect(0, 0, pageWidth, 25, "F");
 
-    // B) Logo FRH PRO (depuis GitHub)
+    // Logo agrandi (30x30 mm) et centré verticalement dans l'en-tête
     const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
     const frhProLogo = new Image();
-    frhProLogo.crossOrigin = "Anonymous"; 
+    frhProLogo.crossOrigin = "Anonymous";
     frhProLogo.src = frhProLogoUrl;
     await new Promise((resolve) => { frhProLogo.onload = resolve; });
+    pdf.addImage(frhProLogo, "PNG", 10, 5, 30, 30);
 
-    // On met "FRH PRO" en blanc
+    // Titre "FRH PRO" centré dans l'en-tête
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(20);
+    pdf.setFontSize(22);
+    pdf.text("FRH PRO", pageWidth / 2, 17, { align: "center" });
 
-    // On ajoute le logo en haut (x=10, y=5, w=15, h=15)
-    pdf.addImage(frhProLogo, "PNG", 10, 5, 15, 15);
-    // Le texte "FRH PRO" à côté
-    pdf.text("FRH PRO", 30, 15);
-
-    // C) Titre sous l'en-tête
+    // Sous-titre avec le titre du rapport et nom du client, centré
     pdf.setTextColor(0, 0, 0);
-    pdf.setFontSize(14);
-
-    let yPos = 35; // on descend sous l'en-tête
-    const companyName   = document.getElementById("companyName")?.value || "";
+    pdf.setFontSize(16);
+    const companyName = document.getElementById("companyName")?.value || "";
     const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
-    const titleLines = pdf.splitTextToSize(mainTitle, 180);
-    pdf.text(titleLines, 10, yPos);
-    yPos += 15;
+    const titleLines = pdf.splitTextToSize(mainTitle, pageWidth - 20);
+    pdf.text(titleLines, pageWidth / 2, 40, { align: "center" });
+    let yPos = 50;
 
-    // D) Image de la carte
+    // Affichage de l'image de la carte (centrée horizontalement avec marges de 15 mm)
     const imgTemp = new Image();
     imgTemp.src = mapCaptureDataURL;
     await new Promise((resolve) => { imgTemp.onload = resolve; });
-
-    const pdfWidth = 180; 
+    const pdfWidth = pageWidth - 30;
     const ratio = imgTemp.height / imgTemp.width;
     const pdfHeight = pdfWidth * ratio;
+    pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 15, yPos, pdfWidth, pdfHeight);
+    yPos += pdfHeight + 10;
 
-    pdf.addImage(
-     mapCaptureDataURL,
-     mapCaptureFormat,
-      15, // x
-      yPos, // y
-      pdfWidth,
-      pdfHeight
-    );
-    yPos += pdfHeight + 10; // on descend en-dessous de la carte
-
-    // E) Infos sous la carte
+    // Affichage des informations client (alignées à gauche)
     pdf.setFontSize(12);
-
-    const addressVal    = document.getElementById("address")?.value || "";
-    const latVal        = document.getElementById("latitudeIrr")?.value || "";
-    const lonVal        = document.getElementById("longitudeIrr")?.value || "";
-    const productibleVal= document.getElementById("productible")?.value || "";
-
-    pdf.text(`Client : ${companyName}`, 15, yPos); yPos += 6;
-    pdf.text(`Adresse : ${addressVal}`, 15, yPos); yPos += 6;
-    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos); yPos += 6;
-    pdf.text(`Productible : ${productibleVal} kWh/kWc/an`, 15, yPos);
+    const addressVal = document.getElementById("address")?.value || "";
+    const latVal = document.getElementById("latitudeIrr")?.value || "";
+    const lonVal = document.getElementById("longitudeIrr")?.value || "";
+    const productibleVal = document.getElementById("productible")?.value || "";
+    pdf.text(`Client : ${companyName}`, 15, yPos);
+    yPos += 6;
+    pdf.text(`Adresse : ${addressVal}`, 15, yPos);
+    yPos += 6;
+    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos);
+    yPos += 6;
+    // Formatage du productible avec toLocaleString("fr-FR")
+    pdf.text(`Productible : ${parseFloat(productibleVal).toLocaleString("fr-FR")} kWh/kWc/an`, 15, yPos);
     yPos += 10;
 
 
