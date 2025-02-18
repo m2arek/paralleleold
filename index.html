@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v2</title>
+  <title>FRH PRO formulaire  - v77</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -19,9 +19,11 @@
   <!-- (6) html2canvas + jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-
+  
   <!-- Chart.js pour le diagramme en barres -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     /****************************************************
@@ -260,7 +262,7 @@
       <!-- TAB 1 : Localisation & Données Irradiation -->
       <div id="tab1" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Localisation & Données Irradiation</h2>
         </div>
 
@@ -325,7 +327,7 @@
       <!-- TAB 2 : Potentiel de production -->
       <div id="tab2" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Potentiel de Production</h2>
         </div>
         <div class="form-section">
@@ -360,7 +362,7 @@
       <!-- TAB 3 : Production mensuel -->
       <div id="tab3" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Production mensuel</h2>
         </div>
         <div class="form-section">
@@ -382,7 +384,7 @@
       <!-- TAB 4 : Infos société -->
       <div id="tab4" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Informations sur la société</h2>
         </div>
         <div class="form-section">
@@ -410,7 +412,7 @@
       <!-- TAB 5 : Infos toiture -->
       <div id="tab5" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Informations sur la toiture</h2>
         </div>
         <div class="form-section">
@@ -473,7 +475,7 @@
       <!-- TAB 6 : Périodes d'utilisation -->
       <div id="tab6" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Périodes d'utilisation</h2>
         </div>
         <div class="form-section">
@@ -523,7 +525,7 @@
       <!-- TAB 7 : Conso mensuelle -->
       <div id="tab7" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+         <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Consommation mensuelle</h2>
         </div>
         <div id="consumptionTableContainer" class="form-section">
@@ -554,7 +556,7 @@
       <!-- TAB 8 : Préconisation -->
       <div id="tab8" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation</h2>
         </div>
         <div class="form-section">
@@ -616,6 +618,7 @@
                 <th>Prime (année 2)</th>
                 <th>Facture Avec PV</th>
                 <th>Total Économies</th>
+                <th>Cumul economies</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -647,7 +650,7 @@
       <!-- TAB 9 : Préconisation Sélection -->
       <div id="tab9" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+         <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Préconisation Sélection</h2>
         </div>
         <div class="form-section">
@@ -683,6 +686,7 @@
                 <th>Prime (année 2)</th>
                 <th>Facture Avec PV</th>
                 <th>Total Économies</th>
+                <th>Cumul economies</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -714,7 +718,7 @@
       <!-- TAB 10 : Commentaires -->
       <div id="tab10" class="tabContent">
         <div class="tabLogo">
-          <img src="https://raw.githubusercontent.com/VOTRE-NOM-UTILISATEUR/NOM-DU-REPO/main/assets/images/frh_pro_logo.png" alt="FRH Pro Logo"/>
+          <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Commentaires</h2>
         </div>
         <div class="form-section">
@@ -726,7 +730,21 @@
             placeholder="Entrez vos commentaires"
           ></textarea>
         </div>
+           <!-- Exemple : Input file caché ou non + label cliquable -->
+  <input 
+    type="file" 
+    id="mapCaptureFile" 
+    accept="image/png, image/jpeg" 
+    style="display:none;"
+  />
+  <label 
+    for="mapCaptureFile" 
+    style="cursor:pointer; color:blue; text-decoration:underline;"
+  >
+    Sélectionner la capture
+  </label>
 
+  <br/><br/>
         <!-- Boutons PDF + gestion JSON -->
         <div style="margin-bottom:15px;">
           <button type="button" id="exportPDFBtn">Exporter en PDF</button>
@@ -1200,44 +1218,443 @@
     productibleInput.addEventListener("input", updateProductionPotential);
 
     /***************************************************
-     * 4) EXPORT PDF
-     ***************************************************/
-    const exportPDFBtn= document.getElementById("exportPDFBtn");
-    exportPDFBtn.addEventListener("click", saveMapAsPDF);
+ * PARTIE : EXPORT PDF AVEC CAPTURE CARTE
+ ***************************************************/
 
-    function saveMapAsPDF(){
-      const mapContainer= document.getElementById("map-container");
-      const userForm= document.getElementById("userForm");
+// 1) On cible l'input file (capture de carte) + le bouton export
+const mapCaptureFileInput = document.getElementById("mapCaptureFile");
+const exportPDFBtn        = document.getElementById("exportPDFBtn");
 
-      html2canvas(mapContainer,{ useCORS:true, scale:2 })
-      .then(canvas=>{
-        const mapImage= canvas.toDataURL("image/png");
-        const {jsPDF}= window.jspdf;
-        const pdf= new jsPDF();
-        pdf.addImage(mapImage,"PNG",10,10,190,100);
+// Variables globales pour stocker le dataURL et le format (PNG/JPEG)
+let mapCaptureDataURL   = null;
+let mapCaptureFormat    = null;
 
-        let yOffset=120;
-        const formData= new FormData(userForm);
-        formData.forEach((value,key)=>{
-          if(value){
-            pdf.text(`${key} : ${value}`,10,yOffset);
-            yOffset+=10;
-          }
-        });
+// 2) Lecture du fichier image (capture) dès qu'il est sélectionné
+mapCaptureFileInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    mapCaptureDataURL = null;
+    mapCaptureFormat  = null;
+    return;
+  }
 
-        pdf.addPage();
-        pdf.text("Consommation mensuelle",10,10);
-        html2canvas(document.getElementById("consumptionTableContainer"),{ useCORS:true, scale:2 })
-        .then(tableCanvas=>{
-          const tableImage= tableCanvas.toDataURL("image/png");
-          pdf.addImage(tableImage,"PNG",10,20,190,0);
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    mapCaptureDataURL = e.target.result; // "data:image/...;base64,..."
 
-          const companyName= document.getElementById("companyName").value;
-          const pdfFileName= companyName? `Formulaire_${companyName}.pdf` : "Formulaire.pdf";
-          pdf.save(pdfFileName);
-        });
-      });
+    // Déterminer le format à partir du type MIME du fichier
+    if (file.type.toLowerCase().includes("jpeg")) {
+      mapCaptureFormat = "JPEG";
+    } else if (file.type.toLowerCase().includes("png")) {
+      mapCaptureFormat = "PNG";
+    } else {
+      mapCaptureFormat = "PNG"; // par défaut
     }
+
+    alert("Capture de carte sélectionnée !");
+  };
+  reader.readAsDataURL(file);
+});
+
+// 3) Au clic sur le bouton PDF, on lance l'export
+exportPDFBtn.addEventListener("click", exportStudyReportPDF);
+
+/***************************************************
+ * FONCTION : exportStudyReportPDF
+ ***************************************************/
+async function exportStudyReportPDF(){
+  try {
+    // Vérif si l'image de la carte est dispo (comme auparavant)
+    if (!mapCaptureDataURL) {
+      alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
+      return;
+    }
+
+    // (A) Retirer / masquer le drawingCanvas pour éviter le tainting
+    const drawingCanvas = document.getElementById("drawingCanvas");
+    let drawingCanvasParent = null;
+    if (drawingCanvas) {
+      drawingCanvasParent = drawingCanvas.parentNode;
+      drawingCanvasParent.removeChild(drawingCanvas);
+      // OU alternative : drawingCanvas.style.display = "none";
+    }
+
+    // (B) Création du PDF (Page 1)
+     const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p","mm","a4");
+
+    /*******************************************************
+     * PAGE 1 : EN-TÊTE + LOGO + TITRE + CARTE
+     *******************************************************/
+    // A) En-tête coloré
+    pdf.setFillColor(0, 92, 160); // un bleu
+    pdf.rect(0, 0, 210, 25, "F"); // rectangle en haut (toute la largeur)
+
+    // B) Logo FRH PRO (depuis GitHub)
+    const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
+    const frhProLogo = new Image();
+    frhProLogo.crossOrigin = "Anonymous"; 
+    frhProLogo.src = frhProLogoUrl;
+    await new Promise((resolve) => { frhProLogo.onload = resolve; });
+
+    // On met "FRH PRO" en blanc
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(20);
+
+    // On ajoute le logo en haut (x=10, y=5, w=15, h=15)
+    pdf.addImage(frhProLogo, "PNG", 10, 5, 15, 15);
+    // Le texte "FRH PRO" à côté
+    pdf.text("FRH PRO", 30, 15);
+
+    // C) Titre sous l'en-tête
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+
+    let yPos = 35; // on descend sous l'en-tête
+    const companyName   = document.getElementById("companyName")?.value || "";
+    const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
+    const titleLines = pdf.splitTextToSize(mainTitle, 180);
+    pdf.text(titleLines, 10, yPos);
+    yPos += 15;
+
+    // D) Image de la carte
+    const imgTemp = new Image();
+    imgTemp.src = mapCaptureDataURL;
+    await new Promise((resolve) => { imgTemp.onload = resolve; });
+
+    const pdfWidth = 180; 
+    const ratio = imgTemp.height / imgTemp.width;
+    const pdfHeight = pdfWidth * ratio;
+
+    pdf.addImage(
+     mapCaptureDataURL,
+     mapCaptureFormat,
+      15, // x
+      yPos, // y
+      pdfWidth,
+      pdfHeight
+    );
+    yPos += pdfHeight + 10; // on descend en-dessous de la carte
+
+    // E) Infos sous la carte
+    pdf.setFontSize(12);
+
+    const addressVal    = document.getElementById("address")?.value || "";
+    const latVal        = document.getElementById("latitudeIrr")?.value || "";
+    const lonVal        = document.getElementById("longitudeIrr")?.value || "";
+    const productibleVal= document.getElementById("productible")?.value || "";
+
+    pdf.text(`Client : ${companyName}`, 15, yPos); yPos += 6;
+    pdf.text(`Adresse : ${addressVal}`, 15, yPos); yPos += 6;
+    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos); yPos += 6;
+    pdf.text(`Productible : ${productibleVal} kWh/kWc/an`, 15, yPos);
+    yPos += 10;
+
+
+    // (C) Choix du scénario
+    let scenarioChoice = prompt(
+      "Choisir la préconisation à utiliser dans le rapport\n" +
+      "'1' => Préconisation standard\n" +
+      "'2' => Préconisation Sélection"
+    );
+    if(!scenarioChoice) return; // Annulation
+    scenarioChoice = scenarioChoice.trim();
+
+  /*******************************************************
+ * Selon le choix, on définit les IDs pour le tableau mensuel,
+ * le canvas du graphique et le tableau de projection 20 ans
+ *******************************************************/
+let monthlyTableId, monthlyChartId, twentyYearsId;
+let puissanceId, coutInstId, primeId, coutReelId, gainSansId, gainAvecId, roiId;
+
+if (scenarioChoice === "2") {
+  // Scénario "Sélection"
+  monthlyTableId   = "preconisationMonthlyTableForced";
+  monthlyChartId   = "monthlyBarChartForced";
+  twentyYearsId    = "preconisationTableForced";
+  puissanceId      = "puissanceRecoForced";
+  coutInstId       = "coutInstallationForced";
+  primeId          = "primeValueForced";
+  coutReelId       = "coutReelInstallationForced";
+  gainSansId       = "gainSansInvForced";
+  gainAvecId       = "gainAvecInvForced";
+  roiId            = "roiResultForced";
+} else {
+  // Par défaut, scénario "standard" (1)
+  monthlyTableId   = "preconisationMonthlyTable";
+  monthlyChartId   = "monthlyBarChart";
+  twentyYearsId    = "preconisationTable";
+  puissanceId      = "puissanceReco";
+  coutInstId       = "coutInstallation";
+  primeId          = "primeValue";
+  coutReelId       = "coutReelInstallation";
+  gainSansId       = "gainSansInv";
+  gainAvecId       = "gainAvecInv";
+  roiId            = "roiResult";
+}
+
+await page2_TableauEtGraphique(pdf, scenarioChoice);
+
+    
+    /*******************************************************
+ * FONCTION : dessiner un diagramme en barres vectoriel
+ *******************************************************/
+function drawVectorBarChart(pdf, chartX, chartY, chartWidth, chartHeight,
+                            moisLabels, consoData, autoData, revData) {
+  // 1) Trouve la valeur max
+  const allValues = [...consoData, ...autoData, ...revData];
+  const maxValue = Math.max(...allValues, 0);
+  if (maxValue <= 0) {
+    pdf.setFontSize(12);
+    pdf.text("Pas de données valides pour tracer le graphique.", chartX, chartY + 10);
+    return;
+  }
+
+  // 2) Nombre de lignes de quadrillage
+  const nbGridLines = 5;
+  const stepValue   = maxValue / nbGridLines;
+  const stepHeight  = chartHeight / nbGridLines;
+
+  // Couleur du quadrillage
+  pdf.setDrawColor(200, 200, 200);
+  pdf.setLineWidth(0.2);
+
+  // 3) Quadrillage horizontal + labels Y
+  pdf.setFontSize(8);
+  for (let i = 0; i <= nbGridLines; i++) {
+    const y = chartY + chartHeight - i * stepHeight; 
+    // ligne horizontale
+    pdf.line(chartX, y, chartX + chartWidth, y);
+    // label
+    const val = i * stepValue;
+    const labelStr = Math.round(val).toLocaleString() + " kWh";
+    pdf.text(labelStr, chartX - 2, y, { align: "right" });
+  }
+
+  // 4) Barres
+  const nbMois     = moisLabels.length;
+  const groupWidth = chartWidth / nbMois;
+  const barWidth   = groupWidth / 3;
+
+  // Couleurs pastel (rouge/vert/bleu)
+  const colorConso = [255, 159, 159];
+  const colorAuto  = [159, 235, 159];
+  const colorRev   = [159, 189, 255];
+
+  pdf.setFontSize(7);
+  for (let i = 0; i < nbMois; i++) {
+    const baseX = chartX + i * groupWidth;
+    const baseY = chartY + chartHeight;
+
+    // Conso
+    const hConso = (consoData[i] / maxValue) * chartHeight;
+    pdf.setFillColor(...colorConso);
+    pdf.rect(baseX, baseY - hConso, barWidth, hConso, "F");
+
+    // Autoconso
+    const hAuto = (autoData[i] / maxValue) * chartHeight;
+    pdf.setFillColor(...colorAuto);
+    pdf.rect(baseX + barWidth, baseY - hAuto, barWidth, hAuto, "F");
+
+    // Revente
+    const hRev = (revData[i] / maxValue) * chartHeight;
+    pdf.setFillColor(...colorRev);
+    pdf.rect(baseX + 2 * barWidth, baseY - hRev, barWidth, hRev, "F");
+
+    // Label du mois sous les barres
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(moisLabels[i], baseX + barWidth, baseY + 3, { align: "center" });
+  }
+
+  // (Option) label "kWh" en haut
+  pdf.setFontSize(9);
+  pdf.text("kWh", chartX + 2, chartY + 5);
+}
+
+/*******************************************************
+ * EXEMPLE : PAGE 2 AVEC TABLEAU + GRAPHIQUE
+ *******************************************************/
+async function page2_TableauEtGraphique(pdf, scenarioChoice) {
+  // On ajoute la page
+  pdf.addPage();
+  pdf.setFontSize(14);
+  pdf.setTextColor(40, 40, 40);
+  pdf.text("Détails par mois (année 1)", 10, 15);
+
+  let nextY = 20;
+
+  // 1) Récupère l'ID du tableau mensuel selon scenario
+  let monthlyTableId;
+  if (scenarioChoice === "2") {
+    monthlyTableId = "preconisationMonthlyTableForced";
+  } else {
+    monthlyTableId = "preconisationMonthlyTable";
+  }
+
+  // 2) Tableau vectoriel
+  const monthlyTableEl = document.getElementById(monthlyTableId);
+  if (monthlyTableEl) {
+    pdf.autoTable({
+      html: monthlyTableEl,
+      startY: nextY,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2
+      },
+      headStyles: {
+        fillColor: [0, 92, 160],
+        textColor: 255,
+        fontSize: 9
+      }
+    });
+    const lastAutoTable = pdf.lastAutoTable;
+    if (lastAutoTable) {
+      nextY = lastAutoTable.finalY + 10;
+    }
+  } else {
+    pdf.setFontSize(12);
+    pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
+    nextY = 35;
+  }
+
+  // 3) Préparation des données du graphique
+  // On parcourt le tableau HTML pour extraire
+  // ex: <td>Mois</td> <td>Conso</td> <td>FactureSansPV</td> <td>AutoCons kWh</td> <td>Economies €</td> <td>Revente kWh</td> ...
+  // Adaptez selon votre structure
+  const moisLabels = [];
+  const consoData  = [];
+  const autoData   = [];
+  const revData    = [];
+
+  if (monthlyTableEl) {
+    const rows = monthlyTableEl.querySelectorAll("tbody tr");
+    rows.forEach((tr) => {
+      const tds = tr.querySelectorAll("td");
+      // Adaptez l'index selon l'ordre de vos colonnes
+      // Ici on suppose : 
+      //  tds[0] = Mois
+      //  tds[1] = Conso kWh
+      //  tds[3] = Autoconso kWh
+      //  tds[5] = Revente kWh
+      if (tds.length >= 6) {
+        const moisTxt = tds[0].textContent.trim();
+        const cVal    = parseFloat(tds[1].textContent) || 0; 
+        const aVal    = parseFloat(tds[3].textContent) || 0;
+        const rVal    = parseFloat(tds[5].textContent) || 0;
+
+        moisLabels.push(moisTxt);
+        consoData.push(cVal);
+        autoData.push(aVal);
+        revData.push(rVal);
+      }
+    });
+  }
+
+  // 4) Titre pour le graphique
+  pdf.setFontSize(14);
+  pdf.text("Graphique (Détails par mois)", 10, nextY);
+  nextY += 10;
+
+  // 5) Appel de la fonction de dessin vectoriel appel de drawVectorBarChart avec chartX=15(pousse a gauche), chartWidth=170, chartHeight=70 
+  drawVectorBarChart(pdf, 15, nextY, 170, 70, moisLabels, consoData, autoData, revData);
+
+  // On met à jour nextY si on veut enchaîner
+  nextY += 80 + 15; 
+}
+
+
+/*******************************************************
+ * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
+ *******************************************************/
+pdf.addPage();
+pdf.setFontSize(14);
+pdf.setTextColor(40, 40, 40);
+pdf.text("Projection sur 20 ans", 10, 15);
+
+let nextY3 = 20;
+// A) Tableau vectoriel => preconisationTable ou preconisationTableForced
+const twentyTableEl = document.getElementById(twentyYearsId);
+if (twentyTableEl) {
+  pdf.autoTable({
+    html: twentyTableEl,
+    startY: nextY3,
+    styles: {
+      fontSize: 8,
+      cellPadding: 2
+    },
+    headStyles: {
+      fillColor: [22, 160, 133],
+      textColor: 255,
+      fontSize: 9
+    }
+  });
+  const lastAuto = pdf.lastAutoTable;
+  if (lastAuto) {
+    nextY3 = lastAuto.finalY + 10;
+  }
+} else {
+  pdf.setFontSize(12);
+  pdf.text("Aucun tableau de projection trouvé.", 10, nextY3 + 5);
+  nextY3 += 15;
+}
+
+// B) Chiffres clés
+pdf.setFontSize(14);
+pdf.text("Chiffres Clés", 10, nextY3);
+nextY3 += 8;
+pdf.setFontSize(12);
+
+// On va chercher les infos selon l'ID choisi
+const pReco   = document.getElementById(puissanceId)?.textContent || "-";
+const cInst   = document.getElementById(coutInstId)?.textContent || "-";
+const cPrime  = document.getElementById(primeId)?.textContent || "-";
+const cReel   = document.getElementById(coutReelId)?.textContent || "-";
+const gSans   = document.getElementById(gainSansId)?.textContent || "-";
+const gAvec   = document.getElementById(gainAvecId)?.textContent || "-";
+const roiVal  = document.getElementById(roiId)?.textContent || "-";
+
+pdf.text(`Puissance préconisée : ${pReco} kWc`, 10, nextY3); nextY3+=6;
+pdf.text(`Coût de l'installation : ${cInst} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Prime : ${cPrime} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Coût réel de l'installation : ${cReel} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Gain total (sans inv.) : ${gSans} €`, 10, nextY3); nextY3+=6;
+pdf.text(`Gain total (avec inv.) : ${gAvec} €`, 10, nextY3); nextY3+=6;
+pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3);
+nextY3 += 12;
+
+// C) Paragraphe final
+pdf.setFontSize(12);
+const finalText = 
+  "Ce projet photovoltaïque vous apporte des bénéfices financiers tout " +
+  "en valorisant votre toiture et en participant à la transition énergétique. " +
+  "Grâce à une expertise FRH PRO, vous bénéficiez d'un accompagnement complet " +
+  "et de conseils personnalisés pour optimiser votre retour sur investissement.\n\n" +
+  "L'autoconsommation et la revente du surplus vous permettent de réduire vos " +
+  "factures d'électricité et de profiter d'une source de revenu durable.";
+const finalLines = pdf.splitTextToSize(finalText, 180);
+pdf.text(finalLines, 10, nextY3);
+nextY3 += 20;
+   
+
+
+    // (D) Sauvegarde finale
+    let pdfFileName = "Rapport_Etude.pdf";
+    if (companyName) {
+      pdfFileName = `Rapport_${companyName}.pdf`;
+    }
+    pdf.save(pdfFileName);
+
+    // (E) Rétablit le drawingCanvas si besoin
+    if (drawingCanvas && drawingCanvasParent) {
+      drawingCanvasParent.appendChild(drawingCanvas);
+      // OU drawingCanvas.style.display = "";
+    }
+
+  } catch (e) {
+    console.error("Erreur exportStudyReportPDF:", e);
+    alert("Une erreur s'est produite lors de l'export PDF (voir console).");
+  }
+}
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
@@ -1411,16 +1828,23 @@
      * 7) CALCUL DE LA PRÉCONISATION
      ***************************************************/
 
-    // (A) COÛT INSTALLATION
-    function costInstallation(S){
-      // ≤100 kWc => formule 1, >100 => 1.15 k€/kWc
+    // (A) COÛT INSTALLATION (modifié pour tenir compte du territoire)
+    function costInstallation(S, territory){
+      let raw;
+      // ≤100 kWc => formule 1, sinon >100 => 1.15 k€/kWc
       if (S <= 100) {
-        const raw = S * ((1.8093 - (0.00659 * S))) * 1000;
-        return Math.round(raw / 100) * 100;
+        raw = S * ((1.9093 - (0.00659 * S))) * 1000;
       } else {
-        const raw = S * 1.15 * 1000;
-        return Math.round(raw / 100) * 100;
+        raw = S * 1.15 * 1000;
       }
+
+      // Multiplicateur selon le territoire
+      if (territory === "Corse") {
+        raw *= 1.00; // +0%
+      } else if (territory === "Reunion") {
+        raw *= 1.13; // +13%
+      }
+      return Math.round(raw / 100) * 100;
     }
 
     // (B) FRACTION DE JOURS FERMÉS
@@ -1465,6 +1889,29 @@
       return {tarif: foundTarif, primeByWc: foundPrime};
     }
 
+    // Ajoutez ici la fonction calculateROI
+function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, annualPriceIncrease) {
+  let cumulativeSavings = 0;
+  let roiYears = 0;
+  // On fixe une borne maximale pour éviter une boucle infinie (ici 100 ans)
+  while (roiYears < 100) {
+    roiYears++;
+    // Les économies d'autoconsommation augmentent chaque année
+    let econAuto = autoYear1 * Math.pow(1 + annualPriceIncrease / 100, roiYears - 1);
+    // On suppose que les gains de revente restent constants (vous pouvez adapter si nécessaire)
+    let gainsRev = surplusYear1;
+    // La prime est versée en année 2
+    let prime = (roiYears === 2) ? primeTotal : 0;
+    let totalYearSavings = econAuto + gainsRev + prime;
+    cumulativeSavings += totalYearSavings;
+    if (cumulativeSavings >= coutInstallation) {
+      break;
+    }
+  }
+  return roiYears;
+}
+    
+    
     // (D) Calcule le GAIN total (auto + revente)
     function computeAutoAndSurplusForPower(S, globalTarif){
       const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
@@ -1493,7 +1940,7 @@
         const leftoverAfter= leftover- autoCons;
         const finalSurplus= forcedSurplus + Math.max(leftoverAfter,0);
 
-        const gainMonth= (autoCons*p_kWh) + (finalSurplus* globalTarif);
+        const gainMonth= (autoCons*p_kWh);
         totalGain+= gainMonth;
       }
       return totalGain;
@@ -1698,7 +2145,8 @@
       preconTableBody.innerHTML="";
 
       let totalSansPv=0, totalAuto=0, totalRev=0, totalPrime=0, totalAvecPv=0, totalEco=0;
-
+      let cumulativeEco = 0; // variable pour le cumul
+      
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100, (year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100, (year-1));
@@ -1717,6 +2165,8 @@
         totalAvecPv+= factureAvecPv;
         totalEco+= totalEcos;
 
+         cumulativeEco += totalEcos; // mise à jour du cumul
+
         const row= document.createElement("tr");
         row.innerHTML= `
           <td>${year}</td>
@@ -1726,6 +2176,7 @@
           <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
+          <td>${cumulativeEco.toFixed(2)} €</td>
         `;
         preconTableBody.appendChild(row);
       }
@@ -1739,7 +2190,12 @@
 
       // recap final
       document.getElementById("puissanceReco").textContent= S.toLocaleString('fr-FR');
-      const costInst= costInstallation(S);
+
+      // On récupère le territoire à l'instant T
+      const territory = document.getElementById("territory").value || "France Metropolitaine";
+
+      // On calcule le coût d'installation en passant le territoire
+      const costInst= costInstallation(S, territory);
       document.getElementById("coutInstallation").textContent= costInst.toLocaleString('fr-FR');
       document.getElementById("primeValue").textContent= primeTotal.toLocaleString('fr-FR');
 
@@ -1752,8 +2208,9 @@
       let gainAvecInvVal= totalEco - coutReel;
       document.getElementById("gainAvecInv").textContent= gainAvecInvVal.toFixed(2)+" €";
 
-      let payback= coutReel/(firstYearGain||1);
-      document.getElementById("roiResult").textContent= payback.toFixed(1);
+      // Nouveau calcul du ROI basé sur le cumul des économies
+let roiYears = calculateROI(costInst, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
+document.getElementById("roiResult").textContent = roiYears.toFixed(1);
     }
 
     // Écouteur => "Calculer la préconisation"
@@ -1982,7 +2439,8 @@
       preconTableBody.innerHTML="";
 
       let totalSansPv=0, totalAuto=0, totalRev=0, totalPrime=0, totalAvecPv=0, totalEco=0;
-
+      let cumulativeEco = 0; // pour le cumul
+      
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100,(year-1));
         const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100,(year-1));
@@ -2000,7 +2458,9 @@
         totalPrime+= primeYear;
         totalAvecPv+= factureAvecPv;
         totalEco+= totalEcos;
-
+        
+        cumulativeEco += totalEcos; // cumul des économies
+        
         const row= document.createElement("tr");
         row.innerHTML= `
           <td>${year}</td>
@@ -2010,6 +2470,7 @@
           <td>${primeYear.toFixed(2)} €</td>
           <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
+          <td>${cumulativeEco.toFixed(2)} €</td>
         `;
         preconTableBody.appendChild(row);
       }
@@ -2022,7 +2483,12 @@
       document.getElementById("totalEconomiesForced").textContent= totalEco.toFixed(2)+" €";
 
       document.getElementById("puissanceRecoForced").textContent= S.toLocaleString('fr-FR');
-      const forcedCost= costInstallation(S);
+
+      // On récupère le territoire à l'instant T
+      const territory = document.getElementById("territory").value || "France Metropolitaine";
+
+      // On calcule le coût d'installation en passant le territoire
+      const forcedCost= costInstallation(S, territory);
       document.getElementById("coutInstallationForced").textContent= forcedCost.toLocaleString('fr-FR');
       document.getElementById("primeValueForced").textContent= primeTotal.toLocaleString('fr-FR');
 
@@ -2036,8 +2502,9 @@
       let gainAvecInvVal= totalEco- coutReel;
       document.getElementById("gainAvecInvForced").textContent= gainAvecInvVal.toFixed(2)+" €";
 
-      let payback= coutReel/(firstYearGain||1);
-      document.getElementById("roiResultForced").textContent= payback.toFixed(1);
+      // Nouveau calcul du ROI basé sur le cumul des économies
+let roiYearsForced = calculateROI(forcedCost, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
+document.getElementById("roiResultForced").textContent = roiYearsForced.toFixed(1);
     }
 
     // Bouton => Préconisation Sélection
