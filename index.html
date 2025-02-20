@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
   <!-- (2) Leaflet Draw + GeometryUtil CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+  <!-- Liens CSS pour Flatpickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
   <!-- (3) Leaflet JS -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -19,6 +21,9 @@
   <!-- (6) html2canvas + jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Script de localisation français pour Flatpickr -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
   
   <!-- Chart.js pour le diagramme en barres -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -755,6 +760,15 @@
         <div class="tabLogo">
           <img src="https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png" alt="FRH Pro Logo"/>
           <h2>Commentaires</h2>
+        </div>
+        <div class="form-section">
+          <h3>RDV</h3>
+          <label for="rdvDate">Date du RDV :</label>
+          <!-- Champ de type text pour activer le calendrier Flatpickr -->
+          <input type="text" id="rdvDate" name="rdvDate" placeholder="Choisissez une date" />
+  
+          <label for="rdvTime">Heure du RDV :</label>
+          <input type="time" id="rdvTime" name="rdvTime" />
         </div>
         <div class="form-section">
           <h3>Commentaires</h3>
@@ -2542,6 +2556,12 @@ document.getElementById("roiResultForced").textContent = roiYearsForced.toFixed(
       fillMonthlyPreconisationForced(S, territoryObj.tarif);
       const totalGain= computeAutoAndSurplusForPower(S, territoryObj.tarif);
       fill20YearsPreconisationForced(S, totalGain, territoryObj);
+    });
+    
+    // Initialisation de Flatpickr pour le champ RDV Date avec format français
+    flatpickr("#rdvDate", {
+      locale: "fr",
+      dateFormat: "d/m/Y"
     });
   </script>
 </body>
