@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v78</title>
+  <title>FRH PRO formulaire  - v79</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -2184,7 +2184,10 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
       
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100, (year-1));
-        const econAuto= autoYear1* Math.pow(1+annualPriceIncrease/100, (year-1));
+        // Appliquer le facteur de dégradation de 0,6% par an sur la production
+  const econAuto = autoYear1 
+                     * Math.pow(1 - 0.006, (year-1))
+                     * Math.pow(1 + annualPriceIncrease/100, (year-1));
         const gainsRev= surplusYear1;
         let primeYear=0;
         if(year===2){
