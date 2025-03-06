@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v83</title>
+  <title>FRH PRO formulaire  - v84</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -2318,7 +2318,7 @@
       const table= document.getElementById("preconisationMonthlyTableForced");
       table.innerHTML="";
 
-      = `<tr>
+      let headerRow= `<tr>
         <th>Mois</th>
         ${ showKwh?'<th>Conso kWh</th>' : '' }
         ${ showKwh?'<th>Production kWh</th>' : '' }
