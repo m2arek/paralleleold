@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v79</title>
+  <title>FRH PRO formulaire  - v80</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -28,7 +28,7 @@
   <!-- Chart.js pour le diagramme en barres -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     /****************************************************
@@ -426,13 +426,6 @@
           name="Annees presence"
           placeholder="Entrez le nombre d'Annees de presence"
            />
-
-
-
-
-
-
-          
         </div>
       </div><!-- fin tab4 -->
 
@@ -458,12 +451,6 @@
           <option value="Oui">Oui</option>
           <option value="Non">Non</option>
         </select>
-
-
-
-
-
-          
 
           <label for="Type de toiture">Type de toiture :</label>
           <select id="Type de toiture" name="Type de toiture">
@@ -1270,426 +1257,424 @@
  * PARTIE : EXPORT PDF AVEC CAPTURE CARTE
  ***************************************************/
 
-// 1) On cible l'input file (capture de carte) + le bouton export
-const mapCaptureFileInput = document.getElementById("mapCaptureFile");
-const exportPDFBtn        = document.getElementById("exportPDFBtn");
+    // 1) On cible l'input file (capture de carte) + le bouton export
+    const mapCaptureFileInput = document.getElementById("mapCaptureFile");
+    const exportPDFBtn        = document.getElementById("exportPDFBtn");
 
-// Variables globales pour stocker le dataURL et le format (PNG/JPEG)
-let mapCaptureDataURL   = null;
-let mapCaptureFormat    = null;
+    // Variables globales pour stocker le dataURL et le format (PNG/JPEG)
+    let mapCaptureDataURL   = null;
+    let mapCaptureFormat    = null;
 
-// 2) Lecture du fichier image (capture) dès qu'il est sélectionné
-mapCaptureFileInput.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    mapCaptureDataURL = null;
-    mapCaptureFormat  = null;
-    return;
-  }
+    // 2) Lecture du fichier image (capture) dès qu'il est sélectionné
+    mapCaptureFileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) {
+        mapCaptureDataURL = null;
+        mapCaptureFormat  = null;
+        return;
+      }
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    mapCaptureDataURL = e.target.result; // "data:image/...;base64,..."
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        mapCaptureDataURL = e.target.result; // "data:image/...;base64,..."
 
-    // Déterminer le format à partir du type MIME du fichier
-    if (file.type.toLowerCase().includes("jpeg")) {
-      mapCaptureFormat = "JPEG";
-    } else if (file.type.toLowerCase().includes("png")) {
-      mapCaptureFormat = "PNG";
+        // Déterminer le format à partir du type MIME du fichier
+        if (file.type.toLowerCase().includes("jpeg")) {
+          mapCaptureFormat = "JPEG";
+        } else if (file.type.toLowerCase().includes("png")) {
+          mapCaptureFormat = "PNG";
+        } else {
+          mapCaptureFormat = "PNG"; // par défaut
+        }
+
+        alert("Capture de carte sélectionnée !");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 3) Au clic sur le bouton PDF, on lance l'export
+    exportPDFBtn.addEventListener("click", exportStudyReportPDF);
+
+    /***************************************************
+     * FONCTION : exportStudyReportPDF
+     ***************************************************/
+    async function exportStudyReportPDF(){
+      try {
+        // Vérifier si la capture de la carte est sélectionnée
+        if (!mapCaptureDataURL) {
+          alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
+          return;
+        }
+
+        // (A) Retirer/másquer le drawingCanvas pour éviter le tainting
+        const drawingCanvas = document.getElementById("drawingCanvas");
+        let drawingCanvasParent = null;
+        if (drawingCanvas) {
+          drawingCanvasParent = drawingCanvas.parentNode;
+          drawingCanvasParent.removeChild(drawingCanvas);
+        }
+
+        // (B) Création du PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pageWidth = pdf.internal.pageSize.getWidth();
+
+        /************* PAGE 1 : EN-TÊTE, LOGO, TITRE, CARTE, INFOS CLIENT *************/
+        // En-tête coloré
+        pdf.setFillColor(0, 92, 160);
+        pdf.rect(0, 0, pageWidth, 25, "F");
+
+        // Logo agrandi (30x30 mm) et centré verticalement dans l'en-tête
+        const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
+        const frhProLogo = new Image();
+        frhProLogo.crossOrigin = "Anonymous";
+        frhProLogo.src = frhProLogoUrl;
+        await new Promise((resolve) => { frhProLogo.onload = resolve; });
+        pdf.addImage(frhProLogo, "PNG", 10, 5, 30, 30);
+
+        // Titre "FRH PRO" centré dans l'en-tête
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(22);
+        pdf.text("FRH PRO", pageWidth / 2, 17, { align: "center" });
+
+        // Sous-titre avec le titre du rapport et nom du client, centré
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(16);
+        const companyName = document.getElementById("companyName")?.value || "";
+        const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
+        const titleLines = pdf.splitTextToSize(mainTitle, pageWidth - 20);
+        pdf.text(titleLines, pageWidth / 2, 40, { align: "center" });
+        let yPos = 50;
+
+        // Affichage de l'image de la carte (centrée horizontalement avec marges de 15 mm)
+        const imgTemp = new Image();
+        imgTemp.src = mapCaptureDataURL;
+        await new Promise((resolve) => { imgTemp.onload = resolve; });
+        const pdfWidth = pageWidth - 30;
+        const ratio = imgTemp.height / imgTemp.width;
+        const pdfHeight = pdfWidth * ratio;
+        pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 15, yPos, pdfWidth, pdfHeight);
+        yPos += pdfHeight + 10;
+
+        // Affichage des informations client (alignées à gauche)
+        pdf.setFontSize(12);
+        const addressVal = document.getElementById("address")?.value || "";
+        const latVal = document.getElementById("latitudeIrr")?.value || "";
+        const lonVal = document.getElementById("longitudeIrr")?.value || "";
+        const productibleVal = document.getElementById("productible")?.value || "";
+        pdf.text(`Client : ${companyName}`, 15, yPos);
+        yPos += 6;
+        pdf.text(`Adresse : ${addressVal}`, 15, yPos);
+        yPos += 6;
+        pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos);
+        yPos += 6;
+        // Formatage du productible avec toLocaleString("fr-FR")
+        pdf.text(`Productible : ${parseFloat(productibleVal).toLocaleString("fr-FR")} kWh/kWc/an`, 15, yPos);
+        yPos += 10;
+
+
+        // (C) Choix du scénario
+        let scenarioChoice = prompt(
+          "Choisir la préconisation à utiliser dans le rapport\n" +
+          "'1' => Préconisation standard\n" +
+          "'2' => Préconisation Sélection"
+        );
+        if(!scenarioChoice) return; // Annulation
+        scenarioChoice = scenarioChoice.trim();
+
+      /*******************************************************
+     * Selon le choix, on définit les IDs pour le tableau mensuel,
+     * le canvas du graphique et le tableau de projection 20 ans
+     *******************************************************/
+    let monthlyTableId, monthlyChartId, twentyYearsId;
+    let puissanceId, coutInstId, primeId, coutReelId, gainSansId, gainAvecId, roiId;
+
+    if (scenarioChoice === "2") {
+      // Scénario "Sélection"
+      monthlyTableId   = "preconisationMonthlyTableForced";
+      monthlyChartId   = "monthlyBarChartForced";
+      twentyYearsId    = "preconisationTableForced";
+      puissanceId      = "puissanceRecoForced";
+      coutInstId       = "coutInstallationForced";
+      primeId          = "primeValueForced";
+      coutReelId       = "coutReelInstallationForced";
+      gainSansId       = "gainSansInvForced";
+      gainAvecId       = "gainAvecInvForced";
+      roiId            = "roiResultForced";
     } else {
-      mapCaptureFormat = "PNG"; // par défaut
+      // Par défaut, scénario "standard" (1)
+      monthlyTableId   = "preconisationMonthlyTable";
+      monthlyChartId   = "monthlyBarChart";
+      twentyYearsId    = "preconisationTable";
+      puissanceId      = "puissanceReco";
+      coutInstId       = "coutInstallation";
+      primeId          = "primeValue";
+      coutReelId       = "coutReelInstallation";
+      gainSansId       = "gainSansInv";
+      gainAvecId       = "gainAvecInv";
+      roiId            = "roiResult";
     }
 
-    alert("Capture de carte sélectionnée !");
-  };
-  reader.readAsDataURL(file);
-});
+    await page2_TableauEtGraphique(pdf, scenarioChoice);
 
-// 3) Au clic sur le bouton PDF, on lance l'export
-exportPDFBtn.addEventListener("click", exportStudyReportPDF);
+        
+        /*******************************************************
+     * FONCTION : dessiner un diagramme en barres vectoriel
+     *******************************************************/
+    function drawVectorBarChart(pdf, chartX, chartY, chartWidth, chartHeight,
+                                moisLabels, consoData, autoData, revData) {
+      // 1) Trouve la valeur max
+      const allValues = [...consoData, ...autoData, ...revData];
+      const maxValue = Math.max(...allValues, 0);
+      if (maxValue <= 0) {
+        pdf.setFontSize(12);
+        pdf.text("Pas de données valides pour tracer le graphique.", chartX, chartY + 10);
+        return;
+      }
 
-/***************************************************
- * FONCTION : exportStudyReportPDF
- ***************************************************/
-async function exportStudyReportPDF(){
-  try {
-    // Vérifier si la capture de la carte est sélectionnée
-    if (!mapCaptureDataURL) {
-      alert("Veuillez sélectionner la capture de la carte avant de générer le PDF.");
-      return;
+      // 2) Nombre de lignes de quadrillage
+      const nbGridLines = 5;
+      const stepValue   = maxValue / nbGridLines;
+      const stepHeight  = chartHeight / nbGridLines;
+
+      // Couleur du quadrillage
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.2);
+
+      // 3) Quadrillage horizontal + labels Y
+      pdf.setFontSize(8);
+      for (let i = 0; i <= nbGridLines; i++) {
+        const y = chartY + chartHeight - i * stepHeight; 
+        // ligne horizontale
+        pdf.line(chartX, y, chartX + chartWidth, y);
+        // label
+        const val = i * stepValue;
+        const labelStr = Math.round(val).toLocaleString() + " kWh";
+        pdf.text(labelStr, chartX - 2, y, { align: "right" });
+      }
+
+      // 4) Barres
+      const nbMois     = moisLabels.length;
+      const groupWidth = chartWidth / nbMois;
+      const barWidth   = groupWidth / 3;
+
+      // Couleurs pastel (rouge/vert/bleu)
+      const colorConso = [255, 159, 159];
+      const colorAuto  = [159, 235, 159];
+      const colorRev   = [159, 189, 255];
+
+      pdf.setFontSize(7);
+      for (let i = 0; i < nbMois; i++) {
+        const baseX = chartX + i * groupWidth;
+        const baseY = chartY + chartHeight;
+
+        // Conso
+        const hConso = (consoData[i] / maxValue) * chartHeight;
+        pdf.setFillColor(...colorConso);
+        pdf.rect(baseX, baseY - hConso, barWidth, hConso, "F");
+
+        // Autoconso
+        const hAuto = (autoData[i] / maxValue) * chartHeight;
+        pdf.setFillColor(...colorAuto);
+        pdf.rect(baseX + barWidth, baseY - hAuto, barWidth, hAuto, "F");
+
+        // Revente
+        const hRev = (revData[i] / maxValue) * chartHeight;
+        pdf.setFillColor(...colorRev);
+        pdf.rect(baseX + 2 * barWidth, baseY - hRev, barWidth, hRev, "F");
+
+        // Label du mois sous les barres
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(moisLabels[i], baseX + barWidth, baseY + 3, { align: "center" });
+      }
+
+      // (Option) label "kWh" en haut
+      pdf.setFontSize(9);
+      pdf.text("kWh", chartX + 2, chartY + 5);
     }
 
-    // (A) Retirer/másquer le drawingCanvas pour éviter le tainting
-    const drawingCanvas = document.getElementById("drawingCanvas");
-    let drawingCanvasParent = null;
-    if (drawingCanvas) {
-      drawingCanvasParent = drawingCanvas.parentNode;
-      drawingCanvasParent.removeChild(drawingCanvas);
-    }
-
-    // (B) Création du PDF
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-
-    /************* PAGE 1 : EN-TÊTE, LOGO, TITRE, CARTE, INFOS CLIENT *************/
-    // En-tête coloré
-    pdf.setFillColor(0, 92, 160);
-    pdf.rect(0, 0, pageWidth, 25, "F");
-
-    // Logo agrandi (30x30 mm) et centré verticalement dans l'en-tête
-    const frhProLogoUrl = "https://raw.githubusercontent.com/m2arek/parallele/main/frh_pro_logo.png";
-    const frhProLogo = new Image();
-    frhProLogo.crossOrigin = "Anonymous";
-    frhProLogo.src = frhProLogoUrl;
-    await new Promise((resolve) => { frhProLogo.onload = resolve; });
-    pdf.addImage(frhProLogo, "PNG", 10, 5, 30, 30);
-
-    // Titre "FRH PRO" centré dans l'en-tête
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(22);
-    pdf.text("FRH PRO", pageWidth / 2, 17, { align: "center" });
-
-    // Sous-titre avec le titre du rapport et nom du client, centré
-    pdf.setTextColor(0, 0, 0);
-    pdf.setFontSize(16);
-    const companyName = document.getElementById("companyName")?.value || "";
-    const mainTitle = `Rapport d'étude photovoltaïque\n${companyName}`;
-    const titleLines = pdf.splitTextToSize(mainTitle, pageWidth - 20);
-    pdf.text(titleLines, pageWidth / 2, 40, { align: "center" });
-    let yPos = 50;
-
-    // Affichage de l'image de la carte (centrée horizontalement avec marges de 15 mm)
-    const imgTemp = new Image();
-    imgTemp.src = mapCaptureDataURL;
-    await new Promise((resolve) => { imgTemp.onload = resolve; });
-    const pdfWidth = pageWidth - 30;
-    const ratio = imgTemp.height / imgTemp.width;
-    const pdfHeight = pdfWidth * ratio;
-    pdf.addImage(mapCaptureDataURL, mapCaptureFormat, 15, yPos, pdfWidth, pdfHeight);
-    yPos += pdfHeight + 10;
-
-    // Affichage des informations client (alignées à gauche)
-    pdf.setFontSize(12);
-    const addressVal = document.getElementById("address")?.value || "";
-    const latVal = document.getElementById("latitudeIrr")?.value || "";
-    const lonVal = document.getElementById("longitudeIrr")?.value || "";
-    const productibleVal = document.getElementById("productible")?.value || "";
-    pdf.text(`Client : ${companyName}`, 15, yPos);
-    yPos += 6;
-    pdf.text(`Adresse : ${addressVal}`, 15, yPos);
-    yPos += 6;
-    pdf.text(`Coordonnées : lat=${latVal}, lon=${lonVal}`, 15, yPos);
-    yPos += 6;
-    // Formatage du productible avec toLocaleString("fr-FR")
-    pdf.text(`Productible : ${parseFloat(productibleVal).toLocaleString("fr-FR")} kWh/kWc/an`, 15, yPos);
-    yPos += 10;
-
-
-    // (C) Choix du scénario
-    let scenarioChoice = prompt(
-      "Choisir la préconisation à utiliser dans le rapport\n" +
-      "'1' => Préconisation standard\n" +
-      "'2' => Préconisation Sélection"
-    );
-    if(!scenarioChoice) return; // Annulation
-    scenarioChoice = scenarioChoice.trim();
-
-  /*******************************************************
- * Selon le choix, on définit les IDs pour le tableau mensuel,
- * le canvas du graphique et le tableau de projection 20 ans
- *******************************************************/
-let monthlyTableId, monthlyChartId, twentyYearsId;
-let puissanceId, coutInstId, primeId, coutReelId, gainSansId, gainAvecId, roiId;
-
-if (scenarioChoice === "2") {
-  // Scénario "Sélection"
-  monthlyTableId   = "preconisationMonthlyTableForced";
-  monthlyChartId   = "monthlyBarChartForced";
-  twentyYearsId    = "preconisationTableForced";
-  puissanceId      = "puissanceRecoForced";
-  coutInstId       = "coutInstallationForced";
-  primeId          = "primeValueForced";
-  coutReelId       = "coutReelInstallationForced";
-  gainSansId       = "gainSansInvForced";
-  gainAvecId       = "gainAvecInvForced";
-  roiId            = "roiResultForced";
-} else {
-  // Par défaut, scénario "standard" (1)
-  monthlyTableId   = "preconisationMonthlyTable";
-  monthlyChartId   = "monthlyBarChart";
-  twentyYearsId    = "preconisationTable";
-  puissanceId      = "puissanceReco";
-  coutInstId       = "coutInstallation";
-  primeId          = "primeValue";
-  coutReelId       = "coutReelInstallation";
-  gainSansId       = "gainSansInv";
-  gainAvecId       = "gainAvecInv";
-  roiId            = "roiResult";
-}
-
-await page2_TableauEtGraphique(pdf, scenarioChoice);
-
-    
     /*******************************************************
- * FONCTION : dessiner un diagramme en barres vectoriel
- *******************************************************/
-function drawVectorBarChart(pdf, chartX, chartY, chartWidth, chartHeight,
-                            moisLabels, consoData, autoData, revData) {
-  // 1) Trouve la valeur max
-  const allValues = [...consoData, ...autoData, ...revData];
-  const maxValue = Math.max(...allValues, 0);
-  if (maxValue <= 0) {
-    pdf.setFontSize(12);
-    pdf.text("Pas de données valides pour tracer le graphique.", chartX, chartY + 10);
-    return;
-  }
+     * EXEMPLE : PAGE 2 AVEC TABLEAU + GRAPHIQUE
+     *******************************************************/
+    async function page2_TableauEtGraphique(pdf, scenarioChoice) {
+      // On ajoute la page
+      pdf.addPage();
+      pdf.setFontSize(14);
+      pdf.setTextColor(40, 40, 40);
+      pdf.text("Détails par mois (année 1)", 10, 15);
 
-  // 2) Nombre de lignes de quadrillage
-  const nbGridLines = 5;
-  const stepValue   = maxValue / nbGridLines;
-  const stepHeight  = chartHeight / nbGridLines;
+      let nextY = 20;
 
-  // Couleur du quadrillage
-  pdf.setDrawColor(200, 200, 200);
-  pdf.setLineWidth(0.2);
-
-  // 3) Quadrillage horizontal + labels Y
-  pdf.setFontSize(8);
-  for (let i = 0; i <= nbGridLines; i++) {
-    const y = chartY + chartHeight - i * stepHeight; 
-    // ligne horizontale
-    pdf.line(chartX, y, chartX + chartWidth, y);
-    // label
-    const val = i * stepValue;
-    const labelStr = Math.round(val).toLocaleString() + " kWh";
-    pdf.text(labelStr, chartX - 2, y, { align: "right" });
-  }
-
-  // 4) Barres
-  const nbMois     = moisLabels.length;
-  const groupWidth = chartWidth / nbMois;
-  const barWidth   = groupWidth / 3;
-
-  // Couleurs pastel (rouge/vert/bleu)
-  const colorConso = [255, 159, 159];
-  const colorAuto  = [159, 235, 159];
-  const colorRev   = [159, 189, 255];
-
-  pdf.setFontSize(7);
-  for (let i = 0; i < nbMois; i++) {
-    const baseX = chartX + i * groupWidth;
-    const baseY = chartY + chartHeight;
-
-    // Conso
-    const hConso = (consoData[i] / maxValue) * chartHeight;
-    pdf.setFillColor(...colorConso);
-    pdf.rect(baseX, baseY - hConso, barWidth, hConso, "F");
-
-    // Autoconso
-    const hAuto = (autoData[i] / maxValue) * chartHeight;
-    pdf.setFillColor(...colorAuto);
-    pdf.rect(baseX + barWidth, baseY - hAuto, barWidth, hAuto, "F");
-
-    // Revente
-    const hRev = (revData[i] / maxValue) * chartHeight;
-    pdf.setFillColor(...colorRev);
-    pdf.rect(baseX + 2 * barWidth, baseY - hRev, barWidth, hRev, "F");
-
-    // Label du mois sous les barres
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(moisLabels[i], baseX + barWidth, baseY + 3, { align: "center" });
-  }
-
-  // (Option) label "kWh" en haut
-  pdf.setFontSize(9);
-  pdf.text("kWh", chartX + 2, chartY + 5);
-}
-
-/*******************************************************
- * EXEMPLE : PAGE 2 AVEC TABLEAU + GRAPHIQUE
- *******************************************************/
-async function page2_TableauEtGraphique(pdf, scenarioChoice) {
-  // On ajoute la page
-  pdf.addPage();
-  pdf.setFontSize(14);
-  pdf.setTextColor(40, 40, 40);
-  pdf.text("Détails par mois (année 1)", 10, 15);
-
-  let nextY = 20;
-
-  // 1) Récupère l'ID du tableau mensuel selon scenario
-  let monthlyTableId;
-  if (scenarioChoice === "2") {
-    monthlyTableId = "preconisationMonthlyTableForced";
-  } else {
-    monthlyTableId = "preconisationMonthlyTable";
-  }
-
-  // 2) Tableau vectoriel
-  const monthlyTableEl = document.getElementById(monthlyTableId);
-  if (monthlyTableEl) {
-    pdf.autoTable({
-      html: monthlyTableEl,
-      startY: nextY,
-      styles: {
-        fontSize: 8,
-        cellPadding: 2
-      },
-      headStyles: {
-        fillColor: [0, 92, 160],
-        textColor: 255,
-        fontSize: 9
+      // 1) Récupère l'ID du tableau mensuel selon scenario
+      let monthlyTableId;
+      if (scenarioChoice === "2") {
+        monthlyTableId = "preconisationMonthlyTableForced";
+      } else {
+        monthlyTableId = "preconisationMonthlyTable";
       }
-    });
-    const lastAutoTable = pdf.lastAutoTable;
-    if (lastAutoTable) {
-      nextY = lastAutoTable.finalY + 10;
-    }
-  } else {
-    pdf.setFontSize(12);
-    pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
-    nextY = 35;
-  }
 
-  // 3) Préparation des données du graphique
-  // On parcourt le tableau HTML pour extraire
-  // ex: <td>Mois</td> <td>Conso</td> <td>FactureSansPV</td> <td>AutoCons kWh</td> <td>Economies €</td> <td>Revente kWh</td> ...
-  // Adaptez selon votre structure
-  const moisLabels = [];
-  const consoData  = [];
-  const autoData   = [];
-  const revData    = [];
-
-  if (monthlyTableEl) {
-    const rows = monthlyTableEl.querySelectorAll("tbody tr");
-    rows.forEach((tr) => {
-      const tds = tr.querySelectorAll("td");
-      // Adaptez l'index selon l'ordre de vos colonnes
-      // Ici on suppose : 
-      //  tds[0] = Mois
-      //  tds[1] = Conso kWh
-      //  tds[3] = Autoconso kWh
-      //  tds[5] = Revente kWh
-      if (tds.length >= 6) {
-        const moisTxt = tds[0].textContent.trim();
-        const cVal    = parseFloat(tds[1].textContent) || 0; 
-        const aVal    = parseFloat(tds[3].textContent) || 0;
-        const rVal    = parseFloat(tds[5].textContent) || 0;
-
-        moisLabels.push(moisTxt);
-        consoData.push(cVal);
-        autoData.push(aVal);
-        revData.push(rVal);
+      // 2) Tableau vectoriel
+      const monthlyTableEl = document.getElementById(monthlyTableId);
+      if (monthlyTableEl) {
+        pdf.autoTable({
+          html: monthlyTableEl,
+          startY: nextY,
+          styles: {
+            fontSize: 8,
+            cellPadding: 2
+          },
+          headStyles: {
+            fillColor: [0, 92, 160],
+            textColor: 255,
+            fontSize: 9
+          }
+        });
+        const lastAutoTable = pdf.lastAutoTable;
+        if (lastAutoTable) {
+          nextY = lastAutoTable.finalY + 10;
+        }
+      } else {
+        pdf.setFontSize(12);
+        pdf.text("Aucun tableau mensuel trouvé.", 10, 25);
+        nextY = 35;
       }
-    });
-  }
 
-  // 4) Titre pour le graphique
-  pdf.setFontSize(14);
-  pdf.text("Graphique (Détails par mois)", 10, nextY);
-  nextY += 10;
+      // 3) Préparation des données du graphique
+      // On parcourt le tableau HTML pour extraire
+      // ex: <td>Mois</td> <td>Conso kWh</td> <td>FactureSansPV</td> <td>Autoconso kWh</td> <td>Economies €</td> <td>Revente kWh</td> ...
+      // Adaptez selon votre structure
+      const moisLabels = [];
+      const consoData  = [];
+      const autoData   = [];
+      const revData    = [];
 
-  // 5) Appel de la fonction de dessin vectoriel appel de drawVectorBarChart avec chartX=15(pousse a gauche), chartWidth=170, chartHeight=70 
-  drawVectorBarChart(pdf, 15, nextY, 170, 70, moisLabels, consoData, autoData, revData);
+      if (monthlyTableEl) {
+        const rows = monthlyTableEl.querySelectorAll("tbody tr");
+        rows.forEach((tr) => {
+          const tds = tr.querySelectorAll("td");
+          // Ici on suppose : 
+          //  tds[0] = Mois
+          //  tds[1] = Conso kWh
+          //  tds[3] = Autoconso kWh
+          //  tds[5] = Revente kWh
+          if (tds.length >= 6) {
+            const moisTxt = tds[0].textContent.trim();
+            const cVal    = parseFloat(tds[1].textContent) || 0; 
+            const aVal    = parseFloat(tds[3].textContent) || 0;
+            const rVal    = parseFloat(tds[5].textContent) || 0;
 
-  // On met à jour nextY si on veut enchaîner
-  nextY += 80 + 15; 
-}
+            moisLabels.push(moisTxt);
+            consoData.push(cVal);
+            autoData.push(aVal);
+            revData.push(rVal);
+          }
+        });
+      }
 
+      // 4) Titre pour le graphique
+      pdf.setFontSize(14);
+      pdf.text("Graphique (Détails par mois)", 10, nextY);
+      nextY += 10;
 
-/*******************************************************
- * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
- *******************************************************/
-pdf.addPage();
-pdf.setFontSize(14);
-pdf.setTextColor(40, 40, 40);
-pdf.text("Projection sur 20 ans", 10, 15);
+      // 5) Appel de la fonction de dessin vectoriel avec chartX=15, chartWidth=170, chartHeight=70 
+      drawVectorBarChart(pdf, 15, nextY, 170, 70, moisLabels, consoData, autoData, revData);
 
-let nextY3 = 20;
-// A) Tableau vectoriel => preconisationTable ou preconisationTableForced
-const twentyTableEl = document.getElementById(twentyYearsId);
-if (twentyTableEl) {
-  pdf.autoTable({
-    html: twentyTableEl,
-    startY: nextY3,
-    styles: {
-      fontSize: 8,
-      cellPadding: 2
-    },
-    headStyles: {
-      fillColor: [22, 160, 133],
-      textColor: 255,
-      fontSize: 9
-    }
-  });
-  const lastAuto = pdf.lastAutoTable;
-  if (lastAuto) {
-    nextY3 = lastAuto.finalY + 10;
-  }
-} else {
-  pdf.setFontSize(12);
-  pdf.text("Aucun tableau de projection trouvé.", 10, nextY3 + 5);
-  nextY3 += 15;
-}
-
-// B) Chiffres clés
-pdf.setFontSize(14);
-pdf.text("Chiffres Clés", 10, nextY3);
-nextY3 += 8;
-pdf.setFontSize(12);
-
-// On va chercher les infos selon l'ID choisi
-const pReco   = document.getElementById(puissanceId)?.textContent || "-";
-const cInst   = document.getElementById(coutInstId)?.textContent || "-";
-const cPrime  = document.getElementById(primeId)?.textContent || "-";
-const cReel   = document.getElementById(coutReelId)?.textContent || "-";
-const gSans   = document.getElementById(gainSansId)?.textContent || "-";
-const gAvec   = document.getElementById(gainAvecId)?.textContent || "-";
-const roiVal  = document.getElementById(roiId)?.textContent || "-";
-
-pdf.text(`Puissance préconisée : ${pReco} kWc`, 10, nextY3); nextY3+=6;
-pdf.text(`Coût de l'installation : ${cInst} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Prime : ${cPrime} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Coût réel de l'installation : ${cReel} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Gain total (sans inv.) : ${gSans} €`, 10, nextY3); nextY3+=6;
-pdf.text(`Gain total (avec inv.) : ${gAvec} €`, 10, nextY3); nextY3+=6;
-pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3);
-nextY3 += 12;
-
-// C) Paragraphe final
-pdf.setFontSize(12);
-const finalText = 
-  "Ce projet photovoltaïque vous apporte des bénéfices financiers tout " +
-  "en valorisant votre toiture et en participant à la transition énergétique. " +
-  "Grâce à une expertise FRH PRO, vous bénéficiez d'un accompagnement complet " +
-  "et de conseils personnalisés pour optimiser votre retour sur investissement.\n\n" +
-  "L'autoconsommation et la revente du surplus vous permettent de réduire vos " +
-  "factures d'électricité et de profiter d'une source de revenu durable.";
-const finalLines = pdf.splitTextToSize(finalText, 180);
-pdf.text(finalLines, 10, nextY3);
-nextY3 += 20;
-   
-
-
-    // (D) Sauvegarde finale
-    let pdfFileName = "Rapport_Etude.pdf";
-    if (companyName) {
-      pdfFileName = `Rapport_${companyName}.pdf`;
-    }
-    pdf.save(pdfFileName);
-
-    // (E) Rétablit le drawingCanvas si besoin
-    if (drawingCanvas && drawingCanvasParent) {
-      drawingCanvasParent.appendChild(drawingCanvas);
-      // OU drawingCanvas.style.display = "";
+      // On met à jour nextY si on veut enchaîner
+      nextY += 80 + 15; 
     }
 
-  } catch (e) {
-    console.error("Erreur exportStudyReportPDF:", e);
-    alert("Une erreur s'est produite lors de l'export PDF (voir console).");
-  }
-}
+
+    /*******************************************************
+     * PAGE 3 : PROJECTION 20 ANS + CHIFFRES CLÉS
+     *******************************************************/
+    pdf.addPage();
+    pdf.setFontSize(14);
+    pdf.setTextColor(40, 40, 40);
+    pdf.text("Projection sur 20 ans", 10, 15);
+
+    let nextY3 = 20;
+    // A) Tableau vectoriel => preconisationTable ou preconisationTableForced
+    const twentyTableEl = document.getElementById(twentyYearsId);
+    if (twentyTableEl) {
+      pdf.autoTable({
+        html: twentyTableEl,
+        startY: nextY3,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2
+        },
+        headStyles: {
+          fillColor: [22, 160, 133],
+          textColor: 255,
+          fontSize: 9
+        }
+      });
+      const lastAuto = pdf.lastAutoTable;
+      if (lastAuto) {
+        nextY3 = lastAuto.finalY + 10;
+      }
+    } else {
+      pdf.setFontSize(12);
+      pdf.text("Aucun tableau de projection trouvé.", 10, nextY3 + 5);
+      nextY3 += 15;
+    }
+
+    // B) Chiffres clés
+    pdf.setFontSize(14);
+    pdf.text("Chiffres Clés", 10, nextY3);
+    nextY3 += 8;
+    pdf.setFontSize(12);
+
+    // On va chercher les infos selon l'ID choisi
+    const pReco   = document.getElementById(puissanceId)?.textContent || "-";
+    const cInst   = document.getElementById(coutInstId)?.textContent || "-";
+    const cPrime  = document.getElementById(primeId)?.textContent || "-";
+    const cReel   = document.getElementById(coutReelId)?.textContent || "-";
+    const gSans   = document.getElementById(gainSansId)?.textContent || "-";
+    const gAvec   = document.getElementById(gainAvecId)?.textContent || "-";
+    const roiVal  = document.getElementById(roiId)?.textContent || "-";
+
+    pdf.text(`Puissance préconisée : ${pReco} kWc`, 10, nextY3); nextY3+=6;
+    pdf.text(`Coût de l'installation : ${cInst} €`, 10, nextY3); nextY3+=6;
+    pdf.text(`Prime : ${cPrime} €`, 10, nextY3); nextY3+=6;
+    pdf.text(`Coût réel de l'installation : ${cReel} €`, 10, nextY3); nextY3+=6;
+    pdf.text(`Gain total (sans inv.) : ${gSans} €`, 10, nextY3); nextY3+=6;
+    pdf.text(`Gain total (avec inv.) : ${gAvec} €`, 10, nextY3); nextY3+=6;
+    pdf.text(`ROI (années) : ${roiVal}`, 10, nextY3);
+    nextY3 += 12;
+
+    // C) Paragraphe final
+    pdf.setFontSize(12);
+    const finalText = 
+      "Ce projet photovoltaïque vous apporte des bénéfices financiers tout " +
+      "en valorisant votre toiture et en participant à la transition énergétique. " +
+      "Grâce à une expertise FRH PRO, vous bénéficiez d'un accompagnement complet " +
+      "et de conseils personnalisés pour optimiser votre retour sur investissement.\n\n" +
+      "L'autoconsommation et la revente du surplus vous permettent de réduire vos " +
+      "factures d'électricité et de profiter d'une source de revenu durable.";
+    const finalLines = pdf.splitTextToSize(finalText, 180);
+    pdf.text(finalLines, 10, nextY3);
+    nextY3 += 20;
+       
+
+        // (D) Sauvegarde finale
+        let pdfFileName = "Rapport_Etude.pdf";
+        if (companyName) {
+          pdfFileName = `Rapport_${companyName}.pdf`;
+        }
+        pdf.save(pdfFileName);
+
+        // (E) Rétablit le drawingCanvas si besoin
+        if (drawingCanvas && drawingCanvasParent) {
+          drawingCanvasParent.appendChild(drawingCanvas);
+          // OU drawingCanvas.style.display = "";
+        }
+
+      } catch (e) {
+        console.error("Erreur exportStudyReportPDF:", e);
+        alert("Une erreur s'est produite lors de l'export PDF (voir console).");
+      }
+    }
 
     /***************************************************
      * 5) SAUVEGARDER / CHARGER JSON
@@ -1925,28 +1910,27 @@ nextY3 += 20;
     }
 
     // Ajoutez ici la fonction calculateROI
-function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, annualPriceIncrease) {
-  let cumulativeSavings = 0;
-  let roiYears = 0;
-  // On fixe une borne maximale pour éviter une boucle infinie (ici 100 ans)
-  while (roiYears < 100) {
-    roiYears++;
-    // Les économies d'autoconsommation augmentent chaque année
-    let econAuto = autoYear1 * Math.pow(1 + annualPriceIncrease / 100, roiYears - 1);
-    // On suppose que les gains de revente restent constants (vous pouvez adapter si nécessaire)
-    let gainsRev = surplusYear1;
-    // La prime est versée en année 2
-    let prime = (roiYears === 2) ? primeTotal : 0;
-    let totalYearSavings = econAuto + gainsRev + prime;
-    cumulativeSavings += totalYearSavings;
-    if (cumulativeSavings >= coutInstallation) {
-      break;
+    function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, annualPriceIncrease) {
+      let cumulativeSavings = 0;
+      let roiYears = 0;
+      // On fixe une borne maximale pour éviter une boucle infinie (ici 100 ans)
+      while (roiYears < 100) {
+        roiYears++;
+        // Les économies d'autoconsommation augmentent chaque année
+        let econAuto = autoYear1 * Math.pow(1 + annualPriceIncrease / 100, roiYears - 1);
+        // On suppose que les gains de revente restent constants (vous pouvez adapter si nécessaire)
+        let gainsRev = surplusYear1;
+        // La prime est versée en année 2
+        let prime = (roiYears === 2) ? primeTotal : 0;
+        let totalYearSavings = econAuto + gainsRev + prime;
+        cumulativeSavings += totalYearSavings;
+        if (cumulativeSavings >= coutInstallation) {
+          break;
+        }
+      }
+      return roiYears;
     }
-  }
-  return roiYears;
-}
-    
-    
+        
     // (D) Calcule le GAIN total (auto + revente)
     function computeAutoAndSurplusForPower(S, globalTarif){
       const ratioDStr= document.getElementById("ratioDiurne").value|| "50";
@@ -1987,7 +1971,7 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
       fill20YearsPreconisation(S, firstYearGain, territoryObj);
     }
 
-    // (F) fillMonthlyPreconisation
+    // (F) fillMonthlyPreconisation (scénario standard)
     let monthlyBarChart=null;
     function createMonthlyBarChart(labels, consoData, autoData, revData){
       const ctx= document.getElementById("monthlyBarChart").getContext("2d");
@@ -2016,9 +2000,11 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
       const table= document.getElementById("preconisationMonthlyTable");
       table.innerHTML="";
 
+      // En-tête avec la nouvelle colonne "Production kWh" ajoutée après "Conso kWh"
       let headerRow= `<tr>
         <th>Mois</th>
         ${ showKwh?'<th>Conso kWh</th>':''}
+        ${ showKwh?'<th>Production kWh</th>':''}
         <th>Facture Sans PV</th>
         ${ showKwh?'<th>Autoconso kWh</th>':'' }
         <th>Économies Autoconso</th>
@@ -2037,10 +2023,11 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
       const tbody= document.createElement("tbody");
       table.appendChild(tbody);
 
-      const tfoot= document.createElement("tfoot");
+      // Pied de tableau avec colonne de total pour "Production kWh"
       let footRow= `<tr>
         <th>Totaux</th>
         ${ showKwh?'<td id="monthlySumKwhConso">-</td>':'' }
+        ${ showKwh?'<td id="monthlySumProduction">-</td>':'' }
         <td id="monthlyTotalSansPv">-</td>
         ${ showKwh?'<td id="monthlySumKwhAuto">-</td>':'' }
         <td id="monthlyTotalAuto">-</td>
@@ -2052,11 +2039,12 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
         <td id="monthlyTotalAutoConsoPerc">-</td>
         <td id="monthlyTotalRevPerc">-</td>
       </tr>`;
+      const tfoot= document.createElement("tfoot");
       tfoot.innerHTML= footRow;
       table.appendChild(tfoot);
 
       let sumSansPv=0, sumAuto=0, sumRev=0, sumAvecPv=0, sumEco=0;
-      let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0;
+      let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0, sumProduction=0;
 
       const moisNoms= ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
@@ -2075,7 +2063,10 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
 
         if(!monthlyProductionData[i]) continue;
         const E_m1kW= monthlyProductionData[i].E_m;
-        const production= S* E_m1kW;
+        const production= S * E_m1kW;
+
+        // Mise à jour de la somme de production
+        sumProduction += production;
 
         // fraction Sélection en revente
         const forcedSurplus= fractionClosed* production;
@@ -2114,6 +2105,7 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
         let row= document.createElement("tr");
         let rowHTML= `<td>${moisNoms[i]}</td>`;
         if(showKwh) { rowHTML+= `<td>${consoKwh.toFixed(1)}</td>`; }
+        if(showKwh) { rowHTML+= `<td>${production.toFixed(1)}</td>`; }
         rowHTML+= `<td>${factureSansPv.toFixed(2)} €</td>`;
         if(showKwh){ rowHTML+= `<td>${autoCons.toFixed(1)}</td>`; }
         rowHTML+= `<td>${economies.toFixed(2)} €</td>`;
@@ -2141,6 +2133,7 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
 
       if(showKwh){
         document.getElementById("monthlySumKwhConso").textContent= sumKwhConso.toFixed(1);
+        document.getElementById("monthlySumProduction").textContent= sumProduction.toFixed(1);
         document.getElementById("monthlySumKwhAuto").textContent= sumKwhAuto.toFixed(1);
         document.getElementById("monthlySumKwhRevente").textContent= sumKwhRev.toFixed(1);
       }
@@ -2185,9 +2178,9 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
       for(let year=1; year<=20; year++){
         const factureSansPv= baseYearCost*Math.pow(1+annualPriceIncrease/100, (year-1));
         // Appliquer le facteur de dégradation de 0,6% par an sur la production
-  const econAuto = autoYear1 
-                     * Math.pow(1 - 0.006, (year-1))
-                     * Math.pow(1 + annualPriceIncrease/100, (year-1));
+        const econAuto = autoYear1 
+                           * Math.pow(1 - 0.006, (year-1))
+                           * Math.pow(1 + annualPriceIncrease/100, (year-1));
         const gainsRev= surplusYear1;
         let primeYear=0;
         if(year===2){
@@ -2247,8 +2240,8 @@ function calculateROI(coutInstallation, autoYear1, surplusYear1, primeTotal, ann
       document.getElementById("gainAvecInv").textContent= gainAvecInvVal.toFixed(2)+" €";
 
       // Nouveau calcul du ROI basé sur le cumul des économies
-let roiYears = calculateROI(costInst, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
-document.getElementById("roiResult").textContent = roiYears.toFixed(1);
+      let roiYears = calculateROI(costInst, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
+      document.getElementById("roiResult").textContent = roiYears.toFixed(1);
     }
 
     // Écouteur => "Calculer la préconisation"
@@ -2314,9 +2307,11 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
       const table= document.getElementById("preconisationMonthlyTableForced");
       table.innerHTML="";
 
+      // En-tête avec la colonne "Production kWh" ajoutée
       let headerRow= `<tr>
         <th>Mois</th>
         ${showKwh?'<th>Conso kWh</th>':''}
+        ${showKwh?'<th>Production kWh</th>':''}
         <th>Facture Sans PV</th>
         ${showKwh?'<th>Autoconso kWh</th>':''}
         <th>Économies Autoconso</th>
@@ -2335,10 +2330,11 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
       const tbody= document.createElement("tbody");
       table.appendChild(tbody);
 
-      const tfoot= document.createElement("tfoot");
+      // Pied de tableau avec cellule pour la somme de "Production kWh"
       let footRow= `<tr>
         <th>Totaux</th>
         ${showKwh?'<td id="monthlySumKwhConsoForced">-</td>':''}
+        ${showKwh?'<td id="monthlySumProductionForced">-</td>':''}
         <td id="monthlyTotalSansPvForced">-</td>
         ${showKwh?'<td id="monthlySumKwhAutoForced">-</td>':''}
         <td id="monthlyTotalAutoForced">-</td>
@@ -2350,11 +2346,12 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
         <td id="monthlyTotalAutoConsoPercForced">-</td>
         <td id="monthlyTotalRevPercForced">-</td>
       </tr>`;
+      const tfoot= document.createElement("tfoot");
       tfoot.innerHTML= footRow;
       table.appendChild(tfoot);
 
-      let sumSansPv=0,sumAuto=0, sumRev=0, sumAvecPv=0,sumEco=0;
-      let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0;
+      let sumSansPv=0, sumAuto=0, sumRev=0, sumAvecPv=0, sumEco=0;
+      let sumKwhConso=0, sumKwhAuto=0, sumKwhRev=0, sumProductionForced=0;
 
       const moisNoms= ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
       const chartConso=[], chartAuto=[], chartRev=[];
@@ -2373,6 +2370,9 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
         if(!monthlyProductionData[i]) continue;
         const E_m1kW= monthlyProductionData[i].E_m || 0;
         const production= S* E_m1kW;
+
+        // Mise à jour de la somme de production
+        sumProductionForced += production;
 
         const forcedSurplus= fractionClosed* production;
         const leftover= production - forcedSurplus;
@@ -2409,6 +2409,7 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
         let row= document.createElement("tr");
         let rowHTML= `<td>${moisNoms[i]}</td>`;
         if(showKwh) { rowHTML+= `<td>${consoKwh.toFixed(1)}</td>`; }
+        if(showKwh) { rowHTML+= `<td>${production.toFixed(1)}</td>`; }
         rowHTML+= `<td>${factureSansPv.toFixed(2)} €</td>`;
         if(showKwh){ rowHTML+= `<td>${autoCons.toFixed(1)}</td>`; }
         rowHTML+= `<td>${economies.toFixed(2)} €</td>`;
@@ -2436,9 +2437,11 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
 
       if(showKwh){
         const sumConsoCell= document.getElementById("monthlySumKwhConsoForced");
+        const sumProdCell= document.getElementById("monthlySumProductionForced");
         const sumAutoCell= document.getElementById("monthlySumKwhAutoForced");
         const sumRevCell= document.getElementById("monthlySumKwhReventeForced");
         if(sumConsoCell) sumConsoCell.textContent= sumKwhConso.toFixed(1);
+        if(sumProdCell) sumProdCell.textContent= sumProductionForced.toFixed(1);
         if(sumAutoCell)  sumAutoCell.textContent= sumKwhAuto.toFixed(1);
         if(sumRevCell)   sumRevCell.textContent= sumKwhRev.toFixed(1);
       }
@@ -2541,8 +2544,8 @@ document.getElementById("roiResult").textContent = roiYears.toFixed(1);
       document.getElementById("gainAvecInvForced").textContent= gainAvecInvVal.toFixed(2)+" €";
 
       // Nouveau calcul du ROI basé sur le cumul des économies
-let roiYearsForced = calculateROI(forcedCost, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
-document.getElementById("roiResultForced").textContent = roiYearsForced.toFixed(1);
+      let roiYearsForced = calculateROI(forcedCost, autoYear1, surplusYear1, primeTotal, annualPriceIncrease);
+      document.getElementById("roiResultForced").textContent = roiYearsForced.toFixed(1);
     }
 
     // Bouton => Préconisation Sélection
