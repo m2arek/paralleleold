@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v91</title>
+  <title>FRH PRO formulaire  - v92</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -413,19 +413,19 @@
           <input type="text" id="Statut" name="Statut"/>
 
           <label for="Propietaire/Locataire">Propietaire/Locataire :</label>
-        <select id="Propietaire/Locataire" name="Propietaire/Locataire">
-          <option value="" disabled selected>indiquer si propietaire ou locataire</option>
-          <option value="Proprietaire">Proprietaire</option>
-          <option value="Locataire">Locataire</option>
-        </select>
+          <select id="Propietaire/Locataire" name="Propietaire/Locataire">
+            <option value="" disabled selected>indiquer si propietaire ou locataire</option>
+            <option value="Proprietaire">Proprietaire</option>
+            <option value="Locataire">Locataire</option>
+          </select>
 
-         <label for="Annees presence">Annees presence :</label>
-        <input
-          type="text"
-          id="Annees presence"
-          name="Annees presence"
-          placeholder="Entrez le nombre d'Annees de presence"
-           />
+          <label for="Annees presence">Annees presence :</label>
+          <input
+            type="text"
+            id="Annees presence"
+            name="Annees presence"
+            placeholder="Entrez le nombre d'Annees de presence"
+          />
         </div>
       </div><!-- fin tab4 -->
 
@@ -446,11 +446,11 @@
           />
 
           <label for="Partage sa toiture">Partage sa toiture? :</label>
-        <select id="Partage sa toiture" name="Partage sa toiture">
-          <option value="" disabled selected>indiquer si la toiture est partagee</option>
-          <option value="Oui">Oui</option>
-          <option value="Non">Non</option>
-        </select>
+          <select id="Partage sa toiture" name="Partage sa toiture">
+            <option value="" disabled selected>indiquer si la toiture est partagee</option>
+            <option value="Oui">Oui</option>
+            <option value="Non">Non</option>
+          </select>
 
           <label for="Type de toiture">Type de toiture :</label>
           <select id="Type de toiture" name="Type de toiture">
@@ -642,9 +642,9 @@
                 <th>Année</th>
                 <th>Facture Sans PV</th>
                 <th>Économies Autoconso</th>
+                <th>Facture Avec PV</th>
                 <th>Gains Revente</th>
                 <th>Prime (année 2)</th>
-                <th>Facture Avec PV</th>
                 <th>Total Économies</th>
                 <th>Cumul economies</th>
               </tr>
@@ -655,9 +655,9 @@
                 <th colspan="1">Totaux sur 20 ans</th>
                 <td id="totalSansPv">-</td>
                 <td id="totalAuto">-</td>
+                <td id="totalAvecPv">-</td>
                 <td id="totalRevente">-</td>
                 <td id="totalPrime">-</td>
-                <td id="totalAvecPv">-</td>
                 <td id="totalEconomies">-</td>
               </tr>
             </tfoot>
@@ -710,9 +710,9 @@
                 <th>Année</th>
                 <th>Facture Sans PV</th>
                 <th>Économies Autoconso</th>
+                <th>Facture Avec PV</th>
                 <th>Gains Revente</th>
                 <th>Prime (année 2)</th>
-                <th>Facture Avec PV</th>
                 <th>Total Économies</th>
                 <th>Cumul economies</th>
               </tr>
@@ -723,9 +723,9 @@
                 <th colspan="1">Totaux sur 20 ans</th>
                 <td id="totalSansPvForced">-</td>
                 <td id="totalAutoForced">-</td>
+                <td id="totalAvecPvForced">-</td>
                 <td id="totalReventeForced">-</td>
                 <td id="totalPrimeForced">-</td>
-                <td id="totalAvecPvForced">-</td>
                 <td id="totalEconomiesForced">-</td>
               </tr>
             </tfoot>
@@ -768,20 +768,20 @@
           ></textarea>
         </div>
            <!-- Exemple : Input file caché ou non + label cliquable -->
-  <input 
-    type="file" 
-    id="mapCaptureFile" 
-    accept="image/png, image/jpeg" 
-    style="display:none;"
-  />
-  <label 
-    for="mapCaptureFile" 
-    style="cursor:pointer; color:blue; text-decoration:underline;"
-  >
-    Sélectionner la capture
-  </label>
+        <input 
+          type="file" 
+          id="mapCaptureFile" 
+          accept="image/png, image/jpeg" 
+          style="display:none;"
+        />
+        <label 
+          for="mapCaptureFile" 
+          style="cursor:pointer; color:blue; text-decoration:underline;"
+        >
+          Sélectionner la capture
+        </label>
 
-  <br/><br/>
+        <br/><br/>
         <!-- Boutons PDF + gestion JSON -->
         <div style="margin-bottom:15px;">
           <button type="button" id="exportPDFBtn">Exporter en PDF</button>
@@ -1543,8 +1543,8 @@
       // 3) Préparation des données du graphique
       // On parcourt le tableau HTML pour extraire
       // ex: <td>Mois</td> <td>Conso kWh</td> <td>Autoconso kWh</td> <td>Revente kWh</td> <td>Facture Sans PV</td>
-      // <td>Économies Autoconso</td> <td>Facture Avec PV</td> <td>Gains Revente</td> <td>Total Économies</td> <td>% Autoproduction</td>
-      // <td>% Autoconsommation</td> <td>% Revente</td>
+      // <td>Économies Autoconso</td> <td>Facture Avec PV</td> <td>Gains Revente</td> <td>Total Économies</td> <td>% Auto prod</td>
+      // <td>% Auto conso</td> <td>% Revente</td>
       const moisLabels = [];
       const consoData  = [];
       const autoData   = [];
@@ -1560,12 +1560,12 @@
           // tds[2] = Production kWh (non utilisé pour le graphique)
           // tds[3] = Autoconso kWh
           // tds[4] = Revente kWh
-          // tds[5] = Facture Sans PV
+          // tds[5] = Facture Sans Centrale
           // tds[6] = Économies Autoconso
-          // tds[7] = Facture Avec PV
+          // tds[7] = Facture Avec Centrale
           // tds[8] = Gains Revente
           // tds[9] = Total Économies
-          // tds[10] = % Autoproduction, tds[11] = % Autoconsommation, tds[12] = % Revente
+          // tds[10] = % Auto prod, tds[11] = % Auto conso, tds[12] = % Revente
           if (tds.length >= 5) {
             const moisTxt = tds[0].textContent.trim();
             const cVal    = parseFloat(tds[1].textContent) || 0; 
@@ -1605,6 +1605,7 @@
     // A) Tableau vectoriel => preconisationTable ou preconisationTableForced
     const twentyTableEl = document.getElementById(twentyYearsId);
     if (twentyTableEl) {
+      // Réagencement de l'en-tête : Facture Avec PV après Économies Autoconso
       pdf.autoTable({
         html: twentyTableEl,
         startY: nextY3,
@@ -2010,7 +2011,8 @@
       const table= document.getElementById("preconisationMonthlyTable");
       table.innerHTML="";
 
-      // En-tête dans l'ordre désiré
+      // En-tête dans l'ordre désiré :
+      // Mois, Conso kWh, Production kWh, Autoconso kWh, Revente kWh, Facture Sans Centrale, Économies Autoconso, Facture Avec Centrale, Gains Revente, Total Économies, % Auto prod, % Auto conso, % Revente
       let headerRow= `<tr>
         <th>Mois</th>
         ${ showKwh?'<th>Conso kWh</th>' : '' }
@@ -2033,7 +2035,6 @@
       const tbody= document.createElement("tbody");
       table.appendChild(tbody);
 
-      // Pied de tableau dans l'ordre désiré
       let footRow= `<tr>
         <th>Totaux</th>
         ${ showKwh?'<td id="monthlySumKwhConso">-</td>' : '' }
@@ -2210,13 +2211,14 @@
          cumulativeEco += totalEcos; // mise à jour du cumul
 
         const row= document.createElement("tr");
+        // Réagencement : Facture Avec PV après Économies Autoconso
         row.innerHTML= `
           <td>${year}</td>
           <td>${factureSansPv.toFixed(2)} €</td>
           <td>${econAuto.toFixed(2)} €</td>
+          <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${gainsRev.toFixed(2)} €</td>
           <td>${primeYear.toFixed(2)} €</td>
-          <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
           <td>${cumulativeEco.toFixed(2)} €</td>
         `;
@@ -2320,10 +2322,10 @@
 
       let headerRow= `<tr>
         <th>Mois</th>
-        ${showKwh?'<th>Conso kWh</th>':''}
-        ${showKwh?'<th>Production kWh</th>':''}
-        ${showKwh?'<th>Autoconso kWh</th>':''}
-        ${showKwh?'<th>Revente kWh</th>':''}
+        ${showKwh?'<th>Conso kWh</th>' : ''}
+        ${showKwh?'<th>Production kWh</th>' : ''}
+        ${showKwh?'<th>Autoconso kWh</th>' : ''}
+        ${showKwh?'<th>Revente kWh</th>' : ''}
         <th>Facture Sans Centrale</th>
         <th>Économies Autoconso</th>
         <th>Facture Avec Centrale</th>
@@ -2342,10 +2344,10 @@
 
       let footRow= `<tr>
         <th>Totaux</th>
-        ${showKwh?'<td id="monthlySumKwhConsoForced">-</td>':''}
-        ${showKwh?'<td id="monthlySumProductionForced">-</td>':''}
-        ${showKwh?'<td id="monthlySumKwhAutoForced">-</td>':''}
-        ${showKwh?'<td id="monthlySumKwhReventeForced">-</td>':''}
+        ${showKwh?'<td id="monthlySumKwhConsoForced">-</td>' : ''}
+        ${showKwh?'<td id="monthlySumProductionForced">-</td>' : ''}
+        ${showKwh?'<td id="monthlySumKwhAutoForced">-</td>' : ''}
+        ${showKwh?'<td id="monthlySumKwhReventeForced">-</td>' : ''}
         <td id="monthlyTotalSansPvForced">-</td>
         <td id="monthlyTotalAutoForced">-</td>
         <td id="monthlyTotalAvecPvForced">-</td>
@@ -2506,13 +2508,14 @@
         cumulativeEco += totalEcos; // cumul des économies
         
         const row= document.createElement("tr");
+        // Réagencement : Facture Avec PV après Économies Autoconso
         row.innerHTML= `
           <td>${year}</td>
           <td>${factureSansPv.toFixed(2)} €</td>
           <td>${econAuto.toFixed(2)} €</td>
+          <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${gainsRev.toFixed(2)} €</td>
           <td>${primeYear.toFixed(2)} €</td>
-          <td>${factureAvecPv.toFixed(2)} €</td>
           <td>${totalEcos.toFixed(2)} €</td>
           <td>${cumulativeEco.toFixed(2)} €</td>
         `;
