@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire  - v82</title>
+  <title>FRH PRO formulaire  - v83</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -2300,7 +2300,7 @@
           datasets:[
             { label:"Conso kWh", data:consoData, backgroundColor:"rgba(255,99,132,0.6)" },
             { label:"Autoconso kWh", data:autoData, backgroundColor:"rgba(75,192,75,0.6)" },
-            { label:"Revente kWh", data:revData, backgroundColor:"rgba(54,162,235,0.6)" }
+            { labelet headerRowl:"Revente kWh", data:revData, backgroundColor:"rgba(54,162,235,0.6)" }
           ]
         },
         options:{
@@ -2318,19 +2318,19 @@
       const table= document.getElementById("preconisationMonthlyTableForced");
       table.innerHTML="";
 
-      let headerRow= `<tr>
+      = `<tr>
         <th>Mois</th>
-        ${showKwh?'<th>Conso kWh</th>':''}
-        ${showKwh?'<th>Production kWh</th>':''}
-        ${showKwh?'<th>Autoconso kWh</th>':''}
-        ${showKwh?'<th>Revente kWh</th>':''}
-        <th>Facture Sans PV</th>
+        ${ showKwh?'<th>Conso kWh</th>' : '' }
+        ${ showKwh?'<th>Production kWh</th>' : '' }
+        ${ showKwh?'<th>Autoconso kWh</th>' : '' }
+        ${ showKwh?'<th>Revente kWh</th>' : '' }
+        <th>Facture Sans Centrale</th>
         <th>Économies Autoconso</th>
-        <th>Facture Avec PV</th>
+        <th>Facture Avec Centrale</th>
         <th>Gains Revente</th>
         <th>Total Économies</th>
-        <th>% Autoproduction</th>
-        <th>% Autoconsommation</th>
+        <th>% Auto prod</th>
+        <th>% Auto conso</th>
         <th>% Revente</th>
       </tr>`;
       const thead= document.createElement("thead");
